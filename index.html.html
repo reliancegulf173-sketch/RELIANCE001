@@ -98,6 +98,11 @@ button,input,select{font:inherit}
 
 .toolbar{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;box-shadow:var(--shadow)}
 .input{border:1px solid #dce4ec;border-radius:10px;padding:10px 11px;background:#fff}
+.input.filter-active{border-color:var(--blue);background:#eaf5ff;color:#174f78;box-shadow:0 0 0 3px rgba(31,111,168,.10);font-weight:700}
+tr.missing-row td{background:#fffdf4}
+td.missing-highlight{background:#ffe7e7!important;color:#a62626;font-weight:800;border-left:3px solid var(--danger)}
+.missing-text{display:inline-block;background:#ffe7e7;color:#a62626;border-radius:8px;padding:5px 8px;font-weight:800}
+
 .grow{flex:1;min-width:220px}
 .table-wrap{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:var(--shadow);max-height:65vh}
 table{border-collapse:collapse;width:max-content;min-width:100%}
@@ -294,7 +299,8 @@ tr:hover td{background:#fbfdff}
         <div class="toolbar">
           <input class="input grow" id="search" placeholder="Search employee name, ID, company or designation">
           <select class="input" id="filterCompany"><option value="">All Companies</option><option>RELIANCE GULF</option><option>RELIANCE INTERNATIONAL</option></select>
-          <select class="input" id="filterStatus"><option value="">All Status</option><option>On Site</option><option>Idle</option><option>On Leave</option><option>Inactive</option></select>
+          <select class="input" id="filterWorkingStatus"><option value="">All Working Status</option><option>Active</option><option>Inactive</option></select>
+          <select class="input" id="filterSiteStatus"><option value="">All Site Status</option><option>On Site</option><option>On Leave</option><option>Idle</option></select>
           <select class="input" id="filterApproval"><option value="">All Approval</option><option>Under Review</option><option>Approved</option><option>Correction Required</option></select>
           <select class="input" id="filterSpecial"><option value="">All Records</option><option value="missing">Missing Information</option><option value="expiry">Expiring within 60 days</option><option value="expired">Expired Documents</option></select>
           <button class="btn light" onclick="clearFilters()">Clear</button>
@@ -312,7 +318,7 @@ tr:hover td{background:#fbfdff}
           <div class="form-section"><h3>Labour & Other Details</h3><div class="form-grid" id="otherGrid"></div></div>
           <div class="form-section"><h3>Technical Certificates</h3><div class="form-grid" id="certGrid"></div></div>
           <div class="form-section"><h3>Document Status</h3><div class="form-grid" id="documentGrid"></div></div>
-          <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send for Review</button></div>
+          <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send to Admin Manager</button></div>
         </form>
       </section>
 
@@ -387,14 +393,20 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 const fields=[
 ['nameEnglish','Employee Name English','general','text',1],['nameArabic','Employee Name Arabic','general','text'],['designation','Actual Designation','general','text',1],['employeeId','Employee ID','general','text',1],['company','Company Name','general','select',1,['RELIANCE GULF','RELIANCE INTERNATIONAL']],
 ['passportNumber','Passport Number','identity','text',1],['passportIssue','Passport Issue Date','identity','date'],['passportExpiry','Passport Expiry Date','identity','date',1],['visaStatus','Visa Status','identity','select',1,['Visit Visa Applied','Employment Visa Outside Sent','Visa Completed']],['unifiedNumber','Unified Number','identity','text'],['emiratesId','Emirates ID Number','identity','text'],['residenceFile','Residence File Number','identity','text'],['idIssue','ID Issue Date','identity','date'],['idExpiry','ID Expiry Date','identity','date'],
-['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['workingStatus','Working Status','other','select',1,['On Site','Idle','On Leave','Inactive']],['cancellationDate','Cancellation Date','other','date'],
+['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['employmentStatus','Working Status','other','select',1,['Active','Inactive']],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],['cancellationDate','Cancellation Date','other','date'],
 ['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],['otherCertExpiry','Other Certificate Expiry','cert','date'],['otherCertRemark','Other Certificate Remark','cert','text'],
 ['docPassport','Passport Document','document','select',0,['Save in Folder','Pending']],['docEmirates','Emirates ID Document','document','select',0,['Save in Folder','Pending']],['docLabour','Approved Labour Contract','document','select',0,['Save in Folder','Pending']],['docOffer','Offer Letter','document','select',0,['Save in Folder','Pending']],['docMedical','ADNOC Medical Document','document','select',0,['Save in Folder','Pending']]
 ];
-const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['workingStatus','Working Status'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
+const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['employmentStatus','Working Status'],['siteStatus','Site Status'],['cancellationDate','Cancellation Date'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
 
 let employees=JSON.parse(localStorage.getItem('rg_employees_v3')||'null')||[];
 let notifications=JSON.parse(localStorage.getItem('rg_notifications_v3')||'null')||[];
+employees=employees.map(e=>({
+  ...e,
+  employmentStatus:e.employmentStatus||(e.workingStatus==='Inactive'?'Inactive':'Active'),
+  siteStatus:e.siteStatus||(['On Site','On Leave','Idle'].includes(e.workingStatus)?e.workingStatus:'')
+}));
+
 let editingId=null,saveAttempt=0,bulkRows=[];
 
 function persist(){localStorage.setItem('rg_employees_v3',JSON.stringify(employees));localStorage.setItem('rg_notifications_v3',JSON.stringify(notifications))}
@@ -450,8 +462,8 @@ function returnPortalHome(){
 
 function renderDashboard(){
   const miss=employees.filter(e=>missing(e).length),exp=employees.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
-  mTotal.textContent=employees.length;mOnsite.textContent=employees.filter(e=>e.workingStatus==='On Site').length;mReview.textContent=employees.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
-  recentEmployees.innerHTML=employees.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('');
+  mTotal.textContent=employees.length;mOnsite.textContent=employees.filter(e=>e.siteStatus==='On Site'&&e.employmentStatus==='Active').length;mReview.textContent=employees.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=employees.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.employmentStatus)} · ${esc(e.siteStatus)}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('');
   dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
   updateBadge();
 }
@@ -466,7 +478,7 @@ function renderEmployees(){
     let v=c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'';
     if(c[0]==='employeeId')return `<td><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v)}</span></td>`;
     if(c[0]==='workingStatus')return `<td><span class="pill ${String(v).toLowerCase().replaceAll(' ','')}">${esc(v)}</span></td>`;
-    if(c[0]==='approvalStatus')return `<td><span class="pill ${v==='Approved'?'approved':v==='Correction Required'?'correction':'review'}">${esc(v)}</span></td>`;
+    if(c[0]==='approvalStatus')return `<td><span class="pill ${v==='Approved'?'approved':(v==='Correction Required'||v==='Rejected')?'correction':'review'}">${esc(v)}</span></td>`;
     return `<td>${esc(v)}</td>`;
   }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`).join('');
   employeeNotices.innerHTML=employees.some(e=>missing(e).length)?`<div class="notice" onclick="specialFilter('missing')"><b>Some employee information is missing.</b> Click to view affected employees.</div>`:'';
@@ -489,16 +501,32 @@ employeeForm.onsubmit=e=>{
   if(old)fields.forEach(f=>{if(String(old[f[0]]||'')!==String(rec[f[0]]||''))changes.push({field:f[1],old:old[f[0]]||'',new:rec[f[0]]||''})});
   let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,date:new Date().toLocaleString(),changes}]};
   if(old)employees=employees.map(x=>x.id===editingId?saved:x);else employees.push(saved);
-  addNotification('Approval',saved,`${old?'Employee information edited':'New employee submitted'} by ${currentUser.name}. Please review.`);
+  addNotification(
+    'Approval',
+    saved,
+    `${old?'Employee information edited and resubmitted':'New employee submitted'} by ${currentUser.name}. Admin Manager review is required.`
+  );
   if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`);
-  persist();editingId=null;saveAttempt=0;showPage('employees');
+  persist();
+  alert('Employee record saved and sent to Admin Manager for review.');
+  editingId=null;
+  saveAttempt=0;
+  showPage('employees');
 };
 
 function renderReview(){
   let q=employees.filter(e=>e.approvalStatus==='Under Review');
-  reviewQueue.innerHTML=q.map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">Changed by ${esc(e.updatedBy)} on ${esc(e.updatedAt)}</span></div><button class="btn primary" onclick="openReview('${e.id}')">Review</button></div>`).join('')||'<p class="muted">No records under review.</p>';
+  reviewQueue.innerHTML=q.map(e=>`<div class="notification-item">
+    <div>
+      <b>Approval Required — ${esc(e.nameEnglish)} (${esc(e.employeeId)})</b>
+      <span class="muted">Submitted by ${esc(e.submittedBy||e.updatedBy)} (${esc(e.submittedRole||'Admin')}) on ${esc(e.submittedAt||e.updatedAt)}</span>
+    </div>
+    <button class="btn primary" onclick="openReview('${e.id}')">Review Employee</button>
+  </div>`).join('')||'<p class="muted">No records under review.</p>';
 }
-function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button> <button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>`;reviewModal.classList.add('show')}
+function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button>
+<button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>
+<button class="btn danger" onclick="decide('${id}','Rejected')">Reject</button>`;reviewModal.classList.add('show')}
 function decide(id,status){let e=employees.find(x=>x.id===id),comment=reviewComment.value;e.approvalStatus=status;e.history.push({action:status,by:currentUser.name,date:new Date().toLocaleString(),comment});addNotification(status==='Approved'?'System':'Approval',e,status==='Approved'?'Employee record approved.':`Correction required: ${comment||'Please review the information.'}`);persist();closeModal('reviewModal');renderReview();renderDashboard()}
 
 function updateBadge(){unreadBadge.textContent=notifications.filter(n=>!n.read).length}

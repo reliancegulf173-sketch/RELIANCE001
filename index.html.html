@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Reliance Gulf ERP Employee Portal frontend prototype">
+<title>Reliance Gulf ERP - Employee Portal</title>
+<link rel="icon" type="image/png" href="assets/images/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<noscript><div style="padding:20px;font-family:Arial">JavaScript is required to use this Employee Portal.</div></noscript>
+
+<div id="loginOverlay" class="login-overlay">
+<div class="login-card">
+<div style="text-align:center;margin-bottom:15px;"><img src="assets/images/reliance-gulf-logo.png" style="max-width:260px;width:100%;height:auto;"><h2 style="margin:10px 0 0;">Employee ERP Portal</h2></div>
+<div class="demo-box">
+<b>Demo Users</b><br><br>
+<b>Admin</b><br>
+Username: <b>admin</b><br>
+Password: <b>admin123</b><br><br>
+<b>Admin Manager</b><br>
+Username: <b>adminmanager</b><br>
+Password: <b>Prince@123</b>
+</div>
+
+<label>Username</label>
+<input id="loginUser" class="input" style="width:100%;margin:6px 0 12px;">
+<label>Password</label>
+<input id="loginPass" type="password" class="input" style="width:100%;margin:6px 0 14px;">
+<button class="btn primary" style="width:100%" onclick="login()">Login</button>
+<p id="loginMsg" style="color:red"></p>
+</div>
+</div>
+
+<div class="app">
+<aside class="sidebar">
+<div class="brand">RELIANCE GULF ERP<small>Employee Portal Prototype</small></div>
+<div class="nav">
+<button class="active" data-page="dashboard">Dashboard</button>
+<button data-page="employees">Employee List</button>
+<button data-page="form">Add Employee</button>
+<button data-page="review">Manager Review</button>
+<button data-page="notifications">Notifications</button>
+<button data-page="bulk">Bulk Upload</button>
+</div>
+</aside>
+<main class="main">
+<header class="topbar"><h1 id="pageTitle">Dashboard</h1><div class="user"><button class="bell" onclick="showPage('notifications')">🔔<span class="badge" id="unreadBadge">0</span></button><span>Admin Manager</span></div></header>
+<div class="content">
+<section class="page active" id="dashboard">
+<div class="cards">
+<div class="card metric"><span class="muted">Total Employees</span><b id="mTotal">0</b><small>All companies</small></div>
+<div class="card metric"><span class="muted">On Site</span><b id="mOnsite">0</b><small>Active at project sites</small></div>
+<div class="card metric"><span class="muted">Under Review</span><b id="mReview">0</b><small>Manager action required</small></div>
+<div class="card metric"><span class="muted">Missing Information</span><b id="mMissing">0</b><small>Incomplete records</small></div>
+</div>
+<div id="dashboardNotices"></div>
+<div class="section"><h3>Recent Employees</h3><div id="recentEmployees"></div></div>
+</section>
+
+<section class="page" id="employees">
+<div id="employeeNotices"></div>
+<div class="toolbar">
+<input class="input grow" id="search" placeholder="Search name, Employee ID, company or designation">
+<select class="input" id="filterCompany"><option value="">All Companies</option><option>RELIANCE GULF</option><option>RELIANCE INTERNATIONAL</option></select>
+<select class="input" id="filterStatus"><option value="">All Working Status</option><option>On Site</option><option>Idle</option><option>On Leave</option><option>Inactive</option></select>
+<select class="input" id="filterApproval"><option value="">All Approval Status</option><option>Under Review</option><option>Approved</option><option>Correction Required</option></select>
+<select class="input" id="filterSpecial"><option value="">All Records</option><option value="missing">Missing Information</option><option value="expiry">Expiry within 60 days</option><option value="expired">Expired Documents</option></select>
+<button class="btn light" onclick="clearFilters()">Clear</button>
+<button class="btn primary" onclick="exportExcel()">Export Excel</button>
+<button class="btn light" onclick="window.print()">Export PDF / Print</button>
+<button class="btn gold" onclick="openNew()">+ Add New Employee</button>
+</div>
+<div class="table-wrap"><table><thead><tr id="employeeHead"></tr></thead><tbody id="employeeBody"></tbody></table></div>
+</section>
+
+<section class="page" id="form">
+<form id="employeeForm">
+<div class="section"><h3>General Information</h3><div class="grid" id="generalGrid"></div></div>
+<div class="section"><h3>Passport, Visa & Emirates ID</h3><div class="grid" id="identityGrid"></div></div>
+<div class="section"><h3>Labour & Other Details</h3><div class="grid" id="otherGrid"></div></div>
+<div class="section"><h3>Technical Certificates</h3><div class="grid" id="certGrid"></div></div>
+<div class="section"><h3>Document Status</h3><div class="grid" id="documentGrid"></div></div>
+<div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send for Review</button></div>
+</form>
+</section>
+
+<section class="page" id="review">
+<div class="section"><h3>Manager/Admin Manager Review Queue</h3><p class="muted">New employees and edited records remain Under Review until approved.</p><div id="reviewQueue"></div></div>
+</section>
+
+<section class="page" id="notifications">
+<div class="toolbar"><select id="notifFilter" class="input"><option>All</option><option>Unread</option><option>Approval</option><option>Missing Information</option><option>Expiry</option><option>System</option></select><button class="btn light" onclick="markAllRead()">Mark All Read</button></div>
+<div id="notificationList"></div>
+</section>
+
+<section class="page" id="bulk">
+<div class="section"><h3>Bulk Employee Upload</h3>
+<p>Download the template, fill employee details and upload the CSV file. This offline prototype validates Employee ID, Emirates ID and mandatory information.</p>
+<button class="btn primary" onclick="downloadTemplate()">Download Excel/CSV Template</button>
+<input type="file" id="bulkFile" accept=".csv" class="input" style="margin-left:8px">
+<button class="btn gold" onclick="previewBulk()">Preview Upload</button>
+</div>
+<div class="section"><h3>Upload Preview</h3><div id="bulkPreview" class="muted">No file selected.</div></div>
+</section>
+</div>
+</main>
+</div>
+
+<div class="modal" id="detailModal"><div class="modal-card"><button class="close" onclick="closeModal('detailModal')">×</button><div id="detailContent"></div></div></div>
+<div class="modal" id="warningModal"><div class="modal-card"><button class="close" onclick="closeModal('warningModal')">×</button><h2>This information is missing.</h2><p>The following fields are empty. Review them and click Save again to save with missing information.</p><ul id="missingList"></ul><button class="btn primary" onclick="closeModal('warningModal')">Review Form</button></div></div>
+<div class="modal" id="reviewModal"><div class="modal-card"><button class="close" onclick="closeModal('reviewModal')">×</button><div id="reviewContent"></div></div></div>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

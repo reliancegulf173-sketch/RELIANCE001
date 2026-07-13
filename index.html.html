@@ -98,11 +98,6 @@ button,input,select{font:inherit}
 
 .toolbar{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;box-shadow:var(--shadow)}
 .input{border:1px solid #dce4ec;border-radius:10px;padding:10px 11px;background:#fff}
-.input.filter-active{border-color:var(--blue);background:#eaf5ff;color:#174f78;box-shadow:0 0 0 3px rgba(31,111,168,.10);font-weight:700}
-tr.missing-row td{background:#fffdf4}
-td.missing-highlight{background:#ffe7e7!important;color:#a62626;font-weight:800;border-left:3px solid var(--danger)}
-.missing-text{display:inline-block;background:#ffe7e7;color:#a62626;border-radius:8px;padding:5px 8px;font-weight:800}
-
 .grow{flex:1;min-width:220px}
 .table-wrap{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:var(--shadow);max-height:65vh}
 table{border-collapse:collapse;width:max-content;min-width:100%}
@@ -272,7 +267,11 @@ tr:hover td{background:#fbfdff}
         </div>
         <div class="kpis">
           <div class="kpi"><div class="label">Total Employees</div><div class="value" id="mTotal">0</div><div class="note">Both companies combined</div></div>
+          <div class="kpi"><div class="label">Active Employees</div><div class="value" id="mActive">0</div><div class="note">Current working status</div></div>
+          <div class="kpi"><div class="label">Inactive Employees</div><div class="value" id="mInactive">0</div><div class="note">Employment cancelled</div></div>
           <div class="kpi"><div class="label">On Site</div><div class="value" id="mOnsite">0</div><div class="note">Currently mobilized</div></div>
+          <div class="kpi"><div class="label">On Leave</div><div class="value" id="mOnLeave">0</div><div class="note">Currently on leave</div></div>
+          <div class="kpi"><div class="label">Idle</div><div class="value" id="mIdle">0</div><div class="note">Available / not assigned</div></div>
           <div class="kpi"><div class="label">Under Review</div><div class="value" id="mReview">0</div><div class="note">Manager approval pending</div></div>
           <div class="kpi"><div class="label">Missing Information</div><div class="value" id="mMissing">0</div><div class="note">Incomplete employee records</div></div>
         </div>
@@ -318,7 +317,7 @@ tr:hover td{background:#fbfdff}
           <div class="form-section"><h3>Labour & Other Details</h3><div class="form-grid" id="otherGrid"></div></div>
           <div class="form-section"><h3>Technical Certificates</h3><div class="form-grid" id="certGrid"></div></div>
           <div class="form-section"><h3>Document Status</h3><div class="form-grid" id="documentGrid"></div></div>
-          <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send to Admin Manager</button></div>
+          <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send for Review</button></div>
         </form>
       </section>
 
@@ -393,25 +392,19 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 const fields=[
 ['nameEnglish','Employee Name English','general','text',1],['nameArabic','Employee Name Arabic','general','text'],['designation','Actual Designation','general','text',1],['employeeId','Employee ID','general','text',1],['company','Company Name','general','select',1,['RELIANCE GULF','RELIANCE INTERNATIONAL']],
 ['passportNumber','Passport Number','identity','text',1],['passportIssue','Passport Issue Date','identity','date'],['passportExpiry','Passport Expiry Date','identity','date',1],['visaStatus','Visa Status','identity','select',1,['Visit Visa Applied','Employment Visa Outside Sent','Visa Completed']],['unifiedNumber','Unified Number','identity','text'],['emiratesId','Emirates ID Number','identity','text'],['residenceFile','Residence File Number','identity','text'],['idIssue','ID Issue Date','identity','date'],['idExpiry','ID Expiry Date','identity','date'],
-['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['employmentStatus','Working Status','other','select',1,['Active','Inactive']],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],['cancellationDate','Cancellation Date','other','date'],
+['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['workingStatus','Working Status','other','select',1,['Active','Inactive']],['cancellationDate','Cancellation Date','other','date'],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],
 ['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],['otherCertExpiry','Other Certificate Expiry','cert','date'],['otherCertRemark','Other Certificate Remark','cert','text'],
 ['docPassport','Passport Document','document','select',0,['Save in Folder','Pending']],['docEmirates','Emirates ID Document','document','select',0,['Save in Folder','Pending']],['docLabour','Approved Labour Contract','document','select',0,['Save in Folder','Pending']],['docOffer','Offer Letter','document','select',0,['Save in Folder','Pending']],['docMedical','ADNOC Medical Document','document','select',0,['Save in Folder','Pending']]
 ];
-const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['employmentStatus','Working Status'],['siteStatus','Site Status'],['cancellationDate','Cancellation Date'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
+const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['workingStatus','Working Status'],['cancellationDate','Cancellation Date'],['siteStatus','Site Status'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
 
 let employees=JSON.parse(localStorage.getItem('rg_employees_v3')||'null')||[];
 let notifications=JSON.parse(localStorage.getItem('rg_notifications_v3')||'null')||[];
-employees=employees.map(e=>({
-  ...e,
-  employmentStatus:e.employmentStatus||(e.workingStatus==='Inactive'?'Inactive':'Active'),
-  siteStatus:e.siteStatus||(['On Site','On Leave','Idle'].includes(e.workingStatus)?e.workingStatus:'')
-}));
-
 let editingId=null,saveAttempt=0,bulkRows=[];
 
 function persist(){localStorage.setItem('rg_employees_v3',JSON.stringify(employees));localStorage.setItem('rg_notifications_v3',JSON.stringify(notifications))}
 function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
-function missing(e){return fields.filter(f=>f[4]&&!e[f[0]]).map(f=>f[1])}
+function missing(e){return fields.filter(f=>f[4]&&!e[f[0]]).map(f=>f[1]).concat(e.workingStatus==='Inactive'&&!e.cancellationDate?['Cancellation Date']:[])}
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
 function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry]].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
 function addNotification(type,e,message){notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status:'Open'})}
@@ -426,6 +419,15 @@ function buildForm(){
       wrap.innerHTML=`<label>${label}${req?' *':''}</label>${ctl}`;host.appendChild(wrap);
     });
   });
+  const working=document.getElementById('workingStatus');
+  if(working){working.addEventListener('change',toggleCancellationDate);toggleCancellationDate()}
+}
+function toggleCancellationDate(){
+  const working=document.getElementById('workingStatus'),date=document.getElementById('cancellationDate'),wrap=document.querySelector('.form-group[data-key="cancellationDate"]');
+  if(!working||!date||!wrap)return;
+  const inactive=working.value==='Inactive';
+  wrap.style.display=inactive?'block':'none';date.required=inactive;
+  if(!inactive)date.value='';
 }
 const pageMeta={
  dashboard:['Dashboard','Employee portal overview'],
@@ -462,14 +464,14 @@ function returnPortalHome(){
 
 function renderDashboard(){
   const miss=employees.filter(e=>missing(e).length),exp=employees.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
-  mTotal.textContent=employees.length;mOnsite.textContent=employees.filter(e=>e.siteStatus==='On Site'&&e.employmentStatus==='Active').length;mReview.textContent=employees.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
-  recentEmployees.innerHTML=employees.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.employmentStatus)} · ${esc(e.siteStatus)}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('');
+  mTotal.textContent=employees.length;mActive.textContent=employees.filter(e=>e.workingStatus==='Active').length;mInactive.textContent=employees.filter(e=>e.workingStatus==='Inactive').length;mOnsite.textContent=employees.filter(e=>e.siteStatus==='On Site').length;mOnLeave.textContent=employees.filter(e=>e.siteStatus==='On Leave').length;mIdle.textContent=employees.filter(e=>e.siteStatus==='Idle').length;mReview.textContent=employees.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=employees.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('');
   dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
   updateBadge();
 }
 function getFiltered(){
-  let q=search.value.toLowerCase(),co=filterCompany.value,st=filterStatus.value,ap=filterApproval.value,sp=filterSpecial.value;
-  return employees.filter(e=>(!q||[e.nameEnglish,e.employeeId,e.company,e.designation].join(' ').toLowerCase().includes(q))&&(!co||e.company===co)&&(!st||e.workingStatus===st)&&(!ap||e.approvalStatus===ap)&&(!sp||(sp==='missing'&&missing(e).length)||(sp==='expiry'&&expiryInfo(e).some(x=>x.days>=0&&x.days<=60))||(sp==='expired'&&expiryInfo(e).some(x=>x.days<0))));
+  let q=search.value.toLowerCase(),co=filterCompany.value,ws=filterWorkingStatus.value,ss=filterSiteStatus.value,ap=filterApproval.value,sp=filterSpecial.value;
+  return employees.filter(e=>(!q||[e.nameEnglish,e.employeeId,e.company,e.designation,e.workingStatus,e.siteStatus].join(' ').toLowerCase().includes(q))&&(!co||e.company===co)&&(!ws||e.workingStatus===ws)&&(!ss||e.siteStatus===ss)&&(!ap||e.approvalStatus===ap)&&(!sp||(sp==='missing'&&missing(e).length)||(sp==='expiry'&&expiryInfo(e).some(x=>x.days>=0&&x.days<=60))||(sp==='expired'&&expiryInfo(e).some(x=>x.days<0))));
 }
 function renderEmployees(){
   const data=getFiltered();
@@ -477,23 +479,24 @@ function renderEmployees(){
   employeeBody.innerHTML=data.map(e=>`<tr>${listColumns.map(c=>{
     let v=c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'';
     if(c[0]==='employeeId')return `<td><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v)}</span></td>`;
-    if(c[0]==='workingStatus')return `<td><span class="pill ${String(v).toLowerCase().replaceAll(' ','')}">${esc(v)}</span></td>`;
-    if(c[0]==='approvalStatus')return `<td><span class="pill ${v==='Approved'?'approved':(v==='Correction Required'||v==='Rejected')?'correction':'review'}">${esc(v)}</span></td>`;
+    if(c[0]==='workingStatus'||c[0]==='siteStatus')return `<td><span class="pill ${String(v).toLowerCase().replaceAll(' ','')}">${esc(v)}</span></td>`;
+    if(c[0]==='approvalStatus')return `<td><span class="pill ${v==='Approved'?'approved':v==='Correction Required'?'correction':'review'}">${esc(v)}</span></td>`;
     return `<td>${esc(v)}</td>`;
   }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`).join('');
   employeeNotices.innerHTML=employees.some(e=>missing(e).length)?`<div class="notice" onclick="specialFilter('missing')"><b>Some employee information is missing.</b> Click to view affected employees.</div>`:'';
 }
-['search','filterCompany','filterStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
-function clearFilters(){['search','filterCompany','filterStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).value='');renderEmployees()}
+['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
+function clearFilters(){['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).value='');renderEmployees()}
 function specialFilter(v){showPage('employees');filterSpecial.value=v;renderEmployees()}
-function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));showPage('form')}
-function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});showPage('form')}
+function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));showPage('form');toggleCancellationDate()}
+function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});showPage('form');toggleCancellationDate()}
 function viewEmployee(id){let e=employees.find(x=>x.id===id);detailContent.innerHTML=`<h2>${esc(e.nameEnglish)} <small>(${esc(e.employeeId)})</small></h2><p><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></p><div class="form-grid">${listColumns.map(c=>`<div><b style="font-size:12px;color:#53697d">${c[1]}</b><div style="margin-top:5px">${esc(c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'-')}</div></div>`).join('')}</div><div style="margin-top:20px"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button></div>`;detailModal.classList.add('show')}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 
 employeeForm.onsubmit=e=>{
   e.preventDefault();let rec={},missingNow=[];
   fields.forEach(f=>{let el=document.getElementById(f[0]);rec[f[0]]=el.value.trim();let wrap=document.querySelector(`.form-group[data-key="${f[0]}"]`);wrap.classList.remove('missing');if(f[4]&&!rec[f[0]]){missingNow.push(f[1]);wrap.classList.add('missing')}});
+  if(rec.workingStatus==='Inactive'&&!rec.cancellationDate){missingNow.push('Cancellation Date');document.querySelector('.form-group[data-key="cancellationDate"]').classList.add('missing')}
   let duplicate=employees.find(x=>x.id!==editingId&&(x.employeeId===rec.employeeId||(rec.emiratesId&&x.emiratesId===rec.emiratesId)));
   if(duplicate){alert(duplicate.employeeId===rec.employeeId?'Already have this Employee ID.':'Already have this Emirates ID.');return}
   if(missingNow.length&&saveAttempt===0){saveAttempt++;missingList.innerHTML=missingNow.map(x=>`<li>${esc(x)}</li>`).join('');warningModal.classList.add('show');return}
@@ -501,32 +504,16 @@ employeeForm.onsubmit=e=>{
   if(old)fields.forEach(f=>{if(String(old[f[0]]||'')!==String(rec[f[0]]||''))changes.push({field:f[1],old:old[f[0]]||'',new:rec[f[0]]||''})});
   let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,date:new Date().toLocaleString(),changes}]};
   if(old)employees=employees.map(x=>x.id===editingId?saved:x);else employees.push(saved);
-  addNotification(
-    'Approval',
-    saved,
-    `${old?'Employee information edited and resubmitted':'New employee submitted'} by ${currentUser.name}. Admin Manager review is required.`
-  );
+  addNotification('Approval',saved,`${old?'Employee information edited':'New employee submitted'} by ${currentUser.name}. Please review.`);
   if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`);
-  persist();
-  alert('Employee record saved and sent to Admin Manager for review.');
-  editingId=null;
-  saveAttempt=0;
-  showPage('employees');
+  persist();editingId=null;saveAttempt=0;showPage('employees');
 };
 
 function renderReview(){
   let q=employees.filter(e=>e.approvalStatus==='Under Review');
-  reviewQueue.innerHTML=q.map(e=>`<div class="notification-item">
-    <div>
-      <b>Approval Required — ${esc(e.nameEnglish)} (${esc(e.employeeId)})</b>
-      <span class="muted">Submitted by ${esc(e.submittedBy||e.updatedBy)} (${esc(e.submittedRole||'Admin')}) on ${esc(e.submittedAt||e.updatedAt)}</span>
-    </div>
-    <button class="btn primary" onclick="openReview('${e.id}')">Review Employee</button>
-  </div>`).join('')||'<p class="muted">No records under review.</p>';
+  reviewQueue.innerHTML=q.map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">Changed by ${esc(e.updatedBy)} on ${esc(e.updatedAt)}</span></div><button class="btn primary" onclick="openReview('${e.id}')">Review</button></div>`).join('')||'<p class="muted">No records under review.</p>';
 }
-function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button>
-<button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>
-<button class="btn danger" onclick="decide('${id}','Rejected')">Reject</button>`;reviewModal.classList.add('show')}
+function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button> <button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>`;reviewModal.classList.add('show')}
 function decide(id,status){let e=employees.find(x=>x.id===id),comment=reviewComment.value;e.approvalStatus=status;e.history.push({action:status,by:currentUser.name,date:new Date().toLocaleString(),comment});addNotification(status==='Approved'?'System':'Approval',e,status==='Approved'?'Employee record approved.':`Correction required: ${comment||'Please review the information.'}`);persist();closeModal('reviewModal');renderReview();renderDashboard()}
 
 function updateBadge(){unreadBadge.textContent=notifications.filter(n=>!n.read).length}

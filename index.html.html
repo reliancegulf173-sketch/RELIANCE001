@@ -205,7 +205,402 @@
       const btnManager = document.getElementById('btn-manager');
 
       if (role === 'Admin') {
-        // Change Name & Avatar dynamically
+        // Change Name & Avatar dynamically<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reliance Gulf ERP - Dual Portals</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+  <div class="flex h-screen overflow-hidden">
+    
+    <!-- ========================================== -->
+    <!-- 1. SIDEBAR (PORTAL SELECTOR & MENU) -->
+    <!-- ========================================== -->
+    <aside class="w-64 h-screen bg-slate-900 text-slate-100 flex flex-col p-4 shadow-xl shrink-0">
+      <div class="mb-6 px-4 py-2 border-b border-slate-800">
+        <h2 class="text-lg font-bold tracking-wider text-white">RELIANCE GULF</h2>
+        <p class="text-xs text-slate-400">Multi-Portal ERP System</p>
+      </div>
+
+      <!-- PORTAL SWITCHER DROPDOWN -->
+      <div class="px-2 mb-6">
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Select Portal</label>
+        <select 
+          id="portal-select" 
+          onchange="switchPortal()" 
+          class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer font-semibold"
+        >
+          <option value="employee-portal">👥 Employee Management</option>
+          <option value="site-portal">🏗️ Site Management</option>
+        </select>
+      </div>
+
+      <!-- PORTAL 1: EMPLOYEE NAVIGATION LINKS -->
+      <ul id="employee-menu-group" class="space-y-1.5 flex-1">
+        <li 
+          id="menu-emp-dashboard"
+          onclick="switchTab('emp-dashboard')"
+          class="group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner"
+        >
+          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md" id="ind-emp-dashboard"></span>
+          <span class="text-base">📊</span>
+          <span>Employee Dashboard</span>
+        </li>
+
+        <li 
+          id="menu-emp-list"
+          onclick="switchTab('emp-list')"
+          class="group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+        >
+          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-emp-list"></span>
+          <span class="text-base">👥</span>
+          <span>Employee List</span>
+        </li>
+      </ul>
+
+      <!-- PORTAL 2: SITE NAVIGATION LINKS (Initially Hidden) -->
+      <ul id="site-menu-group" class="space-y-1.5 flex-1 hidden">
+        <li 
+          id="menu-site-dashboard"
+          onclick="switchTab('site-dashboard')"
+          class="group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner"
+        >
+          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md" id="ind-site-dashboard"></span>
+          <span class="text-base">🏗️</span>
+          <span>Site Dashboard</span>
+        </li>
+
+        <li 
+          id="menu-site-list"
+          onclick="switchTab('site-list')"
+          class="group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+        >
+          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-site-list"></span>
+          <span class="text-base">📍</span>
+          <span>Active Sites</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT AREA -->
+    <!-- ========================================== -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      
+      <!-- ========================================== -->
+      <!-- 2. DYNAMIC HEADER -->
+      <!-- ========================================== -->
+      <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2">
+          <h1 id="page-title" class="text-xl font-semibold text-slate-800">Employee Dashboard</h1>
+        </div>
+        
+        <!-- Dynamic Profile Corner -->
+        <div class="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full transition-all cursor-pointer border border-gray-200">
+          <div class="relative">
+            <img 
+              id="user-avatar"
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60" 
+              alt="User Avatar" 
+              class="w-8 h-8 rounded-full object-cover border border-slate-300" 
+            />
+            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+          </div>
+          <div class="flex flex-col text-right">
+            <span id="user-display-name" class="text-sm font-semibold text-slate-700 leading-tight">Admin Manager</span>
+            <span id="user-display-role" class="text-xs text-slate-400 capitalize">Admin Manager</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ========================================== -->
+      <!-- SCROLLABLE SECTIONS -->
+      <!-- ========================================== -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <!-- USER SWAPPER (With Password Prompt) -->
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex gap-4 items-center">
+          <span class="text-xs font-bold text-blue-700 uppercase tracking-wide">Secure User Switch:</span>
+          <button 
+            onclick="secureUserSwitch('Admin')"
+            id="btn-admin"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
+          >
+            Switch to "Admin" (Pass: admin123)
+          </button>
+          <button 
+            onclick="secureUserSwitch('Admin Manager')"
+            id="btn-manager"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm transition-all"
+          >
+            Switch to "Admin Manager" (Pass: manager123)
+          </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PORTAL 1 TABS (EMPLOYEE PORTAL) -->
+        <!-- ========================================== -->
+        
+        <!-- Tab 1A: Employee Dashboard -->
+        <div id="tab-emp-dashboard-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Active Employees</span>
+                <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm">👥</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-300 tracking-tight">-</h3>
+            </div>
+            <div class="border-t border-dashed border-slate-200"></div>
+            <div class="bg-slate-50/70 px-5 py-3.5 grid grid-cols-2 divide-x divide-slate-200 text-center">
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Local</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Expat</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Employee Status Overview</span>
+                <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm">📊</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-300 tracking-tight">-</h3>
+            </div>
+            <div class="border-t border-dashed border-slate-200"></div>
+            <div class="bg-slate-50/70 px-4 py-3.5 flex justify-between items-center text-center gap-2">
+              <div class="flex-1">
+                <span class="inline-flex items-center gap-1 text-xs text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">At Site</span>
+                <p class="text-base font-bold text-slate-300 mt-1">-</p>
+              </div>
+              <div class="w-px h-8 bg-slate-200"></div>
+              <div class="flex-1">
+                <span class="inline-flex items-center gap-1 text-xs text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">Idle</span>
+                <p class="text-base font-bold text-slate-300 mt-1">-</p>
+              </div>
+              <div class="w-px h-8 bg-slate-200"></div>
+              <div class="flex-1">
+                <span class="inline-flex items-center gap-1 text-xs text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">Leave</span>
+                <p class="text-base font-bold text-slate-300 mt-1">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1B: Employee List View -->
+        <div id="tab-emp-list-content" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-lg">Active Personnel Records</h3>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">No records found</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="p-4 pl-6">ID</th>
+                  <th class="p-4">Name</th>
+                  <th class="p-4">Type</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 pr-6 text-right">Labour Expiry</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-150 text-sm">
+                <tr>
+                  <td colspan="5" class="p-8 text-center text-slate-400 font-medium">No active employees to display.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- PORTAL 2 TABS (SITE PORTAL) -->
+        <!-- ========================================== -->
+        
+        <!-- Tab 2A: Site Dashboard -->
+        <div id="tab-site-dashboard-content" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Projects/Sites</span>
+                <span class="p-2 bg-purple-50 text-purple-600 rounded-lg text-sm">🏗️</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-300 tracking-tight">-</h3>
+            </div>
+            <div class="border-t border-dashed border-slate-200"></div>
+            <div class="bg-slate-50/70 px-5 py-3.5 grid grid-cols-2 divide-x divide-slate-200 text-center">
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Ongoing</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Completed</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Resource Allocation</span>
+                <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-sm">⚙️</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-300 tracking-tight">-</h3>
+            </div>
+            <div class="border-t border-dashed border-slate-200"></div>
+            <div class="bg-slate-50/70 px-5 py-3.5 grid grid-cols-2 divide-x divide-slate-200 text-center">
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Machines Active</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400 font-medium">Labor Strength</p>
+                <p class="text-base font-bold text-slate-300 mt-0.5">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2B: Site List View -->
+        <div id="tab-site-list-content" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-bold text-slate-800 text-lg">Active Project Sites</h3>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">No active sites</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="p-4 pl-6">Project ID</th>
+                  <th class="p-4">Location</th>
+                  <th class="p-4">Supervisor</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 pr-6 text-right">Deadline</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-150 text-sm">
+                <tr>
+                  <td colspan="5" class="p-8 text-center text-slate-400 font-medium">No active site records found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ========================================== -->
+  <script>
+    // 1. Password Verification System
+    function secureUserSwitch(role) {
+      let password = "";
+      if (role === 'Admin') {
+        password = prompt("Enter password for Admin:");
+        if (password === 'admin123') {
+          updateProfileUI('Admin', "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=60", 'btn-admin', 'btn-manager');
+          alert("Success: Logged in as Admin!");
+        } else {
+          alert("Incorrect Password! (Use: admin123)");
+        }
+      } else if (role === 'Admin Manager') {
+        password = prompt("Enter password for Admin Manager:");
+        if (password === 'manager123') {
+          updateProfileUI('Admin Manager', "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60", 'btn-manager', 'btn-admin');
+          alert("Success: Logged in as Admin Manager!");
+        } else {
+          alert("Incorrect Password! (Use: manager123)");
+        }
+      }
+    }
+
+    function updateProfileUI(name, avatar, activeBtnId, inactiveBtnId) {
+      document.getElementById('user-display-name').innerText = name;
+      document.getElementById('user-display-role').innerText = name;
+      document.getElementById('user-avatar').src = avatar;
+
+      document.getElementById(activeBtnId).className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm transition-all";
+      document.getElementById(inactiveBtnId).className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all";
+    }
+
+    // 2. Portal Switcher Logic
+    function switchPortal() {
+      const select = document.getElementById('portal-select');
+      const empMenu = document.getElementById('employee-menu-group');
+      const siteMenu = document.getElementById('site-menu-group');
+
+      if (select.value === 'employee-portal') {
+        empMenu.classList.remove('hidden');
+        siteMenu.classList.add('hidden');
+        switchTab('emp-dashboard');
+      } else if (select.value === 'site-portal') {
+        siteMenu.classList.remove('hidden');
+        empMenu.classList.add('hidden');
+        switchTab('site-dashboard');
+      }
+    }
+
+    // 3. Navigation Tab Switcher
+    function switchTab(tabId) {
+      // Hide all content areas
+      const contents = [
+        'tab-emp-dashboard-content', 'tab-emp-list-content',
+        'tab-site-dashboard-content', 'tab-site-list-content'
+      ];
+      contents.forEach(id => document.getElementById(id).classList.add('hidden'));
+
+      // Show selected content and update header title
+      const pageTitle = document.getElementById('page-title');
+      document.getElementById('tab-' + tabId + '-content').classList.remove('hidden');
+
+      // Reset Active UI Menu Classes
+      const menuIds = ['menu-emp-dashboard', 'menu-emp-list', 'menu-site-dashboard', 'menu-site-list'];
+      const indIds = ['ind-emp-dashboard', 'ind-emp-list', 'ind-site-dashboard', 'ind-site-list'];
+
+      menuIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = "group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200";
+      });
+      indIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      // Apply Active Styles to Current Tab
+      const activeMenu = document.getElementById('menu-' + tabId);
+      const activeInd = document.getElementById('ind-' + tabId);
+      
+      if (activeMenu) {
+        activeMenu.className = "group relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner";
+      }
+      if (activeInd) {
+        activeInd.classList.remove('hidden');
+      }
+
+      // Dynamic Title Update
+      if (tabId === 'emp-dashboard') pageTitle.innerText = "Employee Dashboard";
+      if (tabId === 'emp-list') pageTitle.innerText = "Employee List";
+      if (tabId === 'site-dashboard') pageTitle.innerText = "Site Dashboard";
+      if (tabId === 'site-list') pageTitle.innerText = "Active Sites";
+    }
+  </script>
+</body>
+</html>
         nameElement.innerText = "Admin";
         roleElement.innerText = "Admin";
         avatarElement.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=60";

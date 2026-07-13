@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reliance Gulf ERP</title>
-  <!-- Tailwind CSS CDN for Modern UI -->
+  <!-- Tailwind CSS CDN for exact styling -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#f4f7fe] text-slate-800 min-h-screen p-4 md:p-8">
 
   <div class="max-w-4xl mx-auto space-y-6">
     
-    <!-- 1. Header Card -->
+    <!-- Header Section -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
       <h1 class="text-2xl font-bold text-slate-900">Reliance Gulf ERP</h1>
       <p class="text-sm text-slate-500">Employee Profile Registration Form</p>
@@ -40,7 +40,7 @@
           </select>
         </div>
 
-        <!-- Employee Name -->
+        <!-- Employee Name Input -->
         <div class="flex flex-col space-y-1.5">
           <label class="text-xs font-bold text-slate-500 uppercase">Employee Name</label>
           <input
@@ -53,7 +53,7 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- SECTION 3.5: OTHER DETAILS (Renamed) -->
+    <!-- SECTION 3.5: OTHER DETAILS -->
     <!-- ========================================================= -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
       <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
@@ -79,14 +79,14 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- SECTION 3.6: TECHNICAL CERTIFICATIONS (Dynamic Dropdown) -->
+    <!-- SECTION 3.6: TECHNICAL CERTIFICATIONS -->
     <!-- ========================================================= -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
       <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
         3.6 Technical Certifications
       </h2>
 
-      <!-- Add Certificate Form Controls -->
+      <!-- Form for Adding Certifications -->
       <div class="bg-slate-50 p-4 rounded-xl space-y-4 border border-slate-100">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <!-- Dropdown Select -->
@@ -129,7 +129,7 @@
           </div>
         </div>
 
-        <!-- Add Date Button -->
+        <!-- Add Button -->
         <div class="flex justify-end">
           <button
             type="button"
@@ -141,7 +141,7 @@
         </div>
       </div>
 
-      <!-- Certifications List Container -->
+      <!-- Active Certifications List Table -->
       <div id="certificationsTableContainer" class="hidden">
         <div class="overflow-hidden border border-slate-100 rounded-xl">
           <table class="w-full text-left text-xs border-collapse">
@@ -154,20 +154,20 @@
               </tr>
             </thead>
             <tbody id="certificationsBody" class="divide-y divide-slate-100">
-              <!-- Dynamically Added Rows Go Here -->
+              <!-- Dynamically Added Rows -->
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- No Certifications Added Placeholder -->
+      <!-- Table Empty Placeholder -->
       <p id="noCertPlaceholder" class="text-xs text-slate-400 text-center py-4 bg-slate-50/30 rounded-xl border border-dashed border-slate-200">
         No certifications added yet. Use the dropdown above to add.
       </p>
     </div>
 
     <!-- ========================================================= -->
-    <!-- SECTION 3.7: WORKING STATUS & DEPLOYMENT (Two Cells) -->
+    <!-- SECTION 3.7: WORKING STATUS & DEPLOYMENT -->
     <!-- ========================================================= -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
       <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
@@ -201,7 +201,7 @@
           </div>
         </div>
 
-        <!-- CELL 2: Deployment Status (Dynamic Signs) -->
+        <!-- CELL 2: Deployment Status with Icons -->
         <div class="flex flex-col space-y-1.5">
           <label class="text-xs font-bold text-slate-500 uppercase">Deployment Status</label>
           <div class="relative">
@@ -228,10 +228,10 @@
   </div>
 
   <!-- ========================================================= -->
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- FRONTEND LOGIC (JAVASCRIPT) -->
   <!-- ========================================================= -->
   <script>
-    // System Status Change Logic
+    // Toggle Cancel Date display when status is "Inactive"
     function toggleCancelDate() {
       const status = document.getElementById('systemStatus').value;
       const cancelDateWrapper = document.getElementById('cancelDateWrapper');
@@ -243,11 +243,11 @@
       } else {
         cancelDateWrapper.classList.add('hidden');
         cancelDateInput.removeAttribute('required');
-        cancelDateInput.value = ''; // Reset date
+        cancelDateInput.value = ''; // Reset input
       }
     }
 
-    // Deployment Status Icon Logic
+    // Update the visual status icon based on selected deployment
     function updateDeploymentIcon() {
       const status = document.getElementById('deploymentStatus').value;
       const iconSpan = document.getElementById('statusIcon');
@@ -257,14 +257,14 @@
         iconSpan.className = 'text-emerald-500 animate-pulse';
       } else if (status === 'On Leave') {
         iconSpan.innerHTML = '🏖️';
-        iconSpan.className = ''; // Remove animation
+        iconSpan.className = '';
       } else if (status === 'Idle') {
         iconSpan.innerHTML = '💤';
         iconSpan.className = 'text-amber-500';
       }
     }
 
-    // Dynamic Certifications Management Array
+    // Technical Certifications dynamic handling
     let addedCertifications = [];
 
     function renderCertifications() {
@@ -272,7 +272,6 @@
       const placeholder = document.getElementById('noCertPlaceholder');
       const tableBody = document.getElementById('certificationsBody');
 
-      // Clear existing UI table rows
       tableBody.innerHTML = '';
 
       if (addedCertifications.length > 0) {
@@ -318,26 +317,24 @@
         return;
       }
 
-      // Check if duplicate
+      // Check duplicates
       const alreadyExists = addedCertifications.some(c => c.name === selectedValue);
       if (alreadyExists) {
-        alert('This certificate is already added to the list.');
+        alert('This certificate has already been added.');
         return;
       }
 
-      // Push to our memory array
       addedCertifications.push({
         name: selectedValue,
         date: dateValue,
         remark: remarkValue
       });
 
-      // Reset Form fields
+      // Reset selection values
       certSelect.value = '';
       certDate.value = '';
       certRemark.value = '';
 
-      // Re-render UI
       renderCertifications();
     }
 

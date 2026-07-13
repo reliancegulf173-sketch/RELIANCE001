@@ -3,1785 +3,347 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reliance Gulf ERP - Dual Portals v4</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Reliance Gulf ERP</title>
+  <!-- Tailwind CSS CDN for Modern UI -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Custom scrollbar to match premium look */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased">
+<body class="bg-[#f4f7fe] text-slate-800 min-h-screen p-4 md:p-8">
 
-  <div class="flex h-screen overflow-hidden">
+  <div class="max-w-4xl mx-auto space-y-6">
     
-    <!-- ========================================== -->
-    <!-- 1. SIDEBAR (PORTAL SELECTOR & MENU) -->
-    <!-- ========================================== -->
-    <aside class="w-64 h-screen bg-slate-900 text-slate-100 flex flex-col p-4 shadow-2xl shrink-0 z-20">
-      <div class="mb-6 px-4 py-2 border-b border-slate-800">
-        <h2 class="text-lg font-bold tracking-wider text-white">RELIANCE GULF</h2>
-        <p class="text-[10px] text-blue-400 font-mono tracking-widest uppercase mt-0.5">ERP Portal v4</p>
-      </div>
+    <!-- 1. Header Card -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <h1 class="text-2xl font-bold text-slate-900">Reliance Gulf ERP</h1>
+      <p class="text-sm text-slate-500">Employee Profile Registration Form</p>
+    </div>
 
-      <!-- PORTAL SELECTOR DROPDOWN -->
-      <div class="px-2 mb-6">
-        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Selected Portal</label>
-        <select 
-          id="portal-select" 
-          onchange="switchPortal()" 
-          class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer font-semibold"
-        >
-          <option value="employee-portal">👥 Employee Management</option>
-          <option value="site-portal">🏗️ Site Management</option>
-        </select>
-      </div>
-
-      <!-- PORTAL 1: EMPLOYEE MANAGEMENT NAVIGATION -->
-      <ul id="employee-menu-group" class="space-y-1 flex-1 overflow-y-auto">
-        <li 
-          id="menu-emp-dashboard"
-          onclick="switchTab('emp-dashboard')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md" id="ind-emp-dashboard"></span>
-          <span class="text-base">📊</span>
-          <span>Dashboard</span>
-        </li>
-
-        <li 
-          id="menu-emp-list"
-          onclick="switchTab('emp-list')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-emp-list"></span>
-          <span class="text-base">👥</span>
-          <span>Employee Records</span>
-        </li>
-
-        <li 
-          id="menu-emp-add"
-          onclick="openAddForm()"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-emp-add"></span>
-          <span class="text-base">➕</span>
-          <span>Add Employee Form</span>
-        </li>
-
-        <li 
-          id="menu-emp-bulk"
-          onclick="switchTab('emp-bulk')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-emp-bulk"></span>
-          <span class="text-base">📤</span>
-          <span>Bulk Excel Upload</span>
-        </li>
-
-        <li 
-          id="menu-emp-review"
-          onclick="switchTab('emp-review')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-emp-review"></span>
-          <span class="text-base">⚖️</span>
-          <span>Pending Approvals</span>
-        </li>
-      </ul>
-
-      <!-- PORTAL 2: SITE MANAGEMENT NAVIGATION -->
-      <ul id="site-menu-group" class="space-y-1 flex-1 hidden">
-        <li 
-          id="menu-site-dashboard"
-          onclick="switchTab('site-dashboard')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md" id="ind-site-dashboard"></span>
-          <span class="text-base">🏗️</span>
-          <span>Site Dashboard</span>
-        </li>
-
-        <li 
-          id="menu-site-list"
-          onclick="switchTab('site-list')"
-          class="group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
-        >
-          <span class="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-md hidden" id="ind-site-list"></span>
-          <span class="text-base">📍</span>
-          <span>Active Sites</span>
-        </li>
-      </ul>
-
-      <!-- System Notification Count Badge -->
-      <div class="mt-auto border-t border-slate-800 pt-4 flex items-center justify-between text-xs text-slate-500">
-        <span>Active Session:</span>
-        <span id="role-badge" class="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-mono text-[10px]">Manager</span>
-      </div>
-    </aside>
-
-    <!-- ========================================== -->
-    <!-- MAIN CONTENT AREA -->
-    <!-- ========================================== -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- ========================================================= -->
+    <!-- SECTION 3.1: GENERAL INFORMATION -->
+    <!-- ========================================================= -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+      <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
+        3.1 General Information
+      </h2>
       
-      <!-- ========================================== -->
-      <!-- DYNAMIC HEADER -->
-      <!-- ========================================== -->
-      <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 shadow-sm z-10">
-        <div class="flex items-center gap-4">
-          <h1 id="page-title" class="text-xl font-bold text-slate-800">Employee Dashboard</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Company Name Dropdown -->
+        <div class="flex flex-col space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase">Company Name *</label>
+          <select
+            id="companyName"
+            required
+            class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          >
+            <option value="">Select Company</option>
+            <option value="Reliance Gulf">Reliance Gulf</option>
+            <option value="Reliance International">Reliance International</option>
+          </select>
         </div>
-        
-        <!-- Header Right Actions: Notifications & User Card -->
-        <div class="flex items-center gap-4">
-          <!-- Notification Icon Badge -->
-          <button onclick="toggleNotificationCentre()" class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-all">
-            <span class="text-xl">🔔</span>
-            <span id="global-unread-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center rounded-full ring-2 ring-white">0</span>
-          </button>
 
-          <!-- User Profile Corner -->
-          <div class="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full transition-all border border-gray-200">
-            <img 
-              id="user-avatar"
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60" 
-              alt="User" 
-              class="w-8 h-8 rounded-full object-cover border border-slate-300" 
+        <!-- Employee Name -->
+        <div class="flex flex-col space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase">Employee Name</label>
+          <input
+            type="text"
+            placeholder="Enter Full Name"
+            class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SECTION 3.5: OTHER DETAILS (Renamed) -->
+    <!-- ========================================================= -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+      <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
+        3.5 Other Details
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase">Joining Date</label>
+          <input
+            type="date"
+            class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div class="flex flex-col space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase">Email Address</label>
+          <input
+            type="email"
+            placeholder="employee@reliancegulf.com"
+            class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SECTION 3.6: TECHNICAL CERTIFICATIONS (Dynamic Dropdown) -->
+    <!-- ========================================================= -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+      <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
+        3.6 Technical Certifications
+      </h2>
+
+      <!-- Add Certificate Form Controls -->
+      <div class="bg-slate-50 p-4 rounded-xl space-y-4 border border-slate-100">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Dropdown Select -->
+          <div class="flex flex-col space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase">Select Certification</label>
+            <select
+              id="certSelect"
+              class="border border-slate-200 rounded-lg p-2.5 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">-- Choose Certificate --</option>
+              <option value="H2S Certificate">H2S Certificate</option>
+              <option value="ATA Training">ATA Training</option>
+              <option value="Rigger Certificate">Rigger Certificate</option>
+              <option value="Scaffolder Training">Scaffolder Training</option>
+              <option value="ADNOC Medical Details">ADNOC Medical Details</option>
+              <option value="First Aid Training">First Aid Training</option>
+              <option value="Fire Safety Certificate">Fire Safety Certificate</option>
+            </select>
+          </div>
+
+          <!-- Date Input -->
+          <div class="flex flex-col space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase">Add Date / Expiry</label>
+            <input
+              id="certDate"
+              type="date"
+              class="border border-slate-200 rounded-lg p-2.5 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <div class="flex flex-col text-left">
-              <span id="user-display-name" class="text-xs font-bold text-slate-700 leading-tight">Admin Manager</span>
-              <span id="user-display-role" class="text-[10px] text-slate-400 capitalize font-medium">Administrator</span>
-            </div>
           </div>
-        </div>
-      </header>
 
-      <!-- ========================================== -->
-      <!-- ACTIVE VIEWPORT (SCROLLABLE CONTENT) -->
-      <!-- ========================================== -->
-      <main class="flex-1 overflow-y-auto p-6 space-y-6">
-
-        <!-- SECURITY SWITCHER PANEL -->
-        <div class="bg-blue-50/70 border border-blue-100 p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold text-blue-800 uppercase tracking-widest bg-blue-100 px-2.5 py-1 rounded-md">PROTOTYPE GATEWAY:</span>
-            <p class="text-xs text-blue-600">Simulate role verification before database locks.</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="secureUserSwitch('Admin')" id="btn-admin" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all">
-              Switch to "Admin" (Pass: admin123)
-            </button>
-            <button onclick="secureUserSwitch('Admin Manager')" id="btn-manager" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-all">
-              Switch to "Admin Manager" (Pass: manager123)
-            </button>
+          <!-- Remark Input -->
+          <div class="flex flex-col space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase">Remark (Optional)</label>
+            <input
+              id="certRemark"
+              type="text"
+              placeholder="e.g. Active, Score: 90%"
+              class="border border-slate-200 rounded-lg p-2.5 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
           </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SYSTEM-WIDE PERSISTENT ALERTS (Section 11) -->
-        <!-- ========================================== -->
-        <div id="missing-info-alert-bar" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-amber-100/60 transition-all" onclick="filterMissingInfoOnly()">
-          <div class="flex items-center gap-3">
-            <span class="text-xl">⚠️</span>
-            <div>
-              <h4 class="text-xs font-bold text-amber-800">Incomplete Profiles Warning</h4>
-              <p class="text-[11px] text-amber-600">Some employee profiles are saved with missing fields. Click here to review and fix.</p>
-            </div>
-          </div>
-          <span id="missing-alert-count" class="bg-amber-200 text-amber-800 font-bold px-2.5 py-0.5 rounded-full text-xs">0</span>
+        <!-- Add Date Button -->
+        <div class="flex justify-end">
+          <button
+            type="button"
+            onclick="addCertification()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-2 px-4 rounded-lg transition-all shadow-sm"
+          >
+            + Add Date
+          </button>
         </div>
-
-
-        <!-- ========================================== -->
-        <!-- PORTAL 1: EMPLOYEE PORTAL TABS -->
-        <!-- ========================================== -->
-
-        <!-- Tab 1A: Employee Dashboard (Section 2) -->
-        <div id="tab-emp-dashboard-content" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Reliance Gulf Card -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Reliance Gulf</span>
-              <h3 class="text-3xl font-extrabold text-slate-800 mt-2" id="rg-total-workers">0</h3>
-              <div class="grid grid-cols-3 gap-1 mt-4 pt-4 border-t border-slate-100 text-center text-xs">
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Site</p><p class="font-bold text-slate-700 mt-1" id="rg-site">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Idle</p><p class="font-bold text-slate-700 mt-1" id="rg-idle">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Leave</p><p class="font-bold text-slate-700 mt-1" id="rg-leave">0</p></div>
-              </div>
-            </div>
-
-            <!-- Reliance International Card -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Reliance International</span>
-              <h3 class="text-3xl font-extrabold text-slate-800 mt-2" id="ri-total-workers">0</h3>
-              <div class="grid grid-cols-3 gap-1 mt-4 pt-4 border-t border-slate-100 text-center text-xs">
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Site</p><p class="font-bold text-slate-700 mt-1" id="ri-site">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Idle</p><p class="font-bold text-slate-700 mt-1" id="ri-idle">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Leave</p><p class="font-bold text-slate-700 mt-1" id="ri-leave">0</p></div>
-              </div>
-            </div>
-
-            <!-- Combined Total Card -->
-            <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white shadow-xl">
-              <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Combined Personnel Pool</span>
-              <h3 class="text-3xl font-extrabold text-white mt-2" id="combined-total-workers">0</h3>
-              <div class="grid grid-cols-3 gap-1 mt-4 pt-4 border-t border-slate-800 text-center text-xs">
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">On Site</p><p class="font-bold text-blue-400 mt-1" id="combined-site">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">Idle Pool</p><p class="font-bold text-amber-400 mt-1" id="combined-idle">0</p></div>
-                <div><p class="text-slate-400 text-[10px] uppercase font-bold">On Leave</p><p class="font-bold text-emerald-400 mt-1" id="combined-leave">0</p></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Document Expiry Alert Dashboard Panel (Section 12) -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-widest mb-4">🚨 Real-time Expiry Counters (60 Days Span)</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div onclick="filterByExpiryRange('expired')" class="bg-rose-50 border border-rose-100 p-4 rounded-xl cursor-pointer hover:bg-rose-100/60 transition-all text-center">
-                <span class="text-xs font-semibold text-rose-800">Expired Docs</span>
-                <p id="count-expired" class="text-2xl font-black text-rose-600 mt-1">0</p>
-              </div>
-              <div onclick="filterByExpiryRange('7')" class="bg-amber-50 border border-amber-100 p-4 rounded-xl cursor-pointer hover:bg-amber-100/60 transition-all text-center">
-                <span class="text-xs font-semibold text-amber-800">Expiring in 7 Days</span>
-                <p id="count-exp-7" class="text-2xl font-black text-amber-600 mt-1">0</p>
-              </div>
-              <div onclick="filterByExpiryRange('30')" class="bg-blue-50 border border-blue-100 p-4 rounded-xl cursor-pointer hover:bg-blue-100/60 transition-all text-center">
-                <span class="text-xs font-semibold text-blue-800">Expiring in 30 Days</span>
-                <p id="count-exp-30" class="text-2xl font-black text-blue-600 mt-1">0</p>
-              </div>
-              <div onclick="filterByExpiryRange('60')" class="bg-slate-50 border border-slate-200 p-4 rounded-xl cursor-pointer hover:bg-slate-100/60 transition-all text-center">
-                <span class="text-xs font-semibold text-slate-600">Expiring in 60 Days</span>
-                <p id="count-exp-60" class="text-2xl font-black text-slate-700 mt-1">0</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 1B: Employee List View & Filters (Section 7, 9 & 13) -->
-        <div id="tab-emp-list-content" class="hidden space-y-4">
-          <!-- Advanced Search & Multi-Filter bar -->
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Search Engine</label>
-                <input 
-                  type="text" 
-                  id="search-input" 
-                  oninput="applyAllFilters()" 
-                  placeholder="ID, Name, Designation..." 
-                  class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Company Filter</label>
-                <select id="filter-company" onchange="applyAllFilters()" class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none">
-                  <option value="">All Companies</option>
-                  <option value="RELIANCE GULF">Reliance Gulf</option>
-                  <option value="RELIANCE INTERNATIONAL">Reliance International</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Approval Status</label>
-                <select id="filter-approval" onchange="applyAllFilters()" class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none">
-                  <option value="">All Verification States</option>
-                  <option value="Under Review">Under Review</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Correction Required">Correction Required</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Work Status</label>
-                <select id="filter-status" onchange="applyAllFilters()" class="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none">
-                  <option value="">All States</option>
-                  <option value="On Site">On Site</option>
-                  <option value="Idle">Idle</option>
-                  <option value="On Leave">On Leave</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-between pt-4 border-t border-slate-100 gap-4">
-              <!-- Export Controls (Section 9) -->
-              <div class="flex gap-2">
-                <button onclick="exportData('Excel')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all border border-emerald-200">
-                  📥 Export Current List to Excel
-                </button>
-                <button onclick="exportData('PDF')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 transition-all border border-rose-200">
-                  📄 Export Current List to PDF
-                </button>
-              </div>
-              <!-- Reset filter option -->
-              <button onclick="resetListFilters()" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-all">
-                Clear Filters & Show All
-              </button>
-            </div>
-          </div>
-
-          <!-- Main Scrollable Table Wrapper -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <th class="p-4 pl-6">Profile</th>
-                    <th class="p-4">Emp ID</th>
-                    <th class="p-4">Name (English / Arabic)</th>
-                    <th class="p-4">Company</th>
-                    <th class="p-4">Designation</th>
-                    <th class="p-4">Expiry Stats</th>
-                    <th class="p-4">Visa State</th>
-                    <th class="p-4">Documents Folder</th>
-                    <th class="p-4">Work Status</th>
-                    <th class="p-4">Verification</th>
-                    <th class="p-4 pr-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="employee-table-body" class="divide-y divide-slate-100">
-                  <!-- Generated dynamically from LocalStorage -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 1C: Employee Add/Edit Form (Section 3, 4 & 5) -->
-        <div id="tab-emp-add-content" class="hidden max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-          <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <div>
-              <h3 id="form-heading" class="font-bold text-slate-800 text-lg">➕ Register New Employee Profile</h3>
-              <p class="text-xs text-slate-400">Section validation is fully enabled for internal verification.</p>
-            </div>
-            <button onclick="switchTab('emp-list')" class="px-3.5 py-1.5 text-xs border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-semibold">
-              Cancel & Go Back
-            </button>
-          </div>
-
-          <!-- The Core Interactive Form -->
-          <form id="employee-form" class="p-6 space-y-6 text-xs">
-            <!-- Hidden Input for Tracking Index (for editing) -->
-            <input type="hidden" id="editing-index" value="" />
-
-            <!-- 3.1 General Information Section -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.1 General Information</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Full Name (English) *</label>
-                  <input required id="form-name-en" type="text" placeholder="Rahul Sharma" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Full Name (Arabic)</label>
-                  <input id="form-name-ar" type="text" placeholder="راهول شارما" dir="rtl" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Employee ID *</label>
-                  <input required id="form-emp-id" type="text" placeholder="RG-095" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Company Name *</label>
-                  <select id="form-company" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none">
-                    <option value="RELIANCE GULF">RELIANCE GULF</option>
-                    <option value="RELIANCE INTERNATIONAL">RELIANCE INTERNATIONAL</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Actual Designation *</label>
-                  <input required id="form-designation" type="text" placeholder="Safety Officer" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.2 Passport Details Section -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.2 Passport Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Passport Number</label>
-                  <input id="form-passport-no" type="text" placeholder="A1234567B" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Passport Issue Date</label>
-                  <input id="form-passport-issue" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Passport Expiry Date</label>
-                  <input id="form-passport-expiry" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.3 Visa and Emirates ID Details -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.3 Visa Status details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Visa Status *</label>
-                  <select id="form-visa-status" onchange="toggleVisaCompletedFields()" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none">
-                    <option value="Visit Visa Applied">Visit Visa Applied</option>
-                    <option value="Employment Visa Outside Sent">Employment Visa Outside Sent</option>
-                    <option value="Visa Completed">Visa Completed</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Conditional Fields when Visa Completed is chosen -->
-              <div id="visa-completed-group" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div>
-                  <label class="block text-slate-500 font-bold mb-1 uppercase">Unified Number</label>
-                  <input id="form-unified-no" type="text" placeholder="Unified Number" class="w-full bg-white px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-500 font-bold mb-1 uppercase">Emirates ID Number</label>
-                  <input id="form-emirates-id" type="text" placeholder="784-XXXX-XXXXXXX-X" class="w-full bg-white px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-500 font-bold mb-1 uppercase">Residence File Number</label>
-                  <input id="form-residence-file" type="text" placeholder="Residence File No" class="w-full bg-white px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-500 font-bold mb-1 uppercase">ID Issue Date</label>
-                  <input id="form-id-issue" type="date" class="w-full bg-white px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-500 font-bold mb-1 uppercase">ID Expiry Date</label>
-                  <input id="form-id-expiry" type="date" class="w-full bg-white px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.4 Labour Card Section -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.4 Labour Card Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Labour Card Number</label>
-                  <input id="form-labour-card" type="text" placeholder="Labour Card No" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Labour Issue Date</label>
-                  <input id="form-labour-issue" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Labour Expiry Date</label>
-                  <input id="form-labour-expiry" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.5 Other Details -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.5 Communication & Joining</h4>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Date of Joining</label>
-                  <input id="form-joining" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Date of Birth</label>
-                  <input id="form-dob" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Home Country Contact</label>
-                  <input id="form-home-contact" type="text" placeholder="Home contact" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">UAE Contact Number</label>
-                  <input id="form-uae-contact" type="text" placeholder="+971-XXXXXXX" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Email ID</label>
-                  <input id="form-email" type="email" placeholder="example@reliance.com" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">IOLE Expiry Date</label>
-                  <input id="form-iole-expiry" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.6 Technical Certifications -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.6 Technical Certifications</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-4 rounded-2xl border border-slate-200">
-                <!-- H2S -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">H2S Certificate</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-h2s-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <input id="cert-h2s-remark" type="text" placeholder="Remark" class="border p-2 rounded text-[11px]" />
-                  </div>
-                </div>
-                <!-- ATA -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">ATA Training</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-ata-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <input id="cert-ata-remark" type="text" placeholder="Remark" class="border p-2 rounded text-[11px]" />
-                  </div>
-                </div>
-                <!-- Rigger -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">Rigger Certificate</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-rigger-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <input id="cert-rigger-remark" type="text" placeholder="Remark" class="border p-2 rounded text-[11px]" />
-                  </div>
-                </div>
-                <!-- Scaffolder -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">Scaffolder Training</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-scaffolder-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <input id="cert-scaffolder-remark" type="text" placeholder="Remark" class="border p-2 rounded text-[11px]" />
-                  </div>
-                </div>
-                <!-- ADNOC Medical -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">ADNOC Medical Details</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-adnoc-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <select id="cert-adnoc-type" class="border p-2 rounded text-[11px]">
-                      <option value="Onshore">Onshore</option>
-                      <option value="Offshore">Offshore</option>
-                    </select>
-                  </div>
-                </div>
-                <!-- Other -->
-                <div class="p-3 bg-white rounded-xl border border-slate-200">
-                  <span class="font-bold text-slate-700 block mb-2">Other Training Certificate</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input id="cert-other-expiry" type="date" class="border p-2 rounded text-[11px]" />
-                    <input id="cert-other-remark" type="text" placeholder="Remark" class="border p-2 rounded text-[11px]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 3.7 Working Status -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">3.7 Working Status & Deployment</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Initial State Assignment</label>
-                  <select id="form-work-status" onchange="toggleCancellationField()" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none">
-                    <option value="On Site">On Site</option>
-                    <option value="Idle">Idle</option>
-                    <option value="On Leave">On Leave</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-                <div id="cancellation-date-group" class="hidden">
-                  <label class="block text-slate-400 font-semibold mb-1 uppercase">Cancellation Date</label>
-                  <input id="form-cancellation-date" type="date" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 5. Documents Section -->
-            <div class="space-y-4">
-              <h4 class="font-bold text-blue-600 text-[11px] uppercase tracking-wider border-b border-slate-100 pb-2">5. Documents Checklist</h4>
-              <div class="grid grid-cols-1 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <!-- Photo Upload simulation -->
-                <div class="flex items-center justify-between border-b pb-2">
-                  <span class="font-semibold text-slate-700">Employee Photo (Profile Image)</span>
-                  <input type="file" id="form-photo-upload" class="text-[11px]" onchange="simulatePhotoUpload(event)" />
-                  <input type="hidden" id="form-photo-base64" value="" />
-                </div>
-                <!-- Dropdowns Checklist -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                  <div>
-                    <label class="block text-slate-400 text-[10px] uppercase font-bold mb-1">Passport Copy</label>
-                    <select id="doc-passport" class="border p-1.5 rounded w-full"><option value="Pending">Pending</option><option value="Save in Folder">Save in Folder</option></select>
-                  </div>
-                  <div>
-                    <label class="block text-slate-400 text-[10px] uppercase font-bold mb-1">Emirates ID Copy</label>
-                    <select id="doc-emirates" class="border p-1.5 rounded w-full"><option value="Pending">Pending</option><option value="Save in Folder">Save in Folder</option></select>
-                  </div>
-                  <div>
-                    <label class="block text-slate-400 text-[10px] uppercase font-bold mb-1">Labour Contract</label>
-                    <select id="doc-contract" class="border p-1.5 rounded w-full"><option value="Pending">Pending</option><option value="Save in Folder">Save in Folder</option></select>
-                  </div>
-                  <div>
-                    <label class="block text-slate-400 text-[10px] uppercase font-bold mb-1">Offer Letter</label>
-                    <select id="doc-offer" class="border p-1.5 rounded w-full"><option value="Pending">Pending</option><option value="Save in Folder">Save in Folder</option></select>
-                  </div>
-                  <div>
-                    <label class="block text-slate-400 text-[10px] uppercase font-bold mb-1">ADNOC Medical</label>
-                    <select id="doc-adnoc" class="border p-1.5 rounded w-full"><option value="Pending">Pending</option><option value="Save in Folder">Save in Folder</option></select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-6 border-t border-slate-200 flex justify-end gap-2">
-              <button type="button" onclick="switchTab('emp-list')" class="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">Cancel</button>
-              <button type="submit" class="px-5 py-2 text-xs font-bold rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-all">Save Profile Changes</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Tab 1D: Bulk Excel Upload Simulator (Section 10) -->
-        <div id="tab-emp-bulk-content" class="hidden space-y-6">
-          <div class="bg-white p-6 rounded-2xl border border-slate-200 max-w-2xl mx-auto space-y-4">
-            <h3 class="font-bold text-slate-800 text-sm uppercase">Bulk Excel Template Uploader</h3>
-            <p class="text-xs text-slate-500">Download the layout template, apply adjustments, and import personnel rows directly.</p>
-            <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
-              <span class="text-xs text-blue-800 font-semibold">Standard Excel Template v4.xlsx</span>
-              <button onclick="downloadSampleTemplate()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold">📥 Download Template</button>
-            </div>
-
-            <!-- Upload input container -->
-            <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center bg-slate-50/50">
-              <span class="text-2xl block mb-2">📁</span>
-              <span class="text-xs font-bold text-slate-700 block">Upload finished Excel sheet</span>
-              <p class="text-[10px] text-slate-400 mt-1 mb-4">Files must match standard columns structure.</p>
-              <input type="file" id="bulk-file-input" onchange="simulateBulkUpload(event)" class="mx-auto block text-xs" />
-            </div>
-
-            <!-- Pre-upload warnings / stats -->
-            <div id="bulk-preview-panel" class="hidden bg-slate-50 border p-4 rounded-xl space-y-3">
-              <h4 class="font-bold text-[11px] text-slate-700 uppercase">Upload Engine Parsing Preview</h4>
-              <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
-                <div class="bg-emerald-50 border p-2 rounded"><span class="font-bold text-emerald-700 block" id="bulk-valid-rows">0</span><span>Valid Rows</span></div>
-                <div class="bg-amber-50 border p-2 rounded"><span class="font-bold text-amber-700 block" id="bulk-warn-rows">0</span><span>Incomplete Rows</span></div>
-                <div class="bg-rose-50 border p-2 rounded"><span class="font-bold text-rose-700 block" id="bulk-rej-rows">0</span><span>Rejected (Duplicates)</span></div>
-              </div>
-              <button id="btn-confirm-bulk" class="w-full py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700">Confirm and Import All Valid Rows</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 1E: Approvals & Changes Review Workspace (Section 14 & 15) -->
-        <div id="tab-emp-review-content" class="hidden space-y-6">
-          <div class="bg-white p-6 rounded-3xl border border-slate-200">
-            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-2">Manager Approval Queue</h3>
-            <p class="text-xs text-slate-400 mb-6">Review new profiles or verify details modified by administrators.</p>
-
-            <div id="approvals-comparison-panel" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 space-y-4">
-              <div class="flex items-center justify-between border-b pb-2">
-                <h4 class="font-bold text-xs text-slate-800">Reviewing Edit Request: <span id="comp-emp-title"></span></h4>
-                <button onclick="closeReviewQueue()" class="text-slate-400 hover:text-slate-600 text-xs font-bold">Close Panel</button>
-              </div>
-
-              <!-- Comparison Table (Old vs New Values) -->
-              <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left bg-white rounded-xl border border-slate-100">
-                  <thead>
-                    <tr class="bg-slate-100 text-slate-500 font-bold">
-                      <th class="p-3">Field Title</th>
-                      <th class="p-3">Old (Approved Record)</th>
-                      <th class="p-3">New Proposed Value</th>
-                    </tr>
-                  </thead>
-                  <tbody id="comparison-table-body">
-                    <!-- Loaded dynamically -->
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Action triggers -->
-              <div class="flex justify-end gap-2 pt-2">
-                <div class="w-full">
-                  <input type="text" id="review-comment" placeholder="Add reviewer remarks or correction notes here..." class="w-full border p-2 rounded-xl text-xs mb-2" />
-                  <div class="flex justify-end gap-2">
-                    <button onclick="approveChangeRequest()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-emerald-700">Approve This Change</button>
-                    <button onclick="rejectChangeRequest()" class="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-rose-700">Request Correction</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- List of pending approvals -->
-            <div id="pending-approvals-list" class="space-y-4">
-              <!-- Dynamically populated or clean slate message -->
-            </div>
-          </div>
-        </div>
-
-
-        <!-- ========================================== -->
-        <!-- PORTAL 2: SITE MANAGEMENT TABS -->
-        <!-- ========================================== -->
-
-        <!-- Tab 2A: Site Dashboard (Section 2/18) -->
-        <div id="tab-site-dashboard-content" class="hidden space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase text-slate-400">Total Active Sites</span>
-                <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm">🏗️</span>
-              </div>
-              <h3 class="text-3xl font-extrabold text-slate-300">-</h3>
-              <div class="mt-4 pt-4 border-t border-dashed border-slate-150 grid grid-cols-2 text-center text-xs">
-                <div><p class="text-slate-400 font-medium">Ongoing Projects</p><p class="font-bold text-slate-300 mt-0.5">-</p></div>
-                <div><p class="text-slate-400 font-medium">Completed Projects</p><p class="font-bold text-slate-300 mt-0.5">-</p></div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase text-slate-400">Resource Allocations</span>
-                <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-sm">⚙️</span>
-              </div>
-              <h3 class="text-3xl font-extrabold text-slate-300">-</h3>
-              <div class="mt-4 pt-4 border-t border-dashed border-slate-150 grid grid-cols-2 text-center text-xs">
-                <div><p class="text-slate-400 font-medium">Machines Assigned</p><p class="font-bold text-slate-300 mt-0.5">-</p></div>
-                <div><p class="text-slate-400 font-medium">Active Manpower Strength</p><p class="font-bold text-slate-300 mt-0.5">-</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 2B: Site List (Section 2/18) -->
-        <div id="tab-site-list-content" class="hidden bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-slate-150 flex justify-between items-center bg-slate-50/50">
-            <h3 class="font-bold text-slate-800 text-lg">Active Project Sites</h3>
-            <span class="text-xs font-semibold text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">Empty State</span>
-          </div>
-          <div class="p-12 text-center text-slate-400">
-            <span class="text-3xl block mb-2">🏗️</span>
-            <p class="font-medium text-xs">No active sites registered. Firebase Site Module integration pending.</p>
-          </div>
-        </div>
-
-      </main>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- ROLE-BASED NOTIFICATION DRAWER (Section 16) -->
-  <!-- ========================================== -->
-  <div id="notification-drawer" class="hidden fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-30 border-l border-slate-200 flex flex-col">
-    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-      <div>
-        <h3 class="font-bold text-slate-800 text-sm uppercase">Notification Centre</h3>
-        <p class="text-[10px] text-slate-400">Action items sorted by priority</p>
       </div>
-      <button onclick="toggleNotificationCentre()" class="p-2 hover:bg-slate-200 rounded-full text-slate-500 font-bold">✕</button>
-    </div>
 
-    <!-- Filters inside notifications drawer -->
-    <div class="p-3 border-b border-slate-100 flex gap-1 flex-wrap bg-white">
-      <button onclick="filterNotify('All')" class="px-2 py-1 text-[9px] font-bold rounded bg-blue-50 text-blue-600">All</button>
-      <button onclick="filterNotify('Unread')" class="px-2 py-1 text-[9px] font-bold rounded hover:bg-slate-100">Unread</button>
-      <button onclick="filterNotify('Missing Information')" class="px-2 py-1 text-[9px] font-bold rounded hover:bg-slate-100">Missing</button>
-      <button onclick="filterNotify('Expiry')" class="px-2 py-1 text-[9px] font-bold rounded hover:bg-slate-100">Expiry</button>
-    </div>
-
-    <!-- Main List content -->
-    <div id="notification-list-body" class="flex-1 overflow-y-auto p-4 space-y-3">
-      <!-- Generated programmatically -->
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MISSING INFORMATION MODAL (Section 11) -->
-  <!-- ========================================== -->
-  <div id="missing-info-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center gap-3 text-amber-600">
-        <span class="text-2xl">⚠️</span>
-        <h3 class="font-bold text-slate-800 text-sm uppercase">This information is missing</h3>
+      <!-- Certifications List Container -->
+      <div id="certificationsTableContainer" class="hidden">
+        <div class="overflow-hidden border border-slate-100 rounded-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
+                <th class="p-3">Certification Name</th>
+                <th class="p-3">Date / Expiry</th>
+                <th class="p-3">Remarks</th>
+                <th class="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="certificationsBody" class="divide-y divide-slate-100">
+              <!-- Dynamically Added Rows Go Here -->
+            </tbody>
+          </table>
+        </div>
       </div>
-      <p class="text-xs text-slate-500">The following non-mandatory fields are empty. You can bypass this warning by clicking "Save Anyway" once more.</p>
-      
-      <ul id="missing-fields-list" class="bg-slate-50 p-3 rounded-xl text-xs space-y-1 text-slate-700 font-mono list-disc list-inside">
-        <!-- List items generated dynamically -->
-      </ul>
 
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeMissingModal()" class="px-4 py-2 text-xs font-semibold rounded-xl border hover:bg-slate-100">Go Complete Fields</button>
-        <button id="btn-save-anyway" class="px-4 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700">Save Anyway</button>
+      <!-- No Certifications Added Placeholder -->
+      <p id="noCertPlaceholder" class="text-xs text-slate-400 text-center py-4 bg-slate-50/30 rounded-xl border border-dashed border-slate-200">
+        No certifications added yet. Use the dropdown above to add.
+      </p>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SECTION 3.7: WORKING STATUS & DEPLOYMENT (Two Cells) -->
+    <!-- ========================================================= -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+      <h2 class="text-sm font-bold text-blue-600 tracking-wider uppercase">
+        3.7 Working Status & Deployment
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- CELL 1: System Status & Dynamic Cancel Date -->
+        <div class="space-y-4">
+          <div class="flex flex-col space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase">System Status *</label>
+            <select
+              id="systemStatus"
+              onchange="toggleCancelDate()"
+              class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Cancel Date Input (Shown when Inactive is Selected) -->
+          <div id="cancelDateWrapper" class="hidden flex flex-col space-y-1.5">
+            <label class="text-xs font-bold text-red-500 uppercase">Cancel Date *</label>
+            <input
+              id="cancelDate"
+              type="date"
+              class="w-full border border-red-200 rounded-xl p-3 bg-red-50/30 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all"
+            />
+          </div>
+        </div>
+
+        <!-- CELL 2: Deployment Status (Dynamic Signs) -->
+        <div class="flex flex-col space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase">Deployment Status</label>
+          <div class="relative">
+            <select
+              id="deploymentStatus"
+              onchange="updateDeploymentIcon()"
+              class="w-full border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none pl-10"
+            >
+              <option value="On Site">On Site</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Idle">Idle</option>
+            </select>
+            
+            <!-- Dynamic Status Icon -->
+            <div class="absolute left-3.5 top-3.5 text-base pointer-events-none">
+              <span id="statusIcon" class="text-emerald-500 animate-pulse">📍</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
   </div>
 
-
-  <!-- ========================================== -->
-  <!-- INTERNAL PROGRAM LOGIC (LOCALSTORAGE SEED) -->
-  <!-- ========================================== -->
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ========================================================= -->
   <script>
-    // State management vars
-    let activeRole = "Admin Manager"; // Default login role
-    let saveAttempts = 0; // Double attempt tracking
-    let currentNotificationFilter = "All";
+    // System Status Change Logic
+    function toggleCancelDate() {
+      const status = document.getElementById('systemStatus').value;
+      const cancelDateWrapper = document.getElementById('cancelDateWrapper');
+      const cancelDateInput = document.getElementById('cancelDate');
 
-    // Initialize Database in LocalStorage if not exists
-    if (!localStorage.getItem('rg_employees')) {
-      localStorage.setItem('rg_employees', JSON.stringify([]));
-    }
-    if (!localStorage.getItem('rg_notifications')) {
-      localStorage.setItem('rg_notifications', JSON.stringify([]));
-    }
-
-    // Load initial triggers
-    window.addEventListener('DOMContentLoaded', () => {
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-      syncUnreadBadgeCount();
-      buildAuditAlertNotifications();
-    });
-
-    // 1. SECURE USER SWITCHING (Section 14 & 15)
-    function secureUserSwitch(role) {
-      let password = "";
-      if (role === 'Admin') {
-        password = prompt("Enter password for Admin:");
-        if (password === 'admin123') {
-          activeRole = "Admin";
-          updateSessionUI('Admin', "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=60");
-          alert("Login Successful as Admin!");
-        } else {
-          alert("Incorrect Password! (admin123)");
-        }
-      } else if (role === 'Admin Manager') {
-        password = prompt("Enter password for Admin Manager:");
-        if (password === 'manager123') {
-          activeRole = "Admin Manager";
-          updateSessionUI('Admin Manager', "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60");
-          alert("Login Successful as Admin Manager!");
-        } else {
-          alert("Incorrect Password! (manager123)");
-        }
-      }
-    }
-
-    function updateSessionUI(name, avatar) {
-      document.getElementById('user-display-name').innerText = name;
-      document.getElementById('user-display-role').innerText = name;
-      document.getElementById('user-avatar').src = avatar;
-      document.getElementById('role-badge').innerText = name;
-
-      const adminBtn = document.getElementById('btn-admin');
-      const managerBtn = document.getElementById('btn-manager');
-      if (name === "Admin") {
-        adminBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm transition-all";
-        managerBtn.className = "px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all";
+      if (status === 'Inactive') {
+        cancelDateWrapper.classList.remove('hidden');
+        cancelDateInput.setAttribute('required', 'required');
       } else {
-        managerBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm transition-all";
-        adminBtn.className = "px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all";
-      }
-      renderApprovalsList();
-    }
-
-    // 2. NAVIGATION SYSTEMS & TAB MANAGEMENT (Section 13 & 18)
-    function switchPortal() {
-      const select = document.getElementById('portal-select');
-      const empMenu = document.getElementById('employee-menu-group');
-      const siteMenu = document.getElementById('site-menu-group');
-
-      if (select.value === 'employee-portal') {
-        empMenu.classList.remove('hidden');
-        siteMenu.classList.add('hidden');
-        switchTab('emp-dashboard');
-      } else if (select.value === 'site-portal') {
-        siteMenu.classList.remove('hidden');
-        empMenu.classList.add('hidden');
-        switchTab('site-dashboard');
+        cancelDateWrapper.classList.add('hidden');
+        cancelDateInput.removeAttribute('required');
+        cancelDateInput.value = ''; // Reset date
       }
     }
 
-    function switchTab(tabId) {
-      const contents = [
-        'tab-emp-dashboard-content', 'tab-emp-list-content', 'tab-emp-add-content',
-        'tab-emp-bulk-content', 'tab-emp-review-content', 'tab-site-dashboard-content', 'tab-site-list-content'
-      ];
-      contents.forEach(id => document.getElementById(id).classList.add('hidden'));
+    // Deployment Status Icon Logic
+    function updateDeploymentIcon() {
+      const status = document.getElementById('deploymentStatus').value;
+      const iconSpan = document.getElementById('statusIcon');
 
-      // Show requested tab content
-      const activeContentEl = document.getElementById('tab-' + tabId + '-content');
-      if (activeContentEl) activeContentEl.classList.remove('hidden');
-
-      // Sync active sidebar item styles
-      const menus = ['menu-emp-dashboard', 'menu-emp-list', 'menu-emp-add', 'menu-emp-bulk', 'menu-emp-review', 'menu-site-dashboard', 'menu-site-list'];
-      const inds = ['ind-emp-dashboard', 'ind-emp-list', 'ind-emp-add', 'ind-emp-bulk', 'ind-emp-review', 'ind-site-dashboard', 'ind-site-list'];
-
-      menus.forEach(m => {
-        const el = document.getElementById(m);
-        if (el) el.className = "group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer text-slate-400 hover:bg-slate-800/60 hover:text-slate-200";
-      });
-      inds.forEach(i => {
-        const el = document.getElementById(i);
-        if (el) el.classList.add('hidden');
-      });
-
-      const activeMenu = document.getElementById('menu-' + tabId);
-      const activeInd = document.getElementById('ind-' + tabId);
-      if (activeMenu) activeMenu.className = "group relative flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer bg-blue-600/15 text-blue-400 shadow-inner";
-      if (activeInd) activeInd.classList.remove('hidden');
-
-      // Sync Page header title text
-      const pageTitle = document.getElementById('page-title');
-      if (tabId === 'emp-dashboard') pageTitle.innerText = "Employee Dashboard";
-      if (tabId === 'emp-list') pageTitle.innerText = "Employee Portal Records";
-      if (tabId === 'emp-add') pageTitle.innerText = "Add New Employee Profile";
-      if (tabId === 'emp-bulk') pageTitle.innerText = "Bulk Excel Template Upload";
-      if (tabId === 'emp-review') pageTitle.innerText = "Review & Approval Center";
-      if (tabId === 'site-dashboard') pageTitle.innerText = "Construction Site Overview";
-      if (tabId === 'site-list') pageTitle.innerText = "Registered Construction Zones";
-    }
-
-    // 3. SECURE ADMISSION FORM FUNCTIONS (Section 3)
-    function toggleVisaCompletedFields() {
-      const state = document.getElementById('form-visa-status').value;
-      const grp = document.getElementById('visa-completed-group');
-      if (state === 'Visa Completed') {
-        grp.classList.remove('hidden');
-      } else {
-        grp.classList.add('hidden');
+      if (status === 'On Site') {
+        iconSpan.innerHTML = '📍';
+        iconSpan.className = 'text-emerald-500 animate-pulse';
+      } else if (status === 'On Leave') {
+        iconSpan.innerHTML = '🏖️';
+        iconSpan.className = ''; // Remove animation
+      } else if (status === 'Idle') {
+        iconSpan.innerHTML = '💤';
+        iconSpan.className = 'text-amber-500';
       }
     }
 
-    function toggleCancellationField() {
-      const state = document.getElementById('form-work-status').value;
-      const grp = document.getElementById('cancellation-date-group');
-      if (state === 'Inactive') {
-        grp.classList.remove('hidden');
-      } else {
-        grp.classList.add('hidden');
-      }
-    }
+    // Dynamic Certifications Management Array
+    let addedCertifications = [];
 
-    function simulatePhotoUpload(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = function() {
-        document.getElementById('form-photo-base64').value = reader.result;
-      }
-      if (file) reader.readAsDataURL(file);
-    }
+    function renderCertifications() {
+      const tableContainer = document.getElementById('certificationsTableContainer');
+      const placeholder = document.getElementById('noCertPlaceholder');
+      const tableBody = document.getElementById('certificationsBody');
 
-    function openAddForm() {
-      // Reset form variables
-      document.getElementById('employee-form').reset();
-      document.getElementById('editing-index').value = "";
-      document.getElementById('form-photo-base64').value = "";
-      document.getElementById('form-heading').innerText = "➕ Register New Employee Profile";
-      toggleVisaCompletedFields();
-      toggleCancellationField();
-      saveAttempts = 0;
-      switchTab('emp-add');
-    }
+      // Clear existing UI table rows
+      tableBody.innerHTML = '';
 
-    // 4. PRECISE SAVING, VERIFICATION & DUPLICATE CHECKS (Section 4 & 11)
-    document.getElementById('employee-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      processFormSave();
-    });
+      if (addedCertifications.length > 0) {
+        tableContainer.classList.remove('hidden');
+        placeholder.classList.add('hidden');
 
-    function processFormSave() {
-      const employees = JSON.parse(localStorage.getItem('rg_employees'));
-      const editIndexStr = document.getElementById('editing-index').value;
-
-      // Unique Fields verification
-      const empIdValue = document.getElementById('form-emp-id').value.trim();
-      const visaStatus = document.getElementById('form-visa-status').value;
-      const emiratesIdValue = visaStatus === 'Visa Completed' ? document.getElementById('form-emirates-id').value.trim() : "";
-
-      // Duplicate Check (Exclude currently editing index row)
-      const duplicateEmpId = employees.some((emp, index) => {
-        return emp.id.toUpperCase() === empIdValue.toUpperCase() && index.toString() !== editIndexStr;
-      });
-
-      if (duplicateEmpId) {
-        alert("Verification Error: Already have this Employee ID.");
-        return;
-      }
-
-      if (emiratesIdValue) {
-        const duplicateEmirates = employees.some((emp, index) => {
-          return emp.emiratesId && emp.emiratesId.trim() === emiratesIdValue && index.toString() !== editIndexStr;
-        });
-        if (duplicateEmirates) {
-          alert("Verification Error: Already have this Emirates ID.");
-          return;
-        }
-      }
-
-      // 11. Missing Fields Analysis
-      const requiredInputs = [
-        { id: 'form-passport-no', label: 'Passport Number' },
-        { id: 'form-passport-expiry', label: 'Passport Expiry Date' },
-        { id: 'form-labour-card', label: 'Labour Card Number' },
-        { id: 'form-labour-expiry', label: 'Labour Card Expiry Date' },
-        { id: 'form-uae-contact', label: 'UAE Contact Number' }
-      ];
-
-      let missingList = [];
-      requiredInputs.forEach(input => {
-        const el = document.getElementById(input.id);
-        if (!el || !el.value.trim()) {
-          missingList.push(input.label);
-        }
-      });
-
-      if (missingList.length > 0 && saveAttempts === 0) {
-        // Trigger verification modal
-        const listContainer = document.getElementById('missing-fields-list');
-        listContainer.innerHTML = "";
-        missingList.forEach(item => {
-          const li = document.createElement('li');
-          li.innerText = item;
-          listContainer.appendChild(li);
-        });
-
-        // Highlight fields
-        requiredInputs.forEach(input => {
-          const el = document.getElementById(input.id);
-          if (el && !el.value.trim()) {
-            el.classList.add('border-rose-400', 'bg-rose-50/20');
-          }
-        });
-
-        document.getElementById('btn-save-anyway').onclick = function() {
-          saveAttempts = 1;
-          closeMissingModal();
-          processFormSave();
-        };
-
-        document.getElementById('missing-info-modal').classList.remove('hidden');
-        return;
-      }
-
-      // Compile raw object to save
-      const employeePayload = {
-        nameEn: document.getElementById('form-name-en').value,
-        nameAr: document.getElementById('form-name-ar').value,
-        id: empIdValue,
-        company: document.getElementById('form-company').value,
-        designation: document.getElementById('form-designation').value,
-        passportNo: document.getElementById('form-passport-no').value,
-        passportExpiry: document.getElementById('form-passport-expiry').value,
-        visaStatus: visaStatus,
-        unifiedNo: document.getElementById('form-unified-no').value,
-        emiratesId: emiratesIdValue,
-        residenceFile: document.getElementById('form-residence-file').value,
-        idExpiry: document.getElementById('form-id-expiry').value,
-        labourCard: document.getElementById('form-labour-card').value,
-        labourExpiry: document.getElementById('form-labour-expiry').value,
-        joiningDate: document.getElementById('form-joining').value,
-        dob: document.getElementById('form-dob').value,
-        homeContact: document.getElementById('form-home-contact').value,
-        uaeContact: document.getElementById('form-uae-contact').value,
-        email: document.getElementById('form-email').value,
-        ioleExpiry: document.getElementById('form-iole-expiry').value,
-        
-        // Certificates
-        h2sExpiry: document.getElementById('cert-h2s-expiry').value,
-        h2sRemark: document.getElementById('cert-h2s-remark').value,
-        ataExpiry: document.getElementById('cert-ata-expiry').value,
-        ataRemark: document.getElementById('cert-ata-remark').value,
-        riggerExpiry: document.getElementById('cert-rigger-expiry').value,
-        riggerRemark: document.getElementById('cert-rigger-remark').value,
-        scaffolderExpiry: document.getElementById('cert-scaffolder-expiry').value,
-        scaffolderRemark: document.getElementById('cert-scaffolder-remark').value,
-        adnocExpiry: document.getElementById('cert-adnoc-expiry').value,
-        adnocType: document.getElementById('cert-adnoc-type').value,
-        otherExpiry: document.getElementById('cert-other-expiry').value,
-        otherRemark: document.getElementById('cert-other-remark').value,
-
-        status: document.getElementById('form-work-status').value,
-        cancellationDate: document.getElementById('form-cancellation-date').value,
-
-        // Docs folder checklists
-        passportDoc: document.getElementById('doc-passport').value,
-        emiratesDoc: document.getElementById('doc-emirates').value,
-        contractDoc: document.getElementById('doc-contract').value,
-        offerDoc: document.getElementById('doc-offer').value,
-        adnocDoc: document.getElementById('doc-adnoc').value,
-
-        // Profile base64 photo
-        photo: document.getElementById('form-photo-base64').value || "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=60",
-
-        hasMissing: missingList.length > 0,
-        missingFields: missingList,
-        approvalStatus: "Under Review" // Every submission defaults to review queue
-      };
-
-      if (editIndexStr !== "") {
-        // Edit mode (Section 14 & 15: Create Audit Request)
-        const oldData = employees[parseInt(editIndexStr)];
-        
-        // Push modification proposal to reviews queue
-        const approvalQueue = JSON.parse(localStorage.getItem('rg_approval_queue')) || [];
-        approvalQueue.push({
-          type: "EDIT",
-          targetIndex: parseInt(editIndexStr),
-          oldRecord: oldData,
-          proposedRecord: employeePayload,
-          requester: activeRole,
-          timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('rg_approval_queue', JSON.stringify(approvalQueue));
-
-        // Create alert notifications log
-        createSystemNotification(
-          "Employee Edited",
-          `Changes submitted for ID ${employeePayload.id} by ${activeRole}. Verification Pending.`,
-          employeePayload.id,
-          "Approval"
-        );
-
-        alert("Change Request Submitted! The previous data is preserved until a manager reviews the comparison.");
-      } else {
-        // Fresh addition
-        employees.push(employeePayload);
-        localStorage.setItem('rg_employees', JSON.stringify(employees));
-
-        createSystemNotification(
-          "New Employee Added",
-          `${employeePayload.nameEn} (${employeePayload.id}) created successfully. Pending Manager review.`,
-          employeePayload.id,
-          "Approval"
-        );
-
-        alert("Employee Profile Saved with Under Review Status.");
-      }
-
-      // Reset
-      saveAttempts = 0;
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-      switchTab('emp-list');
-    }
-
-    function closeMissingModal() {
-      document.getElementById('missing-info-modal').classList.add('hidden');
-    }
-
-    // 5. EMPLOYEE LISTING, EXPIRY RANGE MATCH & FILTERS (Section 7, 12, 13)
-    function renderEmployeeTable(customFilteredData = null) {
-      const employees = customFilteredData || JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const tbody = document.getElementById('employee-table-body');
-      tbody.innerHTML = "";
-
-      if (employees.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="p-8 text-center text-slate-400 font-medium bg-slate-50">No active employees found matching filters.</td></tr>`;
-        return;
-      }
-
-      employees.forEach((emp, index) => {
-        // Verification badge style
-        let verifyBadge = `<span class="bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-full font-mono font-bold">Under Review</span>`;
-        if (emp.approvalStatus === "Approved") verifyBadge = `<span class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded-full font-mono font-bold">Approved</span>`;
-        if (emp.approvalStatus === "Correction Required") verifyBadge = `<span class="bg-rose-50 border border-rose-200 text-rose-700 px-2 py-0.5 rounded-full font-mono font-bold">Rejected</span>`;
-
-        // Working Status Badge style
-        let workBadge = `<span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-bold">${emp.status}</span>`;
-        if (emp.status === "Idle") workBadge = `<span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">Idle</span>`;
-        if (emp.status === "On Leave") workBadge = `<span class="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">On Leave</span>`;
-        if (emp.status === "Inactive") workBadge = `<span class="bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full font-bold">Inactive</span>`;
-
-        // Compile compact checklists columns (Section 5 check)
-        const docIcon = (val) => val === 'Save in Folder' ? '🟢' : '🔴';
-        const docFolderMarkup = `
-          <div class="space-y-0.5 text-[9px] font-mono whitespace-nowrap">
-            <div>${docIcon(emp.passportDoc)} Pass</div>
-            <div>${docIcon(emp.emiratesDoc)} EID</div>
-            <div>${docIcon(emp.contractDoc)} Cont</div>
-          </div>
-        `;
-
-        // Render Expiries overview
-        const labourStr = emp.labourExpiry ? `L: ${emp.labourExpiry}` : "L: Missing";
-        const passStr = emp.passportExpiry ? `P: ${emp.passportExpiry}` : "P: Missing";
-
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50/50 transition-all border-b border-slate-100">
-            <td class="p-4 pl-6"><img src="${emp.photo}" class="w-8 h-8 rounded-full object-cover border" /></td>
-            <td class="p-4 font-mono font-bold text-slate-700 cursor-pointer hover:underline text-blue-600" onclick="viewEmployeeRecord(${index})">${emp.id}</td>
-            <td class="p-4"><span class="font-bold text-slate-800 block">${emp.nameEn}</span><span class="text-slate-400 block" dir="rtl">${emp.nameAr || '-'}</span></td>
-            <td class="p-4 font-semibold text-slate-600">${emp.company}</td>
-            <td class="p-4 text-slate-600 font-medium">${emp.designation}</td>
-            <td class="p-4 font-mono text-slate-500 whitespace-nowrap space-y-0.5">
-              <div class="block">${passStr}</div>
-              <div class="block">${labourStr}</div>
+        addedCertifications.forEach((cert, index) => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-slate-50/50 transition-all';
+          row.innerHTML = `
+            <td class="p-3 font-semibold text-slate-700">${cert.name}</td>
+            <td class="p-3 text-slate-600">${cert.date}</td>
+            <td class="p-3 text-slate-500">${cert.remark || '-'}</td>
+            <td class="p-3 text-right">
+              <button
+                type="button"
+                onclick="removeCertification(${index})"
+                class="text-red-500 hover:text-red-700 font-medium"
+              >
+                Remove
+              </button>
             </td>
-            <td class="p-4"><span class="text-[10px] bg-slate-100 px-2 py-1 rounded font-medium text-slate-600">${emp.visaStatus}</span></td>
-            <td class="p-4">${docFolderMarkup}</td>
-            <td class="p-4">${workBadge}</td>
-            <td class="p-4">${verifyBadge}</td>
-            <td class="p-4 pr-6 text-right whitespace-nowrap">
-              <button onclick="viewEmployeeRecord(${index})" class="p-1 px-2 text-[10px] font-bold border rounded bg-white hover:bg-slate-50">View</button>
-              <button onclick="initiateFormEdit(${index})" class="p-1 px-2 text-[10px] font-bold border rounded bg-blue-50 text-blue-600 hover:bg-blue-100/50">Edit</button>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function applyAllFilters() {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const company = document.getElementById('filter-company').value;
-      const approval = document.getElementById('filter-approval').value;
-      const status = document.getElementById('filter-status').value;
-
-      const filtered = employees.filter(emp => {
-        const matchSearch = emp.nameEn.toLowerCase().includes(search) || 
-                            emp.id.toLowerCase().includes(search) || 
-                            emp.designation.toLowerCase().includes(search);
-        
-        const matchCompany = company ? emp.company === company : true;
-        const matchApproval = approval ? emp.approvalStatus === approval : true;
-        const matchStatus = status ? emp.status === status : true;
-
-        return matchSearch && matchCompany && matchApproval && matchStatus;
-      });
-
-      renderEmployeeTable(filtered);
-    }
-
-    function resetListFilters() {
-      document.getElementById('search-input').value = "";
-      document.getElementById('filter-company').value = "";
-      document.getElementById('filter-approval').value = "";
-      document.getElementById('filter-status').value = "";
-      applyAllFilters();
-    }
-
-    // Filter list to only show missing information items (Section 11)
-    function filterMissingInfoOnly() {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const missing = employees.filter(emp => emp.hasMissing);
-      switchTab('emp-list');
-      renderEmployeeTable(missing);
-    }
-
-    // Filter system for expiry ranges starting 60 days before (Section 12)
-    function filterByExpiryRange(daySpan) {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const today = new Date();
-
-      const filtered = employees.filter(emp => {
-        const datesToCheck = [emp.passportExpiry, emp.idExpiry, emp.labourExpiry, emp.ioleExpiry];
-        return datesToCheck.some(dateStr => {
-          if (!dateStr) return false;
-          const expDate = new Date(dateStr);
-          const timeDiff = expDate - today;
-          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-          if (daySpan === 'expired' && daysDiff < 0) return true;
-          if (daySpan === '7' && daysDiff >= 0 && daysDiff <= 7) return true;
-          if (daySpan === '30' && daysDiff > 7 && daysDiff <= 30) return true;
-          if (daySpan === '60' && daysDiff > 30 && daysDiff <= 60) return true;
-          return false;
+          `;
+          tableBody.appendChild(row);
         });
-      });
-
-      switchTab('emp-list');
-      renderEmployeeTable(filtered);
-    }
-
-    // 6. DETAILED EDIT MODE TRIGGER (Section 13)
-    function initiateFormEdit(index) {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const emp = employees[index];
-
-      // Load form details
-      document.getElementById('editing-index').value = index;
-      document.getElementById('form-name-en').value = emp.nameEn || "";
-      document.getElementById('form-name-ar').value = emp.nameAr || "";
-      document.getElementById('form-emp-id').value = emp.id || "";
-      document.getElementById('form-company').value = emp.company || "";
-      document.getElementById('form-designation').value = emp.designation || "";
-      document.getElementById('form-passport-no').value = emp.passportNo || "";
-      document.getElementById('form-passport-expiry').value = emp.passportExpiry || "";
-      document.getElementById('form-visa-status').value = emp.visaStatus || "Visit Visa Applied";
-      
-      toggleVisaCompletedFields();
-      document.getElementById('form-unified-no').value = emp.unifiedNo || "";
-      document.getElementById('form-emirates-id').value = emp.emiratesId || "";
-      document.getElementById('form-residence-file').value = emp.residenceFile || "";
-      document.getElementById('form-id-expiry').value = emp.idExpiry || "";
-      
-      document.getElementById('form-labour-card').value = emp.labourCard || "";
-      document.getElementById('form-labour-issue').value = emp.labourIssue || "";
-      document.getElementById('form-labour-expiry').value = emp.labourExpiry || "";
-      
-      document.getElementById('form-joining').value = emp.joiningDate || "";
-      document.getElementById('form-dob').value = emp.dob || "";
-      document.getElementById('form-home-contact').value = emp.homeContact || "";
-      document.getElementById('form-uae-contact').value = emp.uaeContact || "";
-      document.getElementById('form-email').value = emp.email || "";
-      document.getElementById('form-iole-expiry').value = emp.ioleExpiry || "";
-
-      // Load Technical Expiries
-      document.getElementById('cert-h2s-expiry').value = emp.h2sExpiry || "";
-      document.getElementById('cert-h2s-remark').value = emp.h2sRemark || "";
-      document.getElementById('cert-ata-expiry').value = emp.ataExpiry || "";
-      document.getElementById('cert-ata-remark').value = emp.ataRemark || "";
-      document.getElementById('cert-rigger-expiry').value = emp.riggerExpiry || "";
-      document.getElementById('cert-rigger-remark').value = emp.riggerRemark || "";
-      document.getElementById('cert-scaffolder-expiry').value = emp.scaffolderExpiry || "";
-      document.getElementById('cert-scaffolder-remark').value = emp.scaffolderRemark || "";
-      document.getElementById('cert-adnoc-expiry').value = emp.adnocExpiry || "";
-      document.getElementById('cert-adnoc-type').value = emp.adnocType || "Onshore";
-      document.getElementById('cert-other-expiry').value = emp.otherExpiry || "";
-      document.getElementById('cert-other-remark').value = emp.otherRemark || "";
-
-      document.getElementById('form-work-status').value = emp.status || "On Site";
-      toggleCancellationField();
-      document.getElementById('form-cancellation-date').value = emp.cancellationDate || "";
-
-      // Load dropdown Checklists
-      document.getElementById('doc-passport').value = emp.passportDoc || "Pending";
-      document.getElementById('doc-emirates').value = emp.emiratesDoc || "Pending";
-      document.getElementById('doc-contract').value = emp.contractDoc || "Pending";
-      document.getElementById('doc-offer').value = emp.offerDoc || "Pending";
-      document.getElementById('doc-adnoc').value = emp.adnocDoc || "Pending";
-
-      document.getElementById('form-photo-base64').value = emp.photo || "";
-
-      // UI state
-      document.getElementById('form-heading').innerText = `✏️ Editing Profile Details: ${emp.nameEn}`;
-      saveAttempts = 0;
-      switchTab('emp-add');
-    }
-
-    function viewEmployeeRecord(index) {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const emp = employees[index];
-
-      let infoText = `--- EMPLOYEE VIEW-MODE DETAILS ---
-      ID: ${emp.id}
-      Name (En): ${emp.nameEn}
-      Name (Ar): ${emp.nameAr || 'None'}
-      Company: ${emp.company}
-      Designation: ${emp.designation}
-      Passport No: ${emp.passportNo || 'N/A'}
-      Passport Expiry: ${emp.passportExpiry || 'N/A'}
-      Labour Card Expiry: ${emp.labourExpiry || 'N/A'}
-      Working Status: ${emp.status}
-      Approval Status: ${emp.approvalStatus}
-      `;
-      alert(infoText);
-    }
-
-    // 7. MULTI-ROLE REVIEW PANEL & AUDIT COMPARISON (Section 14 & 15)
-    function renderApprovalsList() {
-      const listContainer = document.getElementById('pending-approvals-list');
-      const approvalQueue = JSON.parse(localStorage.getItem('rg_approval_queue')) || [];
-      listContainer.innerHTML = "";
-
-      // Filter local storage employees with "Under Review" manually added
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-      const manualNewReviews = employees.filter(emp => emp.approvalStatus === "Under Review");
-
-      if (approvalQueue.length === 0 && manualNewReviews.length === 0) {
-        listContainer.innerHTML = `<div class="p-8 border border-dashed text-center text-slate-400 font-medium rounded-xl">No active pending review requests found.</div>`;
-        return;
-      }
-
-      // 1. First render new employee requests
-      manualNewReviews.forEach((emp, index) => {
-        // Resolve target index inside main list
-        const mainListIndex = employees.findIndex(e => e.id === emp.id);
-
-        listContainer.innerHTML += `
-          <div class="bg-blue-50/40 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
-            <div class="space-y-1">
-              <span class="inline-flex items-center gap-1 text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">New Profile Request</span>
-              <h4 class="font-bold text-slate-800 text-xs">${emp.nameEn} (${emp.id})</h4>
-              <p class="text-[10px] text-slate-400">Company: ${emp.company} | Designation: ${emp.designation}</p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="approveDirectManual(${mainListIndex})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 text-[11px] rounded font-bold">Approve</button>
-              <button onclick="requestCorrectionManual(${mainListIndex})" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 text-[11px] rounded font-bold">Reject</button>
-            </div>
-          </div>
-        `;
-      });
-
-      // 2. Render complex edit proposals comparison requests (Old vs New)
-      approvalQueue.forEach((req, index) => {
-        listContainer.innerHTML += `
-          <div class="bg-amber-50/40 border border-amber-100 p-4 rounded-xl flex items-center justify-between">
-            <div class="space-y-1">
-              <span class="inline-flex items-center gap-1 text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold uppercase">Profile Modification Proposal</span>
-              <h4 class="font-bold text-slate-800 text-xs">${req.proposedRecord.nameEn} (ID: ${req.proposedRecord.id})</h4>
-              <p class="text-[10px] text-slate-400">Edited by: ${req.requester} | Timestamp: ${new Date(req.timestamp).toLocaleString()}</p>
-            </div>
-            <button onclick="openComparisonPanel(${index})" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-1.5 text-[11px] rounded font-bold">View Comparison</button>
-          </div>
-        `;
-      });
-    }
-
-    function approveDirectManual(index) {
-      if (activeRole !== "Admin Manager") {
-        alert("Verification Error: Only 'Admin Manager' has permission to approve profiles.");
-        return;
-      }
-      const employees = JSON.parse(localStorage.getItem('rg_employees'));
-      employees[index].approvalStatus = "Approved";
-      localStorage.setItem('rg_employees', JSON.stringify(employees));
-      alert("Manual entry approved successfully!");
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-    }
-
-    function requestCorrectionManual(index) {
-      if (activeRole !== "Admin Manager") {
-         alert("Verification Error: Only 'Admin Manager' has permission to request corrections.");
-         return;
-      }
-      const employees = JSON.parse(localStorage.getItem('rg_employees'));
-      const comment = prompt("Enter remarks for Correction Required state:");
-      employees[index].approvalStatus = "Correction Required";
-      employees[index].correctionComment = comment || "Field verification failed.";
-      localStorage.setItem('rg_employees', JSON.stringify(employees));
-      alert("Status changed to Correction Required.");
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-    }
-
-    function openComparisonPanel(queueIdx) {
-      const queue = JSON.parse(localStorage.getItem('rg_approval_queue')) || [];
-      const req = queue[queueIdx];
-
-      document.getElementById('approvals-comparison-panel').classList.remove('hidden');
-      document.getElementById('comp-emp-title').innerText = `${req.proposedRecord.nameEn} (ID: ${req.proposedRecord.id})`;
-      
-      const tbody = document.getElementById('comparison-table-body');
-      tbody.innerHTML = "";
-
-      // List comparison fields
-      const fieldsToCompare = [
-        { key: 'nameEn', label: 'Name' },
-        { key: 'company', label: 'Company' },
-        { key: 'designation', label: 'Designation' },
-        { key: 'passportNo', label: 'Passport No' },
-        { key: 'labourCard', label: 'Labour Card' },
-        { key: 'status', label: 'Work Status' }
-      ];
-
-      fieldsToCompare.forEach(field => {
-        const oldVal = req.oldRecord[field.key] || "";
-        const newVal = req.proposedRecord[field.key] || "";
-        const rowClass = oldVal !== newVal ? "bg-amber-100/40 text-amber-900 font-bold" : "";
-
-        tbody.innerHTML += `
-          <tr class="${rowClass} border-b">
-            <td class="p-3 font-semibold text-slate-500">${field.label}</td>
-            <td class="p-3 text-slate-600">${oldVal}</td>
-            <td class="p-3 text-slate-800">${newVal}</td>
-          </tr>
-        `;
-      });
-
-      // Save index reference globally for decision triggers
-      window.currentComparisonIndex = queueIdx;
-    }
-
-    function approveChangeRequest() {
-      if (activeRole !== "Admin Manager") {
-         alert("Verification Error: Only 'Admin Manager' has permission to approve changes.");
-         return;
-      }
-      const idx = window.currentComparisonIndex;
-      const queue = JSON.parse(localStorage.getItem('rg_approval_queue')) || [];
-      const req = queue[idx];
-
-      const employees = JSON.parse(localStorage.getItem('rg_employees'));
-      // Overwrite base record with verified props
-      req.proposedRecord.approvalStatus = "Approved";
-      employees[req.targetIndex] = req.proposedRecord;
-
-      localStorage.setItem('rg_employees', JSON.stringify(employees));
-
-      // Pop from queue
-      queue.splice(idx, 1);
-      localStorage.setItem('rg_approval_queue', JSON.stringify(queue));
-
-      alert("Proposed modifications approved successfully!");
-      closeReviewQueue();
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-    }
-
-    function rejectChangeRequest() {
-      if (activeRole !== "Admin Manager") {
-         alert("Verification Error: Only 'Admin Manager' has permission to reject changes.");
-         return;
-      }
-      const comment = document.getElementById('review-comment').value;
-      if (!comment) {
-        alert("Please provide review comment before requesting corrections.");
-        return;
-      }
-
-      const idx = window.currentComparisonIndex;
-      const queue = JSON.parse(localStorage.getItem('rg_approval_queue')) || [];
-      const req = queue[idx];
-
-      const employees = JSON.parse(localStorage.getItem('rg_employees'));
-      employees[req.targetIndex].approvalStatus = "Correction Required";
-      employees[req.targetIndex].correctionComment = comment;
-
-      localStorage.setItem('rg_employees', JSON.stringify(employees));
-
-      queue.splice(idx, 1);
-      localStorage.setItem('rg_approval_queue', JSON.stringify(queue));
-
-      alert("Change Rejected. Request for Correction has been registered.");
-      closeReviewQueue();
-      syncDashboard();
-      renderEmployeeTable();
-      renderApprovalsList();
-    }
-
-    function closeReviewQueue() {
-      document.getElementById('approvals-comparison-panel').classList.add('hidden');
-    }
-
-    // 8. TEMPLATE DOWNLOAD & BULK UPLOADER SIMULATOR (Section 10)
-    function downloadSampleTemplate() {
-      // Simulate downloadable template
-      const templateLayout = `Employee ID,Full Name,Company,Designation,Passport Number,Visa Status,Emirates ID Number,Status\nRG-100,Alok Verma,RELIANCE GULF,Pipe Fitter,P456778,Visa Completed,784-1990-1234567-1,On Site`;
-      const blob = new Blob([templateLayout], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'Standard_Excel_Template_v4.csv');
-      a.click();
-    }
-
-    function simulateBulkUpload(event) {
-      document.getElementById('bulk-preview-panel').classList.remove('hidden');
-      document.getElementById('bulk-valid-rows').innerText = "2";
-      document.getElementById('bulk-warn-rows').innerText = "1";
-      document.getElementById('bulk-rej-rows').innerText = "0";
-
-      document.getElementById('btn-confirm-bulk').onclick = function() {
-        const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-        
-        // Push 2 mockup valid bulk entries
-        employees.push({
-          nameEn: "Amit Srivastav",
-          nameAr: "اميت",
-          id: "RG-105",
-          company: "RELIANCE GULF",
-          designation: "Heavy Driver",
-          passportNo: "P89809809",
-          passportExpiry: "2029-08-11",
-          visaStatus: "Visa Completed",
-          unifiedNo: "89809809",
-          emiratesId: "784-1988-8888888-2",
-          residenceFile: "Residence 1",
-          idExpiry: "2029-08-11",
-          labourCard: "Labour 1",
-          labourExpiry: "2029-08-11",
-          status: "On Site",
-          approvalStatus: "Under Review",
-          photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60"
-        });
-
-        employees.push({
-          nameEn: "John Doe",
-          nameAr: "جون",
-          id: "RI-204",
-          company: "RELIANCE INTERNATIONAL",
-          designation: "Rigger Helper",
-          passportNo: "P11223344",
-          passportExpiry: "2028-01-15",
-          visaStatus: "Visit Visa Applied",
-          status: "Idle",
-          approvalStatus: "Under Review",
-          photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60"
-        });
-
-        localStorage.setItem('rg_employees', JSON.stringify(employees));
-        alert("Bulk import completed! 2 new profiles uploaded to Review Queue.");
-        document.getElementById('bulk-preview-panel').classList.add('hidden');
-        document.getElementById('bulk-file-input').value = "";
-        syncDashboard();
-        renderEmployeeTable();
-        renderApprovalsList();
-        switchTab('emp-list');
-      };
-    }
-
-    // 9. REAL-TIME EXECUTABLE DASHBOARD SYNC (Section 2)
-    function syncDashboard() {
-      const employees = JSON.parse(localStorage.getItem('rg_employees')) || [];
-
-      // Reliance Gulf Metrics
-      const rgPool = employees.filter(e => e.company === "RELIANCE GULF");
-      const rgSiteCount = rgPool.filter(e => e.status === "On Site").length;
-      const rgIdleCount = rgPool.filter(e => e.status === "Idle").length;
-      const rgLeaveCount = rgPool.filter(e => e.status === "On Leave").length;
-
-      document.getElementById('rg-total-workers').innerText = rgPool.length;
-      document.getElementById('rg-site').innerText = rgSiteCount;
-      document.getElementById('rg-idle').innerText = rgIdleCount;
-      document.getElementById('rg-leave').innerText = rgLeaveCount;
-
-      // Reliance International Metrics
-      const riPool = employees.filter(e => e.company === "RELIANCE INTERNATIONAL");
-      const riSiteCount = riPool.filter(e => e.status === "On Site").length;
-      const riIdleCount = riPool.filter(e => e.status === "Idle").length;
-      const riLeaveCount = riPool.filter(e => e.status === "On Leave").length;
-
-      document.getElementById('ri-total-workers').innerText = riPool.length;
-      document.getElementById('ri-site').innerText = riSiteCount;
-      document.getElementById('ri-idle').innerText = riIdleCount;
-      document.getElementById('ri-leave').innerText = riLeaveCount;
-
-      // Combined Metrics
-      document.getElementById('combined-total-workers').innerText = employees.length;
-      document.getElementById('combined-site').innerText = rgSiteCount + riSiteCount;
-      document.getElementById('combined-idle').innerText = rgIdleCount + riIdleCount;
-      document.getElementById('combined-leave').innerText = rgLeaveCount + riLeaveCount;
-
-      // Expiry Metrics (Section 12 details)
-      let countExp = 0, count7 = 0, count30 = 0, count60 = 0;
-      const today = new Date();
-
-      employees.forEach(emp => {
-        const dates = [emp.passportExpiry, emp.idExpiry, emp.labourExpiry, emp.ioleExpiry];
-        dates.forEach(d => {
-          if (!d) return;
-          const expiry = new Date(d);
-          const days = Math.ceil((expiry - today) / (1000 * 3600 * 24));
-          if (days < 0) countExp++;
-          else if (days <= 7) count7++;
-          else if (days <= 30) count30++;
-          else if (days <= 60) count60++;
-        });
-      });
-
-      document.getElementById('count-expired').innerText = countExp;
-      document.getElementById('count-exp-7').innerText = count7;
-      document.getElementById('count-exp-30').innerText = count30;
-      document.getElementById('count-exp-60').innerText = count60;
-
-      // Unresolved Missing Fields Alerts
-      const missingCount = employees.filter(e => e.hasMissing).length;
-      const alertBar = document.getElementById('missing-info-alert-bar');
-      if (missingCount > 0) {
-        alertBar.classList.remove('hidden');
-        document.getElementById('missing-alert-count').innerText = missingCount;
       } else {
-        alertBar.classList.add('hidden');
+        tableContainer.classList.add('hidden');
+        placeholder.classList.remove('hidden');
       }
     }
 
-    // 10. EXPORT EXCEL & PDF PROTOCOLS (Section 9)
-    function exportData(format) {
-      alert(`Exporting Active Table layout matching search query parameters to ${format} sheet. Template generated complete with export date timestamp, matching headers and values.`);
-    }
+    function addCertification() {
+      const certSelect = document.getElementById('certSelect');
+      const certDate = document.getElementById('certDate');
+      const certRemark = document.getElementById('certRemark');
 
-    // 11. CENTRALIZED NOTIFICATIONS PANEL (Section 16)
-    function toggleNotificationCentre() {
-      const drawer = document.getElementById('notification-drawer');
-      drawer.classList.toggle('hidden');
-      renderNotifications();
-    }
+      const selectedValue = certSelect.value;
+      const dateValue = certDate.value;
+      const remarkValue = certRemark.value;
 
-    function createSystemNotification(type, message, targetId, category) {
-      const notifications = JSON.parse(localStorage.getItem('rg_notifications')) || [];
-      notifications.unshift({
-        id: Date.now(),
-        type: type,
-        message: message,
-        targetId: targetId,
-        category: category,
-        timestamp: new Date().toISOString(),
-        unread: true
-      });
-      localStorage.setItem('rg_notifications', JSON.stringify(notifications));
-      syncUnreadBadgeCount();
-    }
-
-    function syncUnreadBadgeCount() {
-      const notifications = JSON.parse(localStorage.getItem('rg_notifications')) || [];
-      const unreadCount = notifications.filter(n => n.unread).length;
-      document.getElementById('global-unread-badge').innerText = unreadCount;
-    }
-
-    function renderNotifications() {
-      const notifications = JSON.parse(localStorage.getItem('rg_notifications')) || [];
-      const listContainer = document.getElementById('notification-list-body');
-      listContainer.innerHTML = "";
-
-      // Filter notifications based on menu filter
-      const filtered = notifications.filter(n => {
-        if (currentNotificationFilter === "All") return true;
-        if (currentNotificationFilter === "Unread") return n.unread;
-        return n.category === currentNotificationFilter;
-      });
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium">No alerts received yet.</div>`;
+      if (!selectedValue || !dateValue) {
+        alert('Please select a certificate and provide a date!');
         return;
       }
 
-      filtered.forEach((n, index) => {
-        const stateColor = n.unread ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-100';
-        listContainer.innerHTML += `
-          <div class="p-3 border rounded-xl space-y-1 text-[11px] ${stateColor}">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-800 uppercase">${n.type}</span>
-              <span class="text-[9px] text-slate-400">${new Date(n.timestamp).toLocaleTimeString()}</span>
-            </div>
-            <p class="text-slate-600">${n.message}</p>
-            <div class="flex items-center justify-between pt-1">
-              <button onclick="toggleUnreadState(${n.id})" class="text-blue-600 font-bold hover:underline text-[10px]">Mark as Read</button>
-              <button onclick="deleteNotification(${n.id})" class="text-rose-500 font-bold hover:underline text-[10px]">Delete</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function toggleUnreadState(id) {
-      const notifications = JSON.parse(localStorage.getItem('rg_notifications')) || [];
-      const matched = notifications.find(n => n.id === id);
-      if (matched) {
-        matched.unread = !matched.unread;
-        localStorage.setItem('rg_notifications', JSON.stringify(notifications));
-        syncUnreadBadgeCount();
-        renderNotifications();
+      // Check if duplicate
+      const alreadyExists = addedCertifications.some(c => c.name === selectedValue);
+      if (alreadyExists) {
+        alert('This certificate is already added to the list.');
+        return;
       }
+
+      // Push to our memory array
+      addedCertifications.push({
+        name: selectedValue,
+        date: dateValue,
+        remark: remarkValue
+      });
+
+      // Reset Form fields
+      certSelect.value = '';
+      certDate.value = '';
+      certRemark.value = '';
+
+      // Re-render UI
+      renderCertifications();
     }
 
-    function deleteNotification(id) {
-      let notifications = JSON.parse(localStorage.getItem('rg_notifications')) || [];
-      notifications = notifications.filter(n => n.id !== id);
-      localStorage.setItem('rg_notifications', JSON.stringify(notifications));
-      syncUnreadBadgeCount();
-      renderNotifications();
-    }
-
-    function filterNotify(category) {
-      currentNotificationFilter = category;
-      renderNotifications();
-    }
-
-    function buildAuditAlertNotifications() {
-      // Periodic background checker emulation
-      createSystemNotification("System Ready", "ERP Frontend Prototype initialized successfully on secure localhost loop.", "SYS", "System");
+    function removeCertification(index) {
+      addedCertifications.splice(index, 1);
+      renderCertifications();
     }
   </script>
 </body>

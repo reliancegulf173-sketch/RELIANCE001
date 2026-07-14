@@ -104,6 +104,8 @@ table{border-collapse:collapse;width:max-content;min-width:100%}
 th,td{padding:11px 12px;border-bottom:1px solid #edf1f5;border-right:1px solid #f0f3f6;font-size:12px;white-space:nowrap;text-align:left}
 th{background:#f0f5f9;color:#345269;position:sticky;top:0;z-index:2}
 tr:hover td{background:#fbfdff}
+td.empty-cell{background:#ffe5e5 !important;color:#b42318;font-weight:700}
+td.missing-summary{background:#fff0f0;color:#b42318;font-weight:700;white-space:normal;min-width:280px;max-width:420px}
 .eid{color:var(--blue);font-weight:800;text-decoration:underline;cursor:pointer}
 .pill{padding:5px 9px;border-radius:20px;font-size:11px;font-weight:800}
 .approved{background:#e7f7ef;color:#167548}
@@ -397,7 +399,13 @@ const fields=[
 ['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],['otherCertExpiry','Other Certificate Expiry','cert','date'],['otherCertRemark','Other Certificate Remark','cert','text'],
 ['docPassport','Passport Document','document','select',0,['Save in Folder','Pending']],['docEmirates','Emirates ID Document','document','select',0,['Save in Folder','Pending']],['docLabour','Approved Labour Contract','document','select',0,['Save in Folder','Pending']],['docOffer','Offer Letter','document','select',0,['Save in Folder','Pending']],['docMedical','ADNOC Medical Document','document','select',0,['Save in Folder','Pending']]
 ];
-const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['workingStatus','Working Status'],['cancellationDate','Cancellation Date'],['siteStatus','Site Status'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
+const listColumns=[
+  ...fields.map(f=>[f[0],f[1]]),
+  ['approvalStatus','Approval Status'],
+  ['updatedBy','Updated By'],
+  ['updatedAt','Updated At'],
+  ['missingFields','Missing Information']
+];
 
 const EMPLOYEE_STORAGE_KEY='rg_employees_v3';
 const NOTIFICATION_STORAGE_KEY='rg_notifications_v3';
@@ -429,7 +437,18 @@ function persist(){
   }
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
-function missing(e){return fields.filter(f=>f[4]&&!e[f[0]]).map(f=>f[1]).concat(e.workingStatus==='Inactive'&&!e.cancellationDate?['Cancellation Date']:[])}
+function missing(e){
+  const result=[];
+  fields.forEach(f=>{
+    const key=f[0],label=f[1];
+    if(key==='cancellationDate'){
+      if(e.workingStatus==='Inactive'&&!String(e[key]??'').trim())result.push(label);
+      return;
+    }
+    if(!String(e[key]??'').trim())result.push(label);
+  });
+  return [...new Set(result)];
+}
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
 function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry]].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
 function addNotification(type,e,message,recipientRole='All',status='Open',actionId=''){
@@ -514,14 +533,37 @@ function getFiltered(){
 }
 function renderEmployees(){
   const data=getFiltered();
-  employeeHead.innerHTML=listColumns.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Action</th>';
-  employeeBody.innerHTML=data.map(e=>`<tr>${listColumns.map(c=>{
-    let v=c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'';
-    if(c[0]==='employeeId')return `<td><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v)}</span></td>`;
-    if(c[0]==='workingStatus'||c[0]==='siteStatus')return `<td><span class="pill ${String(v).toLowerCase().replaceAll(' ','')}">${esc(v)}</span></td>`;
-    if(c[0]==='approvalStatus')return `<td><span class="pill ${v==='Approved'?'approved':v==='Correction Required'?'correction':'review'}">${esc(v)}</span></td>`;
-    return `<td>${esc(v)}</td>`;
-  }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`).join('');
+  employeeHead.innerHTML=listColumns.map(c=>`<th>${esc(c[1])}</th>`).join('')+'<th>Action</th>';
+  employeeBody.innerHTML=data.map(e=>{
+    const missingNames=missing(e);
+    return `<tr>${listColumns.map(c=>{
+      const key=c[0];
+      let raw=key==='missingFields'?missingNames.join(', '):(e[key]??'');
+      let v=String(raw).trim();
+
+      if(key==='employeeId'){
+        return `<td class="${v?'':'empty-cell'}"><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v||'Not Filled')}</span></td>`;
+      }
+
+      if(key==='missingFields'){
+        return `<td class="${missingNames.length?'missing-summary':''}">${esc(v||'Complete')}</td>`;
+      }
+
+      if(key==='workingStatus'||key==='siteStatus'){
+        return v
+          ? `<td><span class="pill ${v.toLowerCase().replaceAll(' ','')}">${esc(v)}</span></td>`
+          : `<td class="empty-cell">Not Filled</td>`;
+      }
+
+      if(key==='approvalStatus'){
+        return v
+          ? `<td><span class="pill ${v==='Approved'?'approved':v==='Correction Required'?'correction':'review'}">${esc(v)}</span></td>`
+          : `<td class="empty-cell">Not Filled</td>`;
+      }
+
+      return `<td class="${v?'':'empty-cell'}">${esc(v||'Not Filled')}</td>`;
+    }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`;
+  }).join('');
   employeeNotices.innerHTML=employees.some(e=>missing(e).length)?`<div class="notice" onclick="specialFilter('missing')"><b>Some employee information is missing.</b> Click to view affected employees.</div>`:'';
 }
 ['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
@@ -529,7 +571,25 @@ function clearFilters(){['search','filterCompany','filterWorkingStatus','filterS
 function specialFilter(v){showPage('employees');filterSpecial.value=v;renderEmployees()}
 function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));showPage('form');toggleCancellationDate()}
 function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});showPage('form');toggleCancellationDate()}
-function viewEmployee(id){let e=employees.find(x=>x.id===id);detailContent.innerHTML=`<h2>${esc(e.nameEnglish)} <small>(${esc(e.employeeId)})</small></h2><p><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></p><div class="form-grid">${listColumns.map(c=>`<div><b style="font-size:12px;color:#53697d">${c[1]}</b><div style="margin-top:5px">${esc(c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'-')}</div></div>`).join('')}</div><div style="margin-top:20px"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button></div>`;detailModal.classList.add('show')}
+function viewEmployee(id){
+  let e=employees.find(x=>x.id===id);
+  const missingNames=missing(e);
+  detailContent.innerHTML=`<h2>${esc(e.nameEnglish||'Not Filled')} <small>(${esc(e.employeeId||'Not Filled')})</small></h2>
+  <p><span class="pill ${e.approvalStatus==='Approved'?'approved':e.approvalStatus==='Correction Required'?'correction':'review'}">${esc(e.approvalStatus||'Not Filled')}</span></p>
+  <div class="form-grid">${fields.map(f=>{
+    const value=String(e[f[0]]??'').trim();
+    const conditionalNotRequired=f[0]==='cancellationDate'&&e.workingStatus!=='Inactive';
+    return `<div style="${!value&&!conditionalNotRequired?'background:#ffe5e5;border:1px solid #f5a3a3;border-radius:10px;padding:10px;':''}">
+      <b style="font-size:12px;color:#53697d">${esc(f[1])}</b>
+      <div style="margin-top:5px;color:${!value&&!conditionalNotRequired?'#b42318':'inherit'};font-weight:${!value&&!conditionalNotRequired?'700':'400'}">${esc(value||(conditionalNotRequired?'Not Applicable':'Not Filled'))}</div>
+    </div>`;
+  }).join('')}</div>
+  <div style="margin-top:18px" class="${missingNames.length?'notice':''}">
+    <b>Missing Information:</b> ${esc(missingNames.join(', ')||'None')}
+  </div>
+  <div style="margin-top:20px"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button></div>`;
+  detailModal.classList.add('show');
+}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 
 employeeForm.onsubmit=e=>{

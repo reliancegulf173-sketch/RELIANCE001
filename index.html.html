@@ -548,7 +548,38 @@ notifFilter.onchange=renderNotifications;
 function toggleRead(id){let n=notifications.find(x=>String(x.id)===String(id));n.read=!n.read;persist();renderNotifications()}
 function markAllRead(){notifications.forEach(n=>n.read=true);persist();renderNotifications()}
 
-function exportExcel(){let data=getFiltered(),cols=listColumns;let table='<table><tr>'+cols.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>'+data.map(e=>'<tr>'+cols.map(c=>`<td>${esc(c[0]==='missingFields'?missing(e).join(', '):e[c[0]]||'')}</td>`).join('')+'</tr>').join('')+'</table>';downloadBlob(new Blob([`<html><meta charset="UTF-8"><body><h2>Reliance Gulf Employee List</h2>${table}</body></html>`],{type:'application/vnd.ms-excel'}),'Reliance_Gulf_Employee_List.xls')}
+function exportExcel(){
+  const data=getFiltered();
+  if(!data.length){alert('No employee records available to export.');return}
+
+  // Export every employee form field, followed by system/approval information.
+  const cols=[
+    ...fields.map(f=>[f[0],f[1]]),
+    ['approvalStatus','Approval Status'],
+    ['missingFields','Missing Information'],
+    ['updatedBy','Updated By'],
+    ['updatedAt','Updated At'],
+    ['recordId','Record ID'],
+    ['history','Change / Approval History']
+  ];
+
+  const cellValue=(employee,key)=>{
+    if(key==='missingFields')return missing(employee).join(', ');
+    if(key==='recordId')return employee.id ?? '';
+    if(key==='history'){
+      return (employee.history||[]).map(h=>{
+        const changes=(h.changes||[]).map(c=>`${c.field}: ${c.old||'-'} -> ${c.new||'-'}`).join('; ');
+        return [h.action,h.by,h.date,h.comment,changes].filter(Boolean).join(' | ');
+      }).join(' || ');
+    }
+    const value=employee[key];
+    return value===null||value===undefined?'':value;
+  };
+
+  const table='<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c[1])}</th>`).join('')+'</tr></thead><tbody>'+data.map(employee=>'<tr>'+cols.map(c=>`<td>${esc(cellValue(employee,c[0]))}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
+  const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Reliance Gulf Employee List</h2>${table}</body></html>`;
+  downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
+}
 function downloadTemplate(){let headers=fields.map(f=>f[0]);downloadBlob(new Blob([headers.join(',')+'\n'],{type:'text/csv'}),'Employee_Bulk_Upload_Template.csv')}
 function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function previewBulk(){let file=bulkFile.files[0];if(!file){alert('Please select a CSV file.');return}let r=new FileReader();r.onload=()=>{let lines=r.result.split(/\r?\n/).filter(Boolean),headers=lines[0].split(','),rows=lines.slice(1).map(line=>{let vals=line.split(','),o={};headers.forEach((h,i)=>o[h.trim()]=vals[i]?.trim()||'');return o});bulkRows=rows;bulkPreview.innerHTML=`<p><b>Total rows:</b> ${rows.length}</p><button class="btn success" onclick="importBulk()">Upload Records</button>`};r.readAsText(file)}

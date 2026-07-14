@@ -93,6 +93,18 @@ button,input,select{font:inherit}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:18px}
 .card h3{margin:0 0 14px;font-size:17px}
 .notice{border-radius:12px;padding:13px 15px;margin:10px 0;border-left:4px solid var(--warning);background:#fff8e8;cursor:pointer}
+.expiry-alert{cursor:pointer;border-left:5px solid #f59e0b}
+.expired-alert{cursor:pointer;border-left:5px solid #dc2626;background:#fff1f2;color:#991b1b}
+.expiring-alert{cursor:pointer;border-left:5px solid #f59e0b;background:#fff7ed;color:#9a3412}
+.expiry-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:14px 0}
+.expiry-summary-card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#fff}
+.expiry-summary-card b{display:block;font-size:24px;margin-top:6px}
+.expiry-table{width:100%;border-collapse:collapse;margin-top:14px}
+.expiry-table th,.expiry-table td{border:1px solid #e5e7eb;padding:10px;text-align:left;vertical-align:top}
+.expiry-table th{background:#f8fafc}
+.expiry-badge-expired{background:#fee2e2;color:#991b1b;padding:4px 8px;border-radius:999px;font-weight:700}
+.expiry-badge-soon{background:#ffedd5;color:#9a3412;padding:4px 8px;border-radius:999px;font-weight:700}
+
 .notice.red{border-color:var(--danger);background:#fff0f0}
 .notice.blue{border-color:var(--blue);background:#eef7ff}
 
@@ -685,6 +697,90 @@ window.addEventListener('storage',event=>{
 });
 const savedUser=sessionStorage.getItem('rg_current_user');
 if(savedUser){currentUser=JSON.parse(savedUser);applyUser()}
+
+function getDocumentExpiryItems(){
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const expiryFields=fields.filter(f=>{
+    const k=String(f[0]||'').toLowerCase();
+    const l=String(f[1]||'').toLowerCase();
+    return k.includes('expiry')||k.includes('expire')||l.includes('expiry')||l.includes('expire');
+  });
+  const items=[];
+  employees.forEach(e=>{
+    expiryFields.forEach(f=>{
+      const raw=e[f[0]];
+      if(!raw)return;
+      const d=new Date(raw);
+      if(Number.isNaN(d.getTime()))return;
+      d.setHours(0,0,0,0);
+      const days=Math.ceil((d-today)/86400000);
+      if(days<0||days<=30){
+        items.push({
+          employeeId:e.employeeId||'Not Filled',
+          employeeName:e.nameEnglish||e.name||'Not Filled',
+          company:e.company||e.companyName||'',
+          document:f[1],
+          expiryDate:raw,
+          days,
+          status:days<0?'Expired':'Expiring Soon'
+        });
+      }
+    });
+  });
+  return items.sort((a,b)=>a.days-b.days);
+}
+
+function showExpiryDetails(type){
+  const all=getDocumentExpiryItems();
+  const rows=type==='expired'?all.filter(x=>x.days<0):type==='soon'?all.filter(x=>x.days>=0&&x.days<=30):all;
+  const expiredCount=all.filter(x=>x.days<0).length;
+  const soonCount=all.filter(x=>x.days>=0&&x.days<=30).length;
+
+  const html=`<h2>Document Expiry Details</h2>
+    <div class="expiry-summary-grid">
+      <div class="expiry-summary-card"><span>Expired Documents</span><b>${expiredCount}</b></div>
+      <div class="expiry-summary-card"><span>Expiring Within 30 Days</span><b>${soonCount}</b></div>
+      <div class="expiry-summary-card"><span>Total Affected Employees</span><b>${new Set(all.map(x=>x.employeeId)).size}</b></div>
+    </div>
+    ${rows.length?`<div style="overflow:auto"><table class="expiry-table">
+      <thead><tr><th>Employee ID</th><th>Employee Name</th><th>Company</th><th>Document</th><th>Expiry Date</th><th>Status</th><th>Days</th></tr></thead>
+      <tbody>${rows.map(x=>`<tr>
+        <td>${esc(x.employeeId)}</td>
+        <td>${esc(x.employeeName)}</td>
+        <td>${esc(x.company||'-')}</td>
+        <td>${esc(x.document)}</td>
+        <td>${esc(x.expiryDate)}</td>
+        <td><span class="${x.days<0?'expiry-badge-expired':'expiry-badge-soon'}">${esc(x.status)}</span></td>
+        <td>${x.days<0?`${Math.abs(x.days)} day(s) overdue`:`${x.days} day(s) left`}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`:`<p>No document expiry records found.</p>`}`;
+
+  const detail=document.getElementById('detailContent');
+  const modal=document.getElementById('detailModal');
+  if(detail&&modal){
+    detail.innerHTML=html;
+    modal.classList.add('show');
+  }else{
+    alert(rows.map(x=>`${x.employeeName} - ${x.document} - ${x.expiryDate}`).join('\n')||'No document expiry records found.');
+  }
+}
+
+
+function renderNotices(){
+  let html='';
+  const missingCount=employees.filter(e=>missing(e).length).length;
+  const expiryItems=getDocumentExpiryItems();
+  const expired=expiryItems.filter(x=>x.days<0);
+  const soon=expiryItems.filter(x=>x.days>=0&&x.days<=30);
+  if(missingCount)html+=`<div class="notice" onclick="specialFilter('missing')"><b>⚠ Missing Information:</b> ${missingCount} employee(s) have incomplete records. Click to review.</div>`;
+  if(expired.length)html+=`<div class="notice expired-alert" onclick="showExpiryDetails('expired')"><b>🔴 Expired Documents:</b> ${expired.length} document(s) already expired. Click to see employee-wise details.</div>`;
+  if(soon.length)html+=`<div class="notice expiring-alert" onclick="showExpiryDetails('soon')"><b>🟠 Expiring Soon:</b> ${soon.length} document(s) will expire within 30 days. Click to see employee-wise details.</div>`;
+  const el=document.getElementById('employeeNotices')||document.getElementById('notices');
+  if(el)el.innerHTML=html;
+}
+
+window.addEventListener('load',()=>{try{renderNotices();}catch(e){console.error(e);}});
 </script>
 </body>
 </html>

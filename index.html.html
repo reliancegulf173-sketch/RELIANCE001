@@ -376,6 +376,7 @@ function applyUser(){
   document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',currentUser.role!=='Admin Manager'));
   showPage('dashboard');
+  renderDashboard();
 }
 function logout(){
   sessionStorage.removeItem('rg_current_user');currentUser=null;
@@ -398,11 +399,35 @@ const fields=[
 ];
 const listColumns=[['nameEnglish','Employee Name'],['employeeId','Employee ID'],['company','Company'],['designation','Designation'],['uaeContact','UAE Contact'],['passportNumber','Passport No.'],['passportExpiry','Passport Expiry'],['emiratesId','Emirates ID'],['idExpiry','ID Expiry'],['labourExpiry','Labour Expiry'],['workingStatus','Working Status'],['cancellationDate','Cancellation Date'],['siteStatus','Site Status'],['approvalStatus','Approval Status'],['missingFields','Missing Information'],['updatedBy','Updated By'],['updatedAt','Updated At']];
 
-let employees=JSON.parse(localStorage.getItem('rg_employees_v3')||'null')||[];
-let notifications=JSON.parse(localStorage.getItem('rg_notifications_v3')||'null')||[];
+const EMPLOYEE_STORAGE_KEY='rg_employees_v3';
+const NOTIFICATION_STORAGE_KEY='rg_notifications_v3';
+
+function readStoredArray(primaryKey,legacyKeys=[]){
+  const keys=[primaryKey,...legacyKeys];
+  for(const key of keys){
+    try{
+      const raw=localStorage.getItem(key);
+      if(!raw)continue;
+      const value=JSON.parse(raw);
+      if(Array.isArray(value))return value;
+    }catch(err){console.warn('Could not read saved data from',key,err)}
+  }
+  return [];
+}
+
+let employees=readStoredArray(EMPLOYEE_STORAGE_KEY,['rg_employees_v2','rg_employees_v1','rg_employees']);
+let notifications=readStoredArray(NOTIFICATION_STORAGE_KEY,['rg_notifications_v2','rg_notifications_v1','rg_notifications']);
 let editingId=null,saveAttempt=0,bulkRows=[];
 
-function persist(){localStorage.setItem('rg_employees_v3',JSON.stringify(employees));localStorage.setItem('rg_notifications_v3',JSON.stringify(notifications))}
+function persist(){
+  try{
+    localStorage.setItem(EMPLOYEE_STORAGE_KEY,JSON.stringify(employees));
+    localStorage.setItem(NOTIFICATION_STORAGE_KEY,JSON.stringify(notifications));
+  }catch(err){
+    console.error('Unable to save portal data.',err);
+    alert('The browser could not save the data. Please check browser storage permissions.');
+  }
+}
 function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
 function missing(e){return fields.filter(f=>f[4]&&!e[f[0]]).map(f=>f[1]).concat(e.workingStatus==='Inactive'&&!e.cancellationDate?['Cancellation Date']:[])}
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
@@ -450,6 +475,7 @@ document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>b.dataset.page===
 function openEmployeePortal(){
   document.querySelectorAll('.employee-nav').forEach(el=>el.classList.remove('hidden'));
   document.querySelectorAll('.site-nav').forEach(el=>el.classList.add('hidden'));
+  renderDashboard();
   showPage('employeeDashboard');
 }
 function openSitePortal(){
@@ -528,7 +554,18 @@ function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.cr
 function previewBulk(){let file=bulkFile.files[0];if(!file){alert('Please select a CSV file.');return}let r=new FileReader();r.onload=()=>{let lines=r.result.split(/\r?\n/).filter(Boolean),headers=lines[0].split(','),rows=lines.slice(1).map(line=>{let vals=line.split(','),o={};headers.forEach((h,i)=>o[h.trim()]=vals[i]?.trim()||'');return o});bulkRows=rows;bulkPreview.innerHTML=`<p><b>Total rows:</b> ${rows.length}</p><button class="btn success" onclick="importBulk()">Upload Records</button>`};r.readAsText(file)}
 function importBulk(){let added=0;bulkRows.forEach(o=>{if(!o.employeeId||employees.some(e=>e.employeeId===o.employeeId))return;let e={...o,id:String(Date.now()+Math.random()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),history:[]};employees.push(e);added++;addNotification('Approval',e,'Employee added through bulk upload.')});persist();alert(added+' employee(s) uploaded.');showPage('employees')}
 
-buildForm();persist();
+buildForm();
+persist();
+renderDashboard();
+window.addEventListener('beforeunload',persist);
+window.addEventListener('storage',event=>{
+  if(event.key===EMPLOYEE_STORAGE_KEY||event.key===NOTIFICATION_STORAGE_KEY){
+    employees=readStoredArray(EMPLOYEE_STORAGE_KEY);
+    notifications=readStoredArray(NOTIFICATION_STORAGE_KEY);
+    renderDashboard();
+    if(document.getElementById('employees').classList.contains('active'))renderEmployees();
+  }
+});
 const savedUser=sessionStorage.getItem('rg_current_user');
 if(savedUser){currentUser=JSON.parse(savedUser);applyUser()}
 </script>

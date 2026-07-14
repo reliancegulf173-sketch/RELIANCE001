@@ -183,6 +183,30 @@ td.missing-summary{background:#fff0f0;color:#b42318;font-weight:700;white-space:
   .app{display:block}.content{padding:0}.table-wrap{max-height:none;overflow:visible;box-shadow:none;border:0}
   th,td{font-size:8px;padding:4px;white-space:normal}
 }
+
+td.expiry-date-expired,
+.expiry-date-expired{
+  background:#fee2e2 !important;
+  color:#991b1b !important;
+  font-weight:800 !important;
+  border:1px solid #ef4444 !important;
+}
+td.expiry-date-soon,
+.expiry-date-soon{
+  background:#ffedd5 !important;
+  color:#9a3412 !important;
+  font-weight:800 !important;
+  border:1px solid #f59e0b !important;
+}
+
+.expiry-date-valid{
+  background:#dcfce7 !important;
+  color:#166534 !important;
+  font-weight:700 !important;
+  border:1px solid #22c55e !important;
+}
+.expiry-doc-list{margin:8px 0 0;padding-left:18px}
+.expiry-doc-list li{margin:5px 0}
 </style>
 </head>
 <body>
@@ -573,7 +597,8 @@ function renderEmployees(){
           : `<td class="empty-cell">Not Filled</td>`;
       }
 
-      return `<td class="${v?'':'empty-cell'}">${esc(v||'Not Filled')}</td>`;
+      const expiryClass=getExpiryDateClass(key,c[1],v);
+      return `<td class="${[v?'':'empty-cell',expiryClass].filter(Boolean).join(' ')}">${esc(v||'Not Filled')}</td>`;
     }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`;
   }).join('');
   employeeNotices.innerHTML=employees.some(e=>missing(e).length)?`<div class="notice" onclick="specialFilter('missing')"><b>Some employee information is missing.</b> Click to view affected employees.</div>`:'';
@@ -591,9 +616,17 @@ function viewEmployee(id){
   <div class="form-grid">${fields.map(f=>{
     const value=String(e[f[0]]??'').trim();
     const conditionalNotRequired=f[0]==='cancellationDate'&&e.workingStatus!=='Inactive';
-    return `<div style="${!value&&!conditionalNotRequired?'background:#ffe5e5;border:1px solid #f5a3a3;border-radius:10px;padding:10px;':''}">
+    const expiryClass=getExpiryDateClass(f[0],f[1],value);
+    const fk=String(f[0]||'').toLowerCase(), fl=String(f[1]||'').toLowerCase();
+    const isExpiryField=fk.includes('expiry')||fk.includes('expire')||fl.includes('expiry')||fl.includes('expire');
+    let validBadge='';
+    if(isExpiryField&&value&&!expiryClass){
+      const d=new Date(value),today=new Date(); today.setHours(0,0,0,0);
+      if(!Number.isNaN(d.getTime())&&d>today)validBadge=' <span class="expiry-date-valid" style="display:inline-block;padding:2px 6px;border-radius:6px;margin-left:5px">Valid</span>';
+    }
+    return `<div class="${expiryClass}" style="${!value&&!conditionalNotRequired?'background:#ffe5e5;border:1px solid #f5a3a3;border-radius:10px;padding:10px;':expiryClass?'border-radius:10px;padding:10px;':''}">
       <b style="font-size:12px;color:#53697d">${esc(f[1])}</b>
-      <div style="margin-top:5px;color:${!value&&!conditionalNotRequired?'#b42318':'inherit'};font-weight:${!value&&!conditionalNotRequired?'700':'400'}">${esc(value||(conditionalNotRequired?'Not Applicable':'Not Filled'))}</div>
+      <div style="margin-top:5px;color:${!value&&!conditionalNotRequired?'#b42318':'inherit'};font-weight:${!value&&!conditionalNotRequired?'700':'400'}">${esc(value||(conditionalNotRequired?'Not Applicable':'Not Filled'))}${validBadge}</div>
     </div>`;
   }).join('')}</div>
   <div style="margin-top:18px" class="${missingNames.length?'notice':''}">
@@ -698,6 +731,23 @@ window.addEventListener('storage',event=>{
 const savedUser=sessionStorage.getItem('rg_current_user');
 if(savedUser){currentUser=JSON.parse(savedUser);applyUser()}
 
+
+function getExpiryDateClass(fieldKey,fieldLabel,value){
+  const k=String(fieldKey||'').toLowerCase();
+  const l=String(fieldLabel||'').toLowerCase();
+  const isExpiryField=k.includes('expiry')||k.includes('expire')||l.includes('expiry')||l.includes('expire');
+  if(!isExpiryField||!value)return '';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return '';
+  d.setHours(0,0,0,0);
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const days=Math.ceil((d-today)/86400000);
+  if(days<0)return 'expiry-date-expired';
+  if(days<=30)return 'expiry-date-soon';
+  return '';
+}
+
 function getDocumentExpiryItems(){
   const today=new Date();
   today.setHours(0,0,0,0);
@@ -721,6 +771,7 @@ function getDocumentExpiryItems(){
           employeeName:e.nameEnglish||e.name||'Not Filled',
           company:e.company||e.companyName||'',
           document:f[1],
+          fieldKey:f[0],
           expiryDate:raw,
           days,
           status:days<0?'Expired':'Expiring Soon'
@@ -733,9 +784,34 @@ function getDocumentExpiryItems(){
 
 function showExpiryDetails(type){
   const all=getDocumentExpiryItems();
-  const rows=type==='expired'?all.filter(x=>x.days<0):type==='soon'?all.filter(x=>x.days>=0&&x.days<=30):all;
+  const rows=type==='expired'
+    ? all.filter(x=>x.days<0)
+    : type==='soon'
+      ? all.filter(x=>x.days>=0&&x.days<=30)
+      : all;
+
   const expiredCount=all.filter(x=>x.days<0).length;
   const soonCount=all.filter(x=>x.days>=0&&x.days<=30).length;
+  const grouped={};
+  rows.forEach(x=>{
+    const key=x.employeeId+'__'+x.employeeName;
+    if(!grouped[key])grouped[key]={employeeId:x.employeeId,employeeName:x.employeeName,company:x.company,items:[]};
+    grouped[key].items.push(x);
+  });
+
+  const groupedHtml=Object.values(grouped).map(g=>`
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0;background:#fff">
+      <div style="font-weight:800;font-size:16px">${esc(g.employeeName)} <span style="color:#64748b">(${esc(g.employeeId)})</span></div>
+      <div style="color:#64748b;margin-top:3px">${esc(g.company||'-')}</div>
+      <ul class="expiry-doc-list">
+        ${g.items.map(x=>`<li>
+          <b>${esc(x.document)}:</b>
+          <span class="${x.days<0?'expiry-date-expired':'expiry-date-soon'}" style="display:inline-block;padding:3px 7px;border-radius:6px;margin:0 5px">${esc(x.expiryDate)}</span>
+          <span class="${x.days<0?'expiry-badge-expired':'expiry-badge-soon'}">${esc(x.status)}</span>
+          — ${x.days<0?`${Math.abs(x.days)} day(s) overdue`:`${x.days} day(s) left`}
+        </li>`).join('')}
+      </ul>
+    </div>`).join('');
 
   const html=`<h2>Document Expiry Details</h2>
     <div class="expiry-summary-grid">
@@ -743,18 +819,7 @@ function showExpiryDetails(type){
       <div class="expiry-summary-card"><span>Expiring Within 30 Days</span><b>${soonCount}</b></div>
       <div class="expiry-summary-card"><span>Total Affected Employees</span><b>${new Set(all.map(x=>x.employeeId)).size}</b></div>
     </div>
-    ${rows.length?`<div style="overflow:auto"><table class="expiry-table">
-      <thead><tr><th>Employee ID</th><th>Employee Name</th><th>Company</th><th>Document</th><th>Expiry Date</th><th>Status</th><th>Days</th></tr></thead>
-      <tbody>${rows.map(x=>`<tr>
-        <td>${esc(x.employeeId)}</td>
-        <td>${esc(x.employeeName)}</td>
-        <td>${esc(x.company||'-')}</td>
-        <td>${esc(x.document)}</td>
-        <td>${esc(x.expiryDate)}</td>
-        <td><span class="${x.days<0?'expiry-badge-expired':'expiry-badge-soon'}">${esc(x.status)}</span></td>
-        <td>${x.days<0?`${Math.abs(x.days)} day(s) overdue`:`${x.days} day(s) left`}</td>
-      </tr>`).join('')}</tbody>
-    </table></div>`:`<p>No document expiry records found.</p>`}`;
+    ${rows.length?groupedHtml:`<p>No document expiry records found.</p>`}`;
 
   const detail=document.getElementById('detailContent');
   const modal=document.getElementById('detailModal');
@@ -762,7 +827,8 @@ function showExpiryDetails(type){
     detail.innerHTML=html;
     modal.classList.add('show');
   }else{
-    alert(rows.map(x=>`${x.employeeName} - ${x.document} - ${x.expiryDate}`).join('\n')||'No document expiry records found.');
+    alert(rows.map(x=>`${x.employeeName} - ${x.document} - ${x.expiryDate}`).join('
+')||'No document expiry records found.');
   }
 }
 
@@ -774,8 +840,8 @@ function renderNotices(){
   const expired=expiryItems.filter(x=>x.days<0);
   const soon=expiryItems.filter(x=>x.days>=0&&x.days<=30);
   if(missingCount)html+=`<div class="notice" onclick="specialFilter('missing')"><b>⚠ Missing Information:</b> ${missingCount} employee(s) have incomplete records. Click to review.</div>`;
-  if(expired.length)html+=`<div class="notice expired-alert" onclick="showExpiryDetails('expired')"><b>🔴 Expired Documents:</b> ${expired.length} document(s) already expired. Click to see employee-wise details.</div>`;
-  if(soon.length)html+=`<div class="notice expiring-alert" onclick="showExpiryDetails('soon')"><b>🟠 Expiring Soon:</b> ${soon.length} document(s) will expire within 30 days. Click to see employee-wise details.</div>`;
+  if(expired.length)html+=`<div class="notice expired-alert" onclick="showExpiryDetails('expired')"><b>🔴 Expired Documents:</b> ${expired.length} document(s) already expired. Click to see employee-wise document and expiry-date details.</div>`;
+  if(soon.length)html+=`<div class="notice expiring-alert" onclick="showExpiryDetails('soon')"><b>🟠 Expiring Soon:</b> ${soon.length} document(s) will expire within 30 days. Click to see employee-wise document and expiry-date details.</div>`;
   const el=document.getElementById('employeeNotices')||document.getElementById('notices');
   if(el)el.innerHTML=html;
 }

@@ -432,7 +432,20 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&l
 function missing(e){return fields.filter(f=>f[4]&&!e[f[0]]).map(f=>f[1]).concat(e.workingStatus==='Inactive'&&!e.cancellationDate?['Cancellation Date']:[])}
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
 function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry]].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
-function addNotification(type,e,message){notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status:'Open'})}
+function addNotification(type,e,message,recipientRole='All',status='Open',actionId=''){
+  notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status,recipientRole,actionId});
+}
+function visibleNotifications(){
+  if(!currentUser)return [];
+  return notifications.filter(n=>!n.recipientRole||n.recipientRole==='All'||n.recipientRole===currentUser.role);
+}
+function resolveManagerReviewNotification(employeeId,actionId,newStatus){
+  notifications.forEach(n=>{
+    if(n.recipientRole==='Admin Manager'&&n.employeeId===employeeId&&n.status==='Under Review'&&(!actionId||n.actionId===actionId)){
+      n.status=newStatus;n.read=true;
+    }
+  });
+}
 function buildForm(){
   const map={general:'generalGrid',identity:'identityGrid',other:'otherGrid',cert:'certGrid',document:'documentGrid'};
   Object.keys(map).forEach(section=>{
@@ -528,25 +541,38 @@ employeeForm.onsubmit=e=>{
   if(missingNow.length&&saveAttempt===0){saveAttempt++;missingList.innerHTML=missingNow.map(x=>`<li>${esc(x)}</li>`).join('');warningModal.classList.add('show');return}
   let old=editingId?employees.find(x=>x.id===editingId):null,changes=[];
   if(old)fields.forEach(f=>{if(String(old[f[0]]||'')!==String(rec[f[0]]||''))changes.push({field:f[1],old:old[f[0]]||'',new:rec[f[0]]||''})});
-  let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,date:new Date().toLocaleString(),changes}]};
+  const actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);
+  let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),submittedByRole:currentUser.role,pendingActionId:actionId,history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,role:currentUser.role,date:new Date().toLocaleString(),changes,actionId}]};
   if(old)employees=employees.map(x=>x.id===editingId?saved:x);else employees.push(saved);
-  addNotification('Approval',saved,`${old?'Employee information edited':'New employee submitted'} by ${currentUser.name}. Please review.`);
-  if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`);
+  if(currentUser.role==='Admin'){
+    addNotification('Approval',saved,`${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for your review.`, 'Admin Manager','Under Review',actionId);
+    if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`, 'Admin Manager','Under Review',actionId);
+  }
   persist();editingId=null;saveAttempt=0;showPage('employees');
 };
 
 function renderReview(){
-  let q=employees.filter(e=>e.approvalStatus==='Under Review');
+  let q=employees.filter(e=>e.approvalStatus==='Under Review'&&e.submittedByRole==='Admin');
   reviewQueue.innerHTML=q.map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">Changed by ${esc(e.updatedBy)} on ${esc(e.updatedAt)}</span></div><button class="btn primary" onclick="openReview('${e.id}')">Review</button></div>`).join('')||'<p class="muted">No records under review.</p>';
 }
 function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button> <button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>`;reviewModal.classList.add('show')}
-function decide(id,status){let e=employees.find(x=>x.id===id),comment=reviewComment.value;e.approvalStatus=status;e.history.push({action:status,by:currentUser.name,date:new Date().toLocaleString(),comment});addNotification(status==='Approved'?'System':'Approval',e,status==='Approved'?'Employee record approved.':`Correction required: ${comment||'Please review the information.'}`);persist();closeModal('reviewModal');renderReview();renderDashboard()}
+function decide(id,status){
+  let e=employees.find(x=>x.id===id),comment=reviewComment.value.trim();
+  if(status==='Correction Required'&&!comment){alert('Please enter comments before returning the record to Admin.');reviewComment.focus();return}
+  e.approvalStatus=status;
+  e.reviewedBy=currentUser.name;e.reviewedAt=new Date().toLocaleString();e.managerComment=comment;
+  e.history.push({action:status,by:currentUser.name,role:currentUser.role,date:e.reviewedAt,comment,actionId:e.pendingActionId||''});
+  resolveManagerReviewNotification(e.employeeId,e.pendingActionId,status);
+  addNotification(status==='Approved'?'Approved':'Correction Required',e,status==='Approved'?`Employee record approved by ${currentUser.name}${comment?'. Comment: '+comment:''}`:`Returned by ${currentUser.name}. Comment: ${comment}`,'Admin',status,e.pendingActionId||'');
+  e.pendingActionId='';
+  persist();closeModal('reviewModal');renderReview();renderDashboard();updateBadge();
+}
 
-function updateBadge(){unreadBadge.textContent=notifications.filter(n=>!n.read).length}
-function renderNotifications(){let f=notifFilter.value,data=notifications.filter(n=>f==='All'||(f==='Unread'&&!n.read)||n.type===f);notificationList.innerHTML=data.map(n=>`<div class="notification-item ${n.read?'':'unread'}"><div><b>${esc(n.type)} — ${esc(n.employeeName)} (${esc(n.employeeId)})</b><p>${esc(n.message)}</p><span class="muted">${esc(n.date)} · ${esc(n.status)}</span></div><button class="btn light" onclick="toggleRead('${n.id}')">${n.read?'Mark Unread':'Mark Read'}</button></div>`).join('')||'<p class="muted">No notifications.</p>';updateBadge()}
+function updateBadge(){unreadBadge.textContent=visibleNotifications().filter(n=>!n.read).length}
+function renderNotifications(){let f=notifFilter.value,data=visibleNotifications().filter(n=>f==='All'||(f==='Unread'&&!n.read)||n.type===f);notificationList.innerHTML=data.map(n=>`<div class="notification-item ${n.read?'':'unread'}"><div><b>${esc(n.type)} — ${esc(n.employeeName)} (${esc(n.employeeId)})</b><p>${esc(n.message)}</p><span class="muted">${esc(n.date)} · ${esc(n.status)}</span></div><button class="btn light" onclick="toggleRead('${n.id}')">${n.read?'Mark Unread':'Mark Read'}</button></div>`).join('')||'<p class="muted">No notifications.</p>';updateBadge()}
 notifFilter.onchange=renderNotifications;
-function toggleRead(id){let n=notifications.find(x=>String(x.id)===String(id));n.read=!n.read;persist();renderNotifications()}
-function markAllRead(){notifications.forEach(n=>n.read=true);persist();renderNotifications()}
+function toggleRead(id){let n=visibleNotifications().find(x=>String(x.id)===String(id));if(!n)return;n.read=!n.read;persist();renderNotifications()}
+function markAllRead(){visibleNotifications().forEach(n=>n.read=true);persist();renderNotifications()}
 
 function exportExcel(){
   const data=getFiltered();
@@ -583,7 +609,7 @@ function exportExcel(){
 function downloadTemplate(){let headers=fields.map(f=>f[0]);downloadBlob(new Blob([headers.join(',')+'\n'],{type:'text/csv'}),'Employee_Bulk_Upload_Template.csv')}
 function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function previewBulk(){let file=bulkFile.files[0];if(!file){alert('Please select a CSV file.');return}let r=new FileReader();r.onload=()=>{let lines=r.result.split(/\r?\n/).filter(Boolean),headers=lines[0].split(','),rows=lines.slice(1).map(line=>{let vals=line.split(','),o={};headers.forEach((h,i)=>o[h.trim()]=vals[i]?.trim()||'');return o});bulkRows=rows;bulkPreview.innerHTML=`<p><b>Total rows:</b> ${rows.length}</p><button class="btn success" onclick="importBulk()">Upload Records</button>`};r.readAsText(file)}
-function importBulk(){let added=0;bulkRows.forEach(o=>{if(!o.employeeId||employees.some(e=>e.employeeId===o.employeeId))return;let e={...o,id:String(Date.now()+Math.random()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),history:[]};employees.push(e);added++;addNotification('Approval',e,'Employee added through bulk upload.')});persist();alert(added+' employee(s) uploaded.');showPage('employees')}
+function importBulk(){let added=0;bulkRows.forEach(o=>{if(!o.employeeId||employees.some(e=>e.employeeId===o.employeeId))return;let actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);let e={...o,id:String(Date.now()+Math.random()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),submittedByRole:currentUser.role,pendingActionId:actionId,history:[{action:'Added through bulk upload',by:currentUser.name,role:currentUser.role,date:new Date().toLocaleString(),actionId}]};employees.push(e);added++;if(currentUser.role==='Admin')addNotification('Approval',e,'Employee added through bulk upload and waiting for your review.','Admin Manager','Under Review',actionId)});persist();alert(added+' employee(s) uploaded.');showPage('employees')}
 
 buildForm();
 persist();

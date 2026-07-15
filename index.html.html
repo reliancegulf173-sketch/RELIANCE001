@@ -767,15 +767,58 @@ employeeForm.onsubmit=e=>{
   const actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);
   let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),submittedByRole:currentUser.role,pendingActionId:actionId,history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,role:currentUser.role,date:new Date().toLocaleString(),changes,actionId}]};
   if(old)employees=employees.map(x=>x.id===editingId?saved:x);else employees.push(saved);
-  if(currentUser.role==='Admin'){
-    addNotification('Approval',saved,`${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for your review.`, 'Admin Manager','Under Review',actionId);
-    if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`, 'Admin Manager','Under Review',actionId);
+  // Every record created or edited by Admin must be submitted to Admin Manager.
+  // Use a normalized role check so harmless spacing/case differences cannot break the workflow.
+  const submitterRole=String(currentUser?.role||'').trim().toLowerCase();
+  const requiresManagerApproval=submitterRole==='admin';
+
+  if(requiresManagerApproval){
+    saved.approvalStatus='Under Review';
+    saved.submittedByRole='Admin';
+    saved.pendingActionId=actionId;
+    saved.managerComment='';
+    saved.reviewedBy='';
+    saved.reviewedAt='';
+
+    // Close any older open manager-review notifications for the same employee,
+    // then create a fresh notification for this exact change action.
+    notifications.forEach(n=>{
+      if(n.recipientRole==='Admin Manager'&&n.employeeId===saved.employeeId&&n.status==='Under Review'){
+        n.status='Superseded';
+        n.read=true;
+      }
+    });
+
+    addNotification(
+      old?'Employee Data Changed':'New Employee Added',
+      saved,
+      `${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for manager approval.`,
+      'Admin Manager',
+      'Under Review',
+      actionId
+    );
+    if(missingNow.length){
+      addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`,'Admin Manager','Under Review',actionId);
+    }
   }
+
+  // Re-save the final version after approval fields and notifications are updated.
+  if(old)employees=employees.map(x=>x.id===saved.id?saved:x);
+  else{
+    const idx=employees.findIndex(x=>x.id===saved.id);
+    if(idx>=0)employees[idx]=saved;
+  }
+
   persist();editingId=null;saveAttempt=0;showPage('employees');
 };
 
 function renderReview(){
-  let q=employees.filter(e=>e.approvalStatus==='Under Review'&&e.submittedByRole==='Admin');
+  // PendingActionId is the reliable indicator that a record is waiting for manager review.
+  // submittedByRole is kept as a fallback for older saved records.
+  let q=employees.filter(e=>
+    e.approvalStatus==='Under Review' &&
+    (Boolean(e.pendingActionId) || String(e.submittedByRole||'').trim().toLowerCase()==='admin')
+  );
   reviewQueue.innerHTML=q.map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">Changed by ${esc(e.updatedBy)} on ${esc(e.updatedAt)}</span></div><button class="btn primary" onclick="openReview('${e.id}')">Review</button></div>`).join('')||'<p class="muted">No records under review.</p>';
 }
 function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button> <button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>`;reviewModal.classList.add('show')}

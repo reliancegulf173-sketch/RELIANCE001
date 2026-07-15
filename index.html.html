@@ -283,17 +283,40 @@ td.expiry-date-soon,
 }
 
 
-.cicpa-summary-card{
-  cursor:pointer;
-  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.cicpa-summary-card:hover,
-.cicpa-summary-card:focus{
-  transform:translateY(-2px);
-  box-shadow:0 12px 28px rgba(15,23,42,.14);
-  border-color:#d4a017;
-  outline:none;
-}
+/* Subcontractor Management Portal */
+.subcontractor-card:before{background:rgba(22,163,74,.12)!important}
+.subcontractor-card .portal-card-icon{background:linear-gradient(135deg,#166534,#22c55e)!important}
+.subcontractor-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.subcontractor-tab.active{background:var(--navy2);color:#fff}
+.subcontractor-kpi{cursor:pointer;transition:.2s ease}
+.subcontractor-kpi:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(17,40,64,.14)}
+.subcontractor-form-grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:14px}
+.subcontractor-error{display:none;background:#fff1f2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:11px 13px;margin-bottom:14px;font-weight:700}
+.subcontractor-error.show{display:block}
+.subcontractor-duplicate{border:2px solid #ef4444!important;background:#fff1f2!important}
+.subcontractor-status-expired{background:#fee2e2!important;color:#991b1b!important;font-weight:800}
+.subcontractor-status-soon{background:#ffedd5!important;color:#9a3412!important;font-weight:800}
+.subcontractor-status-valid{background:#dcfce7!important;color:#166534!important;font-weight:700}
+@media(max-width:900px){.subcontractor-form-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.subcontractor-form-grid{grid-template-columns:1fr}}
+
+
+/* Subcontractor employee module */
+.sce-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:16px 0}
+.sce-kpi{cursor:pointer}
+.sce-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sce-wide{grid-column:1/-1}
+.sce-error{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:10px 12px;border-radius:10px;margin:10px 0}
+.sce-error.show{display:block}
+.sce-duplicate,.sce-missing{border-color:#dc2626!important;background:#fff1f2!important}
+.sce-expired{background:#fee2e2!important;color:#991b1b;font-weight:700}
+.sce-soon{background:#ffedd5!important;color:#9a3412;font-weight:700}
+.sce-valid{color:inherit}
+.sce-certificate-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr 1.2fr auto;gap:8px;align-items:end;padding:12px;border:1px solid #dbe3ee;border-radius:12px;margin-bottom:10px;background:#f8fafc}
+.sce-doc-list{font-size:12px;line-height:1.5;min-width:180px}
+.sce-modal-card{width:min(1180px,96vw);max-height:92vh;overflow:auto}
+@media(max-width:900px){.sce-form-grid{grid-template-columns:1fr 1fr}.sce-certificate-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.sce-form-grid,.sce-certificate-row{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -357,6 +380,7 @@ td.expiry-date-soon,
       <button class="nav-btn employee-nav hidden" data-page="bulk"><span class="nav-icon">⇧</span>Bulk Upload</button>
       <button class="nav-btn site-nav hidden" data-page="sitePortal"><span class="nav-icon">🏗</span>Site Management</button>
       <button class="nav-btn cicpa-nav hidden" data-page="cicpaPortal"><span class="nav-icon">🪪</span>CICPA Management</button>
+      <button class="nav-btn subcontractor-nav hidden" data-page="subcontractorPortal"><span class="nav-icon">🤝</span>Subcontractor Portal</button>
     </div>
     <div class="sidebar-footer">Reliance Gulf ERP<br>Frontend Prototype</div>
   </aside>
@@ -399,8 +423,130 @@ td.expiry-date-soon,
             <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
             <span class="enter">Open CICPA Portal →</span>
           </div>
+          <div class="portal-card subcontractor-card" onclick="openSubcontractorPortal()">
+            <div class="portal-card-icon">🤝</div>
+            <h3>Subcontractor Management Portal</h3>
+            <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
+            <span class="enter">Open Subcontractor Portal →</span>
+          </div>
         </div>
       </section>
+
+      <section id="subcontractorPortal" class="page">
+        <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
+        <div class="hero">
+          <div><h2>Subcontractor Management Portal</h2><p>Manage subcontractor companies, employee module, license expiry and validation.</p></div>
+          <div class="quick"><button class="btn gold" onclick="openSubcontractorForm()">+ Add Subcontractor</button></div>
+        </div>
+
+        <div class="subcontractor-tabs">
+          <button id="scTabCompanies" class="btn subcontractor-tab active" onclick="showSubcontractorModule('companies')">Subcontractors</button>
+          <button id="scTabEmployees" class="btn subcontractor-tab light" onclick="showSubcontractorModule('employees')">Subcontractor Employees</button>
+        </div>
+
+        <div id="scCompaniesModule">
+          <div class="kpis">
+            <div class="kpi subcontractor-kpi" onclick="filterSubcontractors('all')"><div class="label">Total Subcontractors</div><div class="value" id="scTotal">0</div><div class="note">All saved companies</div></div>
+            <div class="kpi subcontractor-kpi" onclick="filterSubcontractors('active')"><div class="label">Active Subcontractors</div><div class="value" id="scActive">0</div><div class="note">Working status active</div></div>
+            <div class="kpi subcontractor-kpi" onclick="filterSubcontractors('inactive')"><div class="label">Inactive Subcontractors</div><div class="value" id="scInactive">0</div><div class="note">Working status inactive</div></div>
+            <div class="kpi subcontractor-kpi" onclick="filterSubcontractors('soon')"><div class="label">Licenses Expiring in 30 Days</div><div class="value" id="scSoon">0</div><div class="note">Click to review</div></div>
+            <div class="kpi subcontractor-kpi" onclick="filterSubcontractors('expired')"><div class="label">Expired Trade Licenses</div><div class="value" id="scExpired">0</div><div class="note">Immediate attention</div></div>
+          </div>
+
+          <div class="toolbar">
+            <input id="scSearch" class="input grow" placeholder="Search name, code, license, VAT, contact..." oninput="renderSubcontractors()">
+            <select id="scStatusFilter" class="input" onchange="renderSubcontractors()"><option value="all">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+            <select id="scExpiryFilter" class="input" onchange="renderSubcontractors()"><option value="all">All License Status</option><option value="soon">Expiring Within 30 Days</option><option value="expired">Expired</option><option value="valid">Valid</option></select>
+            <button class="btn primary" onclick="openSubcontractorForm()">+ Add Subcontractor</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Code</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="scTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="scEmployeesModule" class="hidden">
+          <div class="sce-kpis">
+            <div class="kpi sce-kpi" onclick="filterScEmployees('all')"><div class="label">Total Subcontractor Employees</div><div class="value" id="sceTotal">0</div><div class="note">All subcontractor workers</div></div>
+            <div class="kpi sce-kpi" onclick="filterScEmployees('active')"><div class="label">Active Employees</div><div class="value" id="sceActive">0</div><div class="note">Working status active</div></div>
+            <div class="kpi sce-kpi" onclick="filterScEmployees('inactive')"><div class="label">Inactive Employees</div><div class="value" id="sceInactive">0</div><div class="note">Working status inactive</div></div>
+            <div class="kpi sce-kpi" onclick="filterScEmployees('soon')"><div class="label">Expiring Documents</div><div class="value" id="sceSoon">0</div><div class="note">Within 30 days</div></div>
+            <div class="kpi sce-kpi" onclick="filterScEmployees('expired')"><div class="label">Expired Documents</div><div class="value" id="sceExpired">0</div><div class="note">Immediate attention</div></div>
+            <div class="kpi sce-kpi" onclick="filterScEmployees('missing')"><div class="label">Missing Information</div><div class="value" id="sceMissing">0</div><div class="note">Incomplete mandatory fields</div></div>
+          </div>
+          <div class="toolbar">
+            <input id="sceSearch" class="input grow" placeholder="Search employee, code, company, passport, unified number, Emirates ID..." oninput="renderScEmployees()">
+            <select id="sceCompanyFilter" class="input" onchange="renderScEmployees()"><option value="all">All Subcontractors</option></select>
+            <select id="sceStatusFilter" class="input" onchange="renderScEmployees()"><option value="all">All Working Status</option><option>Active</option><option>Inactive</option></select>
+            <select id="sceTwpFilter" class="input" onchange="renderScEmployees()"><option value="all">All TWP Status</option><option>Documents Pending</option><option>TWP Typed</option><option>Documents Uploaded</option><option>TWP Insurance</option><option>Approved</option><option>Rejected</option></select>
+            <select id="sceExpiryFilter" class="input" onchange="renderScEmployees()"><option value="all">All Document Status</option><option value="soon">Expiring Within 30 Days</option><option value="expired">Expired</option><option value="missing">Missing Information</option></select>
+            <button class="btn primary" onclick="openScEmployeeForm()">+ Add New Employee</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Employee</th><th>Subcontractor</th><th>Trade</th><th>Mobile</th><th>Passport</th><th>Emirates ID</th><th>Working Status</th><th>TWP</th><th>Other Certificates</th><th>Missing Information</th><th>Action</th></tr></thead>
+              <tbody id="sceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div id="subcontractorModal" class="modal">
+        <div class="modal-card">
+          <button class="close" onclick="closeSubcontractorForm()">×</button>
+          <h2 id="scFormTitle">Add Subcontractor</h2>
+          <div id="scFormError" class="subcontractor-error"></div>
+          <form id="subcontractorForm">
+            <div class="subcontractor-form-grid">
+              <div class="form-group"><label>Subcontractor Name *</label><input id="scName" class="input" required></div>
+              <div class="form-group"><label>Subcontractor Code *</label><input id="scCode" class="input" required></div>
+              <div class="form-group"><label>Trade License Number *</label><input id="scLicense" class="input" required></div>
+              <div class="form-group"><label>Trade License Expiry Date *</label><input id="scLicenseExpiry" type="date" class="input" required></div>
+              <div class="form-group"><label>VAT Registration Number *</label><input id="scVat" class="input" required></div>
+              <div class="form-group"><label>Contact Person</label><input id="scContact" class="input"></div>
+              <div class="form-group"><label>Mobile Number</label><input id="scMobile" class="input"></div>
+              <div class="form-group"><label>Email Address</label><input id="scEmail" type="email" class="input"></div>
+              <div class="form-group"><label>ICV Status</label><select id="scIcv" class="input"><option value="Yes">Yes</option><option value="No">No</option></select></div>
+              <div class="form-group"><label>Working Status</label><select id="scWorkingStatus" class="input"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+            </div>
+            <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end"><button type="button" class="btn light" onclick="closeSubcontractorForm()">Cancel</button><button type="submit" class="btn success">Save Subcontractor</button></div>
+          </form>
+        </div>
+      </div>
+
+      <div id="scEmployeeModal" class="modal">
+        <div class="modal-card sce-modal-card">
+          <button class="close" onclick="closeScEmployeeForm()">×</button>
+          <h2 id="sceFormTitle">Add Subcontractor Employee</h2>
+          <div id="sceFormError" class="sce-error"></div>
+          <form id="scEmployeeForm">
+            <div class="sce-form-grid">
+              <div class="form-group"><label>Employee Name *</label><input id="sceName" class="input" required></div>
+              <div class="form-group"><label>Employee Code *</label><input id="sceCode" class="input" required></div>
+              <div class="form-group"><label>Subcontractor Company *</label><select id="sceCompany" class="input" required></select></div>
+              <div class="form-group"><label>Designation / Trade *</label><input id="sceTrade" class="input" required></div>
+              <div class="form-group"><label>Nationality *</label><input id="sceNationality" class="input" required></div>
+              <div class="form-group"><label>Mobile Number *</label><input id="sceMobile" class="input" required></div>
+              <div class="form-group"><label>Passport Number *</label><input id="scePassport" class="input" required></div>
+              <div class="form-group"><label>Passport Expiry Date *</label><input id="scePassportExpiry" type="date" class="input" required></div>
+              <div class="form-group"><label>Visa Number</label><input id="sceVisa" class="input"></div>
+              <div class="form-group"><label>Unified Number *</label><input id="sceUnified" class="input" required></div>
+              <div class="form-group"><label>Emirates ID Number *</label><input id="sceEid" class="input" required></div>
+              <div class="form-group"><label>Emirates ID Expiry Date *</label><input id="sceEidExpiry" type="date" class="input" required></div>
+              <div class="form-group"><label>Working Status *</label><select id="sceWorkingStatus" class="input"><option>Active</option><option>Inactive</option></select></div>
+              <div class="form-group"><label>TWP Status *</label><select id="sceTwpStatus" class="input" onchange="toggleSceTwpFields()"><option>Documents Pending</option><option>TWP Typed</option><option>Documents Uploaded</option><option>TWP Insurance</option><option>Approved</option><option>Rejected</option></select></div>
+              <div id="sceTwpCardGroup" class="form-group hidden"><label>TWP Card Number *</label><input id="sceTwpCard" class="input"></div>
+              <div id="sceTwpExpiryGroup" class="form-group hidden"><label>TWP Card Expiry Date *</label><input id="sceTwpExpiry" type="date" class="input"></div>
+              <div id="sceTwpUploadGroup" class="form-group hidden"><label>Upload TWP Card</label><input id="sceTwpUpload" type="file" class="input" accept="image/*,.pdf"></div>
+              <div class="sce-wide"><h3 style="margin:8px 0">Other Certificates</h3><div id="sceCertificates"></div><button type="button" class="btn light" onclick="addSceCertificate()">+ Add More Certificate</button></div>
+            </div>
+            <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end"><button type="button" class="btn light" onclick="closeScEmployeeForm()">Cancel</button><button type="submit" class="btn success">Save Employee</button></div>
+          </form>
+        </div>
+      </div>
 
       <section id="employeeDashboard" class="page">
         <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
@@ -440,9 +586,9 @@ td.expiry-date-soon,
         <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
         <div class="hero"><div><h2>CICPA Management Portal</h2><p>Search an employee by ID, assign locations and manage up to three CICPA passes.</p></div><button class="btn gold" onclick="openCicpaForm()">+ Add CICPA</button></div>
         <div class="cicpa-summary">
-          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Active')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Active')}"><div class="label">Total Active CICPA</div><div class="value" id="cicpaActive">0</div><div class="note">Click to view active list</div></div>
-          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Near to Expire')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Near to Expire')}"><div class="label">Near to Expire</div><div class="value" id="cicpaSoon">0</div><div class="note">Click to view expiring list</div></div>
-          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Expired')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Expired')}"><div class="label">Expired CICPA</div><div class="value" id="cicpaExpired">0</div><div class="note">Click to view expired list</div></div>
+          <div class="kpi"><div class="label">Total Active CICPA</div><div class="value" id="cicpaActive">0</div><div class="note">Valid and not cancelled</div></div>
+          <div class="kpi"><div class="label">Near to Expire</div><div class="value" id="cicpaSoon">0</div><div class="note">Expires within 30 days</div></div>
+          <div class="kpi"><div class="label">Expired CICPA</div><div class="value" id="cicpaExpired">0</div><div class="note">Expiry date passed</div></div>
         </div>
         <div class="toolbar">
           <input class="input grow" id="cicpaSearch" placeholder="Search employee ID, name, CICPA number or location">
@@ -725,15 +871,6 @@ function renderCicpa(){
  document.getElementById('cicpaBody').innerHTML=rows.map(x=>{const r=x.record,p=x.pass,cl=x.status==='Expired'?'cicpa-expired-row':x.status==='Near to Expire'?'cicpa-soon-row':'';return `<tr class="${cl}"><td>${esc(r.employeeName)}</td><td>${esc(r.employeeId)}</td><td>${esc((p.locations||[]).join(', ')||'-')}</td><td><b>${esc(p.number)}</b></td><td>${esc(p.type||'-')}</td><td>${esc(p.applicationDate||'-')}</td><td>${esc(p.issueDate||'-')}</td><td>${esc(p.expiryDate||'-')}</td><td><span class="pill cicpa-status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${p.cancelled?esc(p.cancellationDate||'Cancelled'):'-'}</td><td><button class="btn light" onclick="editCicpa('${r.id}')">Edit</button> <button class="btn danger" onclick="deleteCicpaPass('${r.id}',${x.index})">Delete</button></td></tr>`}).join('')||'<tr><td colspan="11" class="muted">No CICPA records found.</td></tr>';
  renderCicpaLocationManagement();
 }
-function openCicpaSummaryList(status){
-  const statusFilter=document.getElementById('cicpaStatusFilter');
-  const searchInput=document.getElementById('cicpaSearch');
-  if(searchInput) searchInput.value='';
-  if(statusFilter) statusFilter.value=status;
-  renderCicpa();
-  const table=document.getElementById('cicpaBody')?.closest('.table-wrap');
-  if(table) table.scrollIntoView({behavior:'smooth',block:'start'});
-}
 function clearCicpaFilters(){document.getElementById('cicpaSearch').value='';document.getElementById('cicpaStatusFilter').value='';renderCicpa()}
 function openCicpaForm(){const f=document.getElementById('cicpaForm');f.reset();document.getElementById('cicpaEditId').value='';document.getElementById('cicpaEmployeeId').value='';document.getElementById('cicpaEmployeeName').value='';document.getElementById('cicpaPasses').innerHTML='';document.getElementById('cicpaEmpInfo').classList.remove('show');document.getElementById('cicpaFormTitle').textContent='Add Employee CICPA';document.getElementById('cicpaModal').classList.add('show')}
 function findCicpaEmployee(){const id=document.getElementById('cicpaEmployeeSearch').value.trim();const e=employees.find(x=>String(x.employeeId||x.employeeCode||'').trim().toLowerCase()===id.toLowerCase());if(!e){document.getElementById('cicpaEmployeeId').value='';document.getElementById('cicpaEmployeeName').value='';document.getElementById('cicpaEmpInfo').classList.remove('show');alert('Employee Code not found in Employee Portal.');return}document.getElementById('cicpaEmployeeId').value=e.employeeId||e.employeeCode;document.getElementById('cicpaEmployeeName').value=e.nameEnglish||e.nameArabic||'Employee';document.getElementById('cicpaEmpNameView').textContent=e.nameEnglish||e.nameArabic||'-';document.getElementById('cicpaEmpCodeView').textContent=e.employeeId||e.employeeCode||'-';document.getElementById('cicpaEmpCompanyView').textContent=e.company||'-';document.getElementById('cicpaEmpDesignationView').textContent=e.designation||'-';document.getElementById('cicpaEmpInfo').classList.add('show');const existing=cicpaRecords.find(r=>String(r.employeeId).toLowerCase()===String(e.employeeId||e.employeeCode).toLowerCase());document.getElementById('cicpaPasses').innerHTML='';if(existing){document.getElementById('cicpaEditId').value=existing.id;(existing.passes||[]).forEach(addCicpaPass)}else{document.getElementById('cicpaEditId').value=''}}
@@ -837,6 +974,7 @@ const pageMeta={
  employeeDashboard:['Employee Management Portal','Employee records, approvals, alerts and reports'],
  sitePortal:['Site Management Portal','Site modules and workflow'],
  cicpaPortal:['CICPA Management','Manage CICPA passes, locations and expiry status'],
+ subcontractorPortal:['Subcontractor Management Portal','Manage subcontractors, licenses and status'],
  employees:['Employee List','Search, filter and manage employee records'],
  form:['Employee Form','Add or update employee information'],
  review:['Manager Review','Approve or request corrections'],
@@ -848,31 +986,38 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   document.getElementById('pageTitle').textContent=pageMeta[id][0];document.getElementById('pageSubtitle').textContent=pageMeta[id][1];
-  if(id==='employeeDashboard')renderDashboard();if(id==='cicpaPortal')renderCicpa();if(id==='employees')renderEmployees();if(id==='review')renderReview();if(id==='notifications')renderNotifications();
+  if(id==='employeeDashboard')renderDashboard();if(id==='cicpaPortal')renderCicpa();if(id==='subcontractorPortal')renderSubcontractors();if(id==='employees')renderEmployees();if(id==='review')renderReview();if(id==='notifications')renderNotifications();
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>b.dataset.page==='form'?openNew():showPage(b.dataset.page));
 
 
 function openEmployeePortal(){
   document.querySelectorAll('.employee-nav').forEach(el=>el.classList.remove('hidden'));
-  document.querySelectorAll('.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.site-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));
   renderDashboard();
   showPage('employeeDashboard');
 }
 function openSitePortal(){
-  document.querySelectorAll('.employee-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.employee-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.site-nav').forEach(el=>el.classList.remove('hidden'));
   showPage('sitePortal');
 }
 
 function openCicpaPortal(){
-  document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.employee-nav,.site-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.cicpa-nav').forEach(el=>el.classList.remove('hidden'));
   showPage('cicpaPortal');
 }
 
+function openSubcontractorPortal(){
+  document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.subcontractor-nav').forEach(el=>el.classList.remove('hidden'));
+  showSubcontractorModule('companies');
+  showPage('subcontractorPortal');
+}
+
 function returnPortalHome(){
-  document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));
   showPage('dashboard');
 }
 
@@ -1170,6 +1315,116 @@ function renderNotices(){
 }
 
 window.addEventListener('load',()=>{try{renderNotices();}catch(e){console.error(e);}});
+</script>
+<script>
+// ===== Subcontractor Management Portal =====
+const SUBCONTRACTOR_STORAGE_KEY='rg_subcontractors_v1';
+let subcontractors=[];
+let scEditingId=null;
+try{subcontractors=JSON.parse(localStorage.getItem(SUBCONTRACTOR_STORAGE_KEY)||'[]');if(!Array.isArray(subcontractors))subcontractors=[];}catch(e){subcontractors=[];}
+
+function scEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function scDays(date){if(!date)return null;const d=new Date(date+'T00:00:00');const t=new Date();t.setHours(0,0,0,0);return Math.ceil((d-t)/86400000);}
+function scExpiryState(date){const d=scDays(date);if(d===null)return 'valid';if(d<0)return 'expired';if(d<=30)return 'soon';return 'valid';}
+function scPersist(){localStorage.setItem(SUBCONTRACTOR_STORAGE_KEY,JSON.stringify(subcontractors));}
+function showSubcontractorModule(module){
+  document.getElementById('scCompaniesModule').classList.toggle('hidden',module!=='companies');
+  document.getElementById('scEmployeesModule').classList.toggle('hidden',module!=='employees');
+  document.getElementById('scTabCompanies').classList.toggle('active',module==='companies');
+  document.getElementById('scTabEmployees').classList.toggle('active',module==='employees');
+  document.getElementById('scTabCompanies').classList.toggle('light',module!=='companies');
+  document.getElementById('scTabEmployees').classList.toggle('light',module!=='employees');
+  if(module==='companies')renderSubcontractors(); else {refreshSceCompanyOptions();renderScEmployees();}
+}
+function openSubcontractorForm(id=null){
+  scEditingId=id;
+  document.querySelectorAll('#subcontractorForm .subcontractor-duplicate').forEach(x=>x.classList.remove('subcontractor-duplicate'));
+  document.getElementById('scFormError').classList.remove('show');
+  const r=id?subcontractors.find(x=>x.id===id):null;
+  document.getElementById('scFormTitle').textContent=r?'Edit Subcontractor':'Add Subcontractor';
+  const values={scName:r?.name||'',scCode:r?.code||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scContact:r?.contact||'',scMobile:r?.mobile||'',scEmail:r?.email||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
+  Object.entries(values).forEach(([id,val])=>document.getElementById(id).value=val);
+  document.getElementById('subcontractorModal').classList.add('show');
+}
+function closeSubcontractorForm(){document.getElementById('subcontractorModal').classList.remove('show');scEditingId=null;}
+function deleteSubcontractor(id){
+  const r=subcontractors.find(x=>x.id===id);if(!r)return;
+  if(!confirm(`Delete subcontractor ${r.name}?`))return;
+  subcontractors=subcontractors.filter(x=>x.id!==id);scPersist();renderSubcontractors();
+}
+function filterSubcontractors(kind){
+  document.getElementById('scStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';
+  document.getElementById('scExpiryFilter').value=['soon','expired','valid'].includes(kind)?kind:'all';
+  renderSubcontractors();
+  document.getElementById('scTableBody').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderSubcontractors(){
+  const q=(document.getElementById('scSearch')?.value||'').toLowerCase();
+  const sf=document.getElementById('scStatusFilter')?.value||'all';
+  const ef=document.getElementById('scExpiryFilter')?.value||'all';
+  document.getElementById('scTotal').textContent=subcontractors.length;
+  document.getElementById('scActive').textContent=subcontractors.filter(x=>x.workingStatus==='Active').length;
+  document.getElementById('scInactive').textContent=subcontractors.filter(x=>x.workingStatus==='Inactive').length;
+  document.getElementById('scSoon').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='soon').length;
+  document.getElementById('scExpired').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='expired').length;
+  const rows=subcontractors.filter(x=>{
+    const hay=[x.name,x.code,x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
+    return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
+  });
+  document.getElementById('scTableBody').innerHTML=rows.map(x=>{
+    const state=scExpiryState(x.licenseExpiry),days=scDays(x.licenseExpiry);
+    const label=state==='expired'?`Expired ${Math.abs(days)} day(s) ago`:state==='soon'?`${days} day(s) remaining`:'Valid';
+    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scEscape(x.contact)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.email)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
+  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
+}
+
+document.getElementById('subcontractorForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  const data={name:scName.value.trim(),code:scCode.value.trim(),license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contact:scContact.value.trim(),mobile:scMobile.value.trim(),email:scEmail.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
+  document.querySelectorAll('#subcontractorForm .subcontractor-duplicate').forEach(x=>x.classList.remove('subcontractor-duplicate'));
+  const checks=[['code','scCode','Subcontractor Code'],['license','scLicense','Trade License Number'],['vat','scVat','VAT Registration Number']];
+  const duplicateFields=[];
+  checks.forEach(([key,id,label])=>{if(data[key]&&subcontractors.some(x=>x.id!==scEditingId&&String(x[key]).toLowerCase()===data[key].toLowerCase())){duplicateFields.push(label);document.getElementById(id).classList.add('subcontractor-duplicate');}});
+  if(duplicateFields.length){const box=document.getElementById('scFormError');box.textContent='Duplicate entry found: '+duplicateFields.join(', ')+'. Record cannot be saved.';box.classList.add('show');return;}
+  const existing=scEditingId?subcontractors.find(x=>x.id===scEditingId):null;
+  const record={...(existing||{}),...data,id:scEditingId||String(Date.now()),updatedAt:new Date().toLocaleString()};
+  subcontractors=scEditingId?subcontractors.map(x=>x.id===scEditingId?record:x):[...subcontractors,record];
+  scPersist();closeSubcontractorForm();renderSubcontractors();
+});
+
+// ===== Subcontractor Employee Management =====
+const SC_EMP_STORAGE_KEY='relianceGulfSubcontractorEmployeesV1';
+let scEmployees=[];let sceEditingId=null;
+try{scEmployees=JSON.parse(localStorage.getItem(SC_EMP_STORAGE_KEY)||'[]');if(!Array.isArray(scEmployees))scEmployees=[];}catch(e){scEmployees=[];}
+function scePersist(){localStorage.setItem(SC_EMP_STORAGE_KEY,JSON.stringify(scEmployees));}
+function sceNorm(v){return String(v||'').trim().toLowerCase();}
+function sceCompanyName(id){const r=subcontractors.find(x=>x.id===id);return r?`${r.name} (${r.code})`:'Unknown Subcontractor';}
+function refreshSceCompanyOptions(){
+ const active=subcontractors.filter(x=>x.workingStatus==='Active');
+ const all=subcontractors;
+ const form=document.getElementById('sceCompany'),filter=document.getElementById('sceCompanyFilter'); if(!form||!filter)return;
+ const current=form.value,fc=filter.value;
+ form.innerHTML='<option value="">Select Subcontractor Company</option>'+active.map(x=>`<option value="${x.id}">${scEscape(x.name)} (${scEscape(x.code)})</option>`).join('');
+ filter.innerHTML='<option value="all">All Subcontractors</option>'+all.map(x=>`<option value="${x.id}">${scEscape(x.name)} (${scEscape(x.code)})${x.workingStatus==='Inactive'?' - Inactive':''}</option>`).join('');
+ if([...form.options].some(o=>o.value===current))form.value=current;if([...filter.options].some(o=>o.value===fc))filter.value=fc;
+}
+function toggleSceTwpFields(){const approved=document.getElementById('sceTwpStatus').value==='Approved';['sceTwpCardGroup','sceTwpExpiryGroup','sceTwpUploadGroup'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!approved));document.getElementById('sceTwpCard').required=approved;document.getElementById('sceTwpExpiry').required=approved;}
+function sceCertRow(c={}){const id='cert_'+Date.now()+'_'+Math.random().toString(36).slice(2);return `<div class="sce-certificate-row" data-cert-id="${id}"><div class="form-group"><label>Certificate Name</label><select class="input sce-cert-name" onchange="sceCertTypeChanged(this)"><option value="">Select</option>${['ADNOC Medical','Rigger Training Certificate','Scaffolder Certificate','ATA Training','H2S Certificate','Other'].map(v=>`<option ${c.name===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="form-group sce-cert-type-wrap ${c.name==='ADNOC Medical'?'':'hidden'}"><label>Type</label><select class="input sce-cert-type"><option ${c.type==='Onshore'?'selected':''}>Onshore</option><option ${c.type==='Offshore'?'selected':''}>Offshore</option></select></div><div class="form-group sce-cert-other-wrap ${c.name==='Other'?'':'hidden'}"><label>Other Name</label><input class="input sce-cert-other" value="${scEscape(c.otherName||'')}"></div><div class="form-group"><label>Certificate Number</label><input class="input sce-cert-number" value="${scEscape(c.number||'')}"></div><div class="form-group"><label>Issue Date</label><input type="date" class="input sce-cert-issue" value="${scEscape(c.issueDate||'')}"></div><div class="form-group"><label>Expiry Date</label><input type="date" class="input sce-cert-expiry" value="${scEscape(c.expiryDate||'')}"></div><div class="form-group"><label>Upload</label><input type="file" class="input sce-cert-upload" accept="image/*,.pdf"><small class="muted">${scEscape(c.fileName||'')}</small></div><button type="button" class="btn danger" onclick="this.closest('.sce-certificate-row').remove()">Delete</button></div>`;}
+function addSceCertificate(c={}){document.getElementById('sceCertificates').insertAdjacentHTML('beforeend',sceCertRow(c));}
+function sceCertTypeChanged(sel){const row=sel.closest('.sce-certificate-row'),v=sel.value;row.querySelector('.sce-cert-type-wrap').classList.toggle('hidden',v!=='ADNOC Medical');row.querySelector('.sce-cert-other-wrap').classList.toggle('hidden',v!=='Other');}
+function readSceCertificates(){return [...document.querySelectorAll('#sceCertificates .sce-certificate-row')].map(row=>{const f=row.querySelector('.sce-cert-upload');return{name:row.querySelector('.sce-cert-name').value,type:row.querySelector('.sce-cert-type').value,otherName:row.querySelector('.sce-cert-other').value.trim(),number:row.querySelector('.sce-cert-number').value.trim(),issueDate:row.querySelector('.sce-cert-issue').value,expiryDate:row.querySelector('.sce-cert-expiry').value,fileName:f.files[0]?.name||row.querySelector('small').textContent.trim()};}).filter(c=>c.name||c.number||c.expiryDate);}
+function openScEmployeeForm(id=null){sceEditingId=id;refreshSceCompanyOptions();const r=id?scEmployees.find(x=>x.id===id):null;document.getElementById('sceFormTitle').textContent=r?'Edit Subcontractor Employee':'Add Subcontractor Employee';document.getElementById('sceFormError').classList.remove('show');document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const vals={sceName:r?.name||'',sceCode:r?.code||'',sceCompany:r?.companyId||'',sceTrade:r?.trade||'',sceNationality:r?.nationality||'',sceMobile:r?.mobile||'',scePassport:r?.passport||'',scePassportExpiry:r?.passportExpiry||'',sceVisa:r?.visa||'',sceUnified:r?.unified||'',sceEid:r?.eid||'',sceEidExpiry:r?.eidExpiry||'',sceWorkingStatus:r?.workingStatus||'Active',sceTwpStatus:r?.twpStatus||'Documents Pending',sceTwpCard:r?.twpCard||'',sceTwpExpiry:r?.twpExpiry||''};Object.entries(vals).forEach(([k,v])=>document.getElementById(k).value=v);document.getElementById('sceCertificates').innerHTML='';(r?.certificates||[]).forEach(addSceCertificate);if(!(r?.certificates||[]).length)addSceCertificate();toggleSceTwpFields();document.getElementById('scEmployeeModal').classList.add('show');}
+function closeScEmployeeForm(){document.getElementById('scEmployeeModal').classList.remove('show');sceEditingId=null;}
+function sceMissingFields(r){const m=[];[['name','Employee Name'],['code','Employee Code'],['companyId','Subcontractor Company'],['trade','Designation / Trade'],['nationality','Nationality'],['mobile','Mobile Number'],['passport','Passport Number'],['passportExpiry','Passport Expiry Date'],['unified','Unified Number'],['eid','Emirates ID Number'],['eidExpiry','Emirates ID Expiry Date']].forEach(([k,l])=>{if(!r[k])m.push(l+' Missing');});if(r.twpStatus==='Approved'){if(!r.twpCard)m.push('TWP Card Number Missing');if(!r.twpExpiry)m.push('TWP Card Expiry Date Missing');}return m;}
+function sceAllDates(r){const a=[['Passport',r.passport,r.passportExpiry],['Emirates ID',r.eid,r.eidExpiry]];if(r.twpStatus==='Approved')a.push(['TWP Card',r.twpCard,r.twpExpiry]);(r.certificates||[]).forEach(c=>a.push([c.name==='Other'?(c.otherName||'Other Certificate'):c.name,c.number,c.expiryDate]));return a.filter(x=>x[2]);}
+function sceOverallExpiry(r){const states=sceAllDates(r).map(x=>scExpiryState(x[2]));return states.includes('expired')?'expired':states.includes('soon')?'soon':'valid';}
+function sceDateHtml(date){if(!date)return '<span class="sce-missing">Missing</span>';const s=scExpiryState(date),d=scDays(date),label=s==='expired'?`Expired ${Math.abs(d)}d`:s==='soon'?`${d}d left`:'Valid';return `<span class="sce-${s}">${scEscape(date)}<br><small>${label}</small></span>`;}
+function filterScEmployees(kind){document.getElementById('sceStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';document.getElementById('sceExpiryFilter').value=['soon','expired','missing'].includes(kind)?kind:'all';renderScEmployees();document.getElementById('sceTableBody').scrollIntoView({behavior:'smooth'});}
+function deleteScEmployee(id){const r=scEmployees.find(x=>x.id===id);if(r&&confirm(`Delete employee ${r.name}?`)){scEmployees=scEmployees.filter(x=>x.id!==id);scePersist();renderScEmployees();}}
+function renderScEmployees(){refreshSceCompanyOptions();const q=sceNorm(document.getElementById('sceSearch')?.value),cf=document.getElementById('sceCompanyFilter')?.value||'all',sf=document.getElementById('sceStatusFilter')?.value||'all',tf=document.getElementById('sceTwpFilter')?.value||'all',ef=document.getElementById('sceExpiryFilter')?.value||'all';document.getElementById('sceTotal').textContent=scEmployees.length;document.getElementById('sceActive').textContent=scEmployees.filter(x=>x.workingStatus==='Active').length;document.getElementById('sceInactive').textContent=scEmployees.filter(x=>x.workingStatus==='Inactive').length;document.getElementById('sceSoon').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='soon').length;document.getElementById('sceExpired').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='expired').length;document.getElementById('sceMissing').textContent=scEmployees.filter(x=>sceMissingFields(x).length).length;const rows=scEmployees.filter(x=>{const hay=sceNorm([x.name,x.code,sceCompanyName(x.companyId),x.trade,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));});document.getElementById('sceTableBody').innerHTML=rows.map(x=>{const certs=(x.certificates||[]).map(c=>`<div>${scEscape(c.name==='Other'?(c.otherName||'Other'):c.name)}: ${scEscape(c.number||'-')}<br>${sceDateHtml(c.expiryDate)}</div>`).join('')||'<span class="muted">None</span>';return `<tr><td><b>${scEscape(x.name)}</b><br><small>${scEscape(x.code)}</small></td><td>${scEscape(sceCompanyName(x.companyId))}</td><td>${scEscape(x.trade)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.passport)}<br>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.eid)}<br>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${x.workingStatus}</span></td><td>${scEscape(x.twpStatus)}${x.twpStatus==='Approved'?`<br>${scEscape(x.twpCard)}<br>${sceDateHtml(x.twpExpiry)}`:''}</td><td class="sce-doc-list">${certs}</td><td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td></tr>`;}).join('')||'<tr><td colspan="11" style="text-align:center;padding:28px" class="muted">No subcontractor employee records found.</td></tr>';}
+document.getElementById('scEmployeeForm').addEventListener('submit',function(e){e.preventDefault();const data={name:sceName.value.trim(),code:sceCode.value.trim(),companyId:sceCompany.value,trade:sceTrade.value.trim(),nationality:sceNationality.value.trim(),mobile:sceMobile.value.trim(),passport:scePassport.value.trim(),passportExpiry:scePassportExpiry.value,visa:sceVisa.value.trim(),unified:sceUnified.value.trim(),eid:sceEid.value.trim(),eidExpiry:sceEidExpiry.value,workingStatus:sceWorkingStatus.value,twpStatus:sceTwpStatus.value,twpCard:sceTwpStatus.value==='Approved'?sceTwpCard.value.trim():'',twpExpiry:sceTwpStatus.value==='Approved'?sceTwpExpiry.value:'',twpFileName:sceTwpUpload.files[0]?.name||'',certificates:readSceCertificates()};document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const checks=[['code','sceCode','Employee Code'],['passport','scePassport','Passport Number'],['unified','sceUnified','Unified Number'],['eid','sceEid','Emirates ID Number'],['twpCard','sceTwpCard','TWP Card Number']];const dup=[];checks.forEach(([k,id,l])=>{if(data[k]&&scEmployees.some(x=>x.id!==sceEditingId&&sceNorm(x[k])===sceNorm(data[k]))){dup.push(l);document.getElementById(id).classList.add('sce-duplicate');}});if(dup.length){const existing=scEmployees.find(x=>checks.some(([k])=>data[k]&&sceNorm(x[k])===sceNorm(data[k])));const box=document.getElementById('sceFormError');box.textContent=`Duplicate ${dup.join(', ')}. Existing employee: ${existing?.name||''} (${existing?.code||''}). Record cannot be saved.`;box.classList.add('show');return;}const old=sceEditingId?scEmployees.find(x=>x.id===sceEditingId):null;const rec={...(old||{}),...data,id:sceEditingId||String(Date.now()),updatedAt:new Date().toLocaleString()};scEmployees=sceEditingId?scEmployees.map(x=>x.id===sceEditingId?rec:x):[...scEmployees,rec];scePersist();closeScEmployeeForm();renderScEmployees();});
+
+window.addEventListener('load',()=>{try{renderSubcontractors();refreshSceCompanyOptions();renderScEmployees();}catch(e){console.error(e);}});
 </script>
 </body>
 </html>

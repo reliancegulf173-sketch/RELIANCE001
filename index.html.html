@@ -300,6 +300,7 @@ td.expiry-date-soon,
       <button class="nav-btn employee-nav hidden" data-page="notifications"><span class="nav-icon">🔔</span>Notifications</button>
       <button class="nav-btn employee-nav hidden" data-page="bulk"><span class="nav-icon">⇧</span>Bulk Upload</button>
       <button class="nav-btn site-nav hidden" data-page="sitePortal"><span class="nav-icon">🏗</span>Site Management</button>
+      <button class="nav-btn cicpa-nav hidden" data-page="cicpaPortal"><span class="nav-icon">🪪</span>CICPA Management</button>
     </div>
     <div class="sidebar-footer">Reliance Gulf ERP<br>Frontend Prototype</div>
   </aside>
@@ -335,6 +336,12 @@ td.expiry-date-soon,
             <h3>Site Management Portal</h3>
             <p>Site modules, headings and workflow will be added after detailed discussion and approval.</p>
             <span class="enter">Open Site Portal →</span>
+          </div>
+          <div class="portal-card cicpa-card" onclick="openCicpaPortal()">
+            <div class="portal-card-icon">🪪</div>
+            <h3>CICPA Management Portal</h3>
+            <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
+            <span class="enter">Open CICPA Portal →</span>
           </div>
         </div>
       </section>
@@ -372,6 +379,34 @@ td.expiry-date-soon,
           <div class="notice blue"><b>Coming Next</b><br>We will define the required site-management headings and features in the next stage.</div>
         </div>
       </section>
+
+      <section id="cicpaPortal" class="page">
+        <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
+        <div class="hero"><div><h2>CICPA Management Portal</h2><p>Search an employee by ID, assign locations and manage up to three CICPA passes.</p></div><button class="btn gold" onclick="openCicpaForm()">+ Add CICPA</button></div>
+        <div class="cicpa-summary">
+          <div class="kpi"><div class="label">Total CICPA</div><div class="value" id="cicpaTotal">0</div><div class="note">All pass records</div></div>
+          <div class="kpi"><div class="label">Active CICPA</div><div class="value" id="cicpaActive">0</div><div class="note">Valid and not cancelled</div></div>
+          <div class="kpi"><div class="label">Near to Expire</div><div class="value" id="cicpaSoon">0</div><div class="note">Expires within 30 days</div></div>
+          <div class="kpi"><div class="label">Expired CICPA</div><div class="value" id="cicpaExpired">0</div><div class="note">Expiry date passed</div></div>
+        </div>
+        <div class="toolbar">
+          <input class="input grow" id="cicpaSearch" placeholder="Search employee ID, name, CICPA number or location">
+          <select class="input" id="cicpaStatusFilter"><option value="">All Status</option><option>Active</option><option>Near to Expire</option><option>Expired</option><option>Cancelled</option></select>
+          <button class="btn light" onclick="clearCicpaFilters()">Clear</button><button class="btn primary" onclick="exportCicpaExcel()">Export Excel</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Employee ID</th><th>Locations</th><th>CICPA No.</th><th>Type</th><th>Application</th><th>Issue</th><th>Expiry</th><th>Status</th><th>Cancellation</th><th>Action</th></tr></thead><tbody id="cicpaBody"></tbody></table></div>
+      </section>
+
+      <datalist id="cicpaLocationOptions"><option>ADNOC Onshore</option><option>ADNOC Offshore</option><option>Ruwais</option><option>Das Island</option><option>Habshan</option><option>Jebel Dhanna</option><option>Musaffah</option><option>KEZAD</option></datalist>
+
+      <div id="cicpaModal" class="modal"><div class="modal-box" style="max-width:1050px"><button class="modal-close" onclick="closeModal('cicpaModal')">×</button><h2 id="cicpaFormTitle">Add CICPA Record</h2>
+        <form id="cicpaForm">
+          <div class="form-grid"><div class="form-group"><label>Search Employee ID *</label><input id="cicpaEmployeeSearch" placeholder="Enter exact Employee ID"><button type="button" class="btn light" style="margin-top:8px" onclick="findCicpaEmployee()">Search Employee</button></div><div class="form-group"><label>Selected Employee</label><input id="cicpaEmployeeName" readonly placeholder="Employee name will show here"></div></div>
+          <input type="hidden" id="cicpaEmployeeId"><input type="hidden" id="cicpaEditId">
+          <div class="form-section"><h3>CICPA Locations (Maximum 5)</h3><div id="cicpaLocations"></div><button type="button" class="btn light" onclick="addCicpaLocation()">+ Add Location</button></div>
+          <div class="form-section"><h3>CICPA Passes (Maximum 3)</h3><div id="cicpaPasses"></div><button type="button" class="btn light" onclick="addCicpaPass()">+ Add CICPA Number</button></div>
+          <div class="form-actions"><button type="button" class="btn light" onclick="closeModal('cicpaModal')">Cancel</button><button class="btn primary" type="submit">Save CICPA Record</button></div>
+        </form></div></div>
 
       <section id="employees" class="page">
         <div id="employeeNotices"></div>
@@ -478,7 +513,7 @@ function applyUser(){
   document.getElementById('currentUserRole').textContent=currentUser.role;
   document.getElementById('avatarText').textContent=currentUser.name.charAt(0).toUpperCase();
   document.getElementById('welcomeTitle').textContent='Good day, '+currentUser.name;
-  document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',currentUser.role!=='Admin Manager'));
   showPage('dashboard');
   renderDashboard();
@@ -619,6 +654,28 @@ function resolveManagerReviewNotification(employeeId,actionId,newStatus){
     }
   });
 }
+
+const CICPA_STORAGE_KEY='rg_cicpa_records_v1';
+let cicpaRecords=readStoredArray(CICPA_STORAGE_KEY);
+function persistCicpa(){try{localStorage.setItem(CICPA_STORAGE_KEY,JSON.stringify(cicpaRecords))}catch(e){alert('Unable to save CICPA data in browser storage.')}}
+function cicpaPassStatus(pass){if(pass.cancelled)return 'Cancelled';if(!pass.expiryDate)return 'Active';const d=daysTo(pass.expiryDate);if(d<0)return 'Expired';if(d<=30)return 'Near to Expire';return 'Active'}
+function allCicpaPasses(){return cicpaRecords.flatMap(r=>(r.passes||[]).map((p,i)=>({record:r,pass:p,index:i,status:cicpaPassStatus(p)})))}
+function renderCicpa(){
+ const all=allCicpaPasses(),q=(document.getElementById('cicpaSearch')?.value||'').toLowerCase(),sf=document.getElementById('cicpaStatusFilter')?.value||'';
+ cicpaTotal.textContent=all.length;cicpaActive.textContent=all.filter(x=>x.status==='Active').length;cicpaSoon.textContent=all.filter(x=>x.status==='Near to Expire').length;cicpaExpired.textContent=all.filter(x=>x.status==='Expired').length;
+ const rows=all.filter(x=>{const r=x.record,p=x.pass;return (!sf||x.status===sf)&&(!q||[r.employeeId,r.employeeName,(r.locations||[]).join(' '),p.number,p.type].join(' ').toLowerCase().includes(q))});
+ cicpaBody.innerHTML=rows.map(x=>{const r=x.record,p=x.pass,cl=x.status==='Expired'?'cicpa-expired-row':x.status==='Near to Expire'?'cicpa-soon-row':'';return `<tr class="${cl}"><td>${esc(r.employeeName)}</td><td>${esc(r.employeeId)}</td><td>${esc((r.locations||[]).join(', ')||'-')}</td><td><b>${esc(p.number)}</b></td><td>${esc(p.type||'-')}</td><td>${esc(p.applicationDate||'-')}</td><td>${esc(p.issueDate||'-')}</td><td>${esc(p.expiryDate||'-')}</td><td><span class="pill cicpa-status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${p.cancelled?esc(p.cancellationDate||'Cancelled'):'-'}</td><td><button class="btn light" onclick="editCicpa('${r.id}')">Edit</button> <button class="btn danger" onclick="deleteCicpa('${r.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="11" class="muted">No CICPA records found.</td></tr>';
+}
+function clearCicpaFilters(){cicpaSearch.value='';cicpaStatusFilter.value='';renderCicpa()}
+function openCicpaForm(){cicpaForm.reset();cicpaEditId.value='';cicpaEmployeeId.value='';cicpaEmployeeName.value='';cicpaLocations.innerHTML='';cicpaPasses.innerHTML='';addCicpaLocation();addCicpaPass();cicpaFormTitle.textContent='Add CICPA Record';cicpaModal.classList.add('show')}
+function findCicpaEmployee(){const id=cicpaEmployeeSearch.value.trim();const e=employees.find(x=>String(x.employeeId).trim().toLowerCase()===id.toLowerCase());if(!e){cicpaEmployeeId.value='';cicpaEmployeeName.value='';alert('Employee ID not found in Employee Portal.');return}cicpaEmployeeId.value=e.employeeId;cicpaEmployeeName.value=e.nameEnglish||e.nameArabic||'Employee Found'}
+function addCicpaLocation(value=''){if(cicpaLocations.children.length>=5){alert('Maximum 5 locations are allowed for one employee.');return}const d=document.createElement('div');d.className='cicpa-location-row';d.innerHTML=`<div class="form-group"><label>Location ${cicpaLocations.children.length+1}</label><input class="cicpa-location" value="${esc(value)}" placeholder="Select or enter CICPA location" list="cicpaLocationOptions"></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Remove</button>`;cicpaLocations.appendChild(d)}
+function addCicpaPass(p={}){if(cicpaPasses.children.length>=3){alert('Maximum 3 CICPA numbers are allowed for one employee.');return}const d=document.createElement('div');d.className='cicpa-pass-box';d.innerHTML=`<div class="cicpa-pass-grid"><div class="form-group"><label>CICPA Number *</label><input class="cp-number" value="${esc(p.number||'')}" required></div><div class="form-group"><label>CICPA Type *</label><select class="cp-type" required><option value="">Select</option><option ${p.type==='Temporary'?'selected':''}>Temporary</option><option ${p.type==='Permanent'?'selected':''}>Permanent</option><option ${p.type==='Vehicle'?'selected':''}>Vehicle</option><option ${p.type==='Other'?'selected':''}>Other</option></select></div><div class="form-group"><label>Application Date</label><input class="cp-application" type="date" value="${esc(p.applicationDate||'')}"></div><div class="form-group"><label>Issue Date</label><input class="cp-issue" type="date" value="${esc(p.issueDate||'')}"></div><div class="form-group"><label>Expiry Date *</label><input class="cp-expiry" type="date" value="${esc(p.expiryDate||'')}" required></div><div class="form-group"><label>Cancel CICPA?</label><select class="cp-cancelled" onchange="this.closest('.cicpa-pass-box').querySelector('.cp-cancel-date-wrap').style.display=this.value==='Yes'?'block':'none'"><option ${!p.cancelled?'selected':''}>No</option><option ${p.cancelled?'selected':''}>Yes</option></select></div><div class="form-group cp-cancel-date-wrap" style="display:${p.cancelled?'block':'none'}"><label>Cancellation Date</label><input class="cp-cancel-date" type="date" value="${esc(p.cancellationDate||'')}"></div></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Remove This CICPA</button>`;cicpaPasses.appendChild(d)}
+function collectCicpaPasses(){return [...cicpaPasses.querySelectorAll('.cicpa-pass-box')].map(b=>({number:b.querySelector('.cp-number').value.trim(),type:b.querySelector('.cp-type').value,applicationDate:b.querySelector('.cp-application').value,issueDate:b.querySelector('.cp-issue').value,expiryDate:b.querySelector('.cp-expiry').value,cancelled:b.querySelector('.cp-cancelled').value==='Yes',cancellationDate:b.querySelector('.cp-cancel-date').value})).filter(p=>p.number)}
+function editCicpa(id){const r=cicpaRecords.find(x=>String(x.id)===String(id));if(!r)return;openCicpaForm();cicpaEditId.value=r.id;cicpaEmployeeSearch.value=r.employeeId;cicpaEmployeeId.value=r.employeeId;cicpaEmployeeName.value=r.employeeName;cicpaLocations.innerHTML='';(r.locations||[]).forEach(addCicpaLocation);if(!(r.locations||[]).length)addCicpaLocation();cicpaPasses.innerHTML='';(r.passes||[]).forEach(addCicpaPass);cicpaFormTitle.textContent='Edit CICPA Record'}
+function deleteCicpa(id){if(!confirm('Delete this complete CICPA record?'))return;cicpaRecords=cicpaRecords.filter(x=>String(x.id)!==String(id));persistCicpa();renderCicpa()}
+function exportCicpaExcel(){const rows=allCicpaPasses();if(!rows.length){alert('No CICPA data to export.');return}const table='<table border="1"><tr><th>Employee</th><th>Employee ID</th><th>Locations</th><th>CICPA Number</th><th>Type</th><th>Application Date</th><th>Issue Date</th><th>Expiry Date</th><th>Status</th><th>Cancellation Date</th></tr>'+rows.map(x=>`<tr><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.employeeId)}</td><td>${esc((x.record.locations||[]).join(', '))}</td><td>${esc(x.pass.number)}</td><td>${esc(x.pass.type)}</td><td>${esc(x.pass.applicationDate)}</td><td>${esc(x.pass.issueDate)}</td><td>${esc(x.pass.expiryDate)}</td><td>${esc(x.status)}</td><td>${esc(x.pass.cancellationDate||'')}</td></tr>`).join('')+'</table>';downloadBlob(new Blob(['\ufeff',table],{type:'application/vnd.ms-excel'}),'CICPA_Management_Report.xls')}
+
 function buildForm(){
   const map={general:'generalGrid',identity:'identityGrid',other:'otherGrid',cert:'certGrid',document:'documentGrid'};
   Object.keys(map).forEach(section=>{
@@ -642,6 +699,9 @@ function toggleCancellationDate(){
 }
 const pageMeta={
  dashboard:['Dashboard','Employee portal overview'],
+ employeeDashboard:['Employee Management Portal','Employee records, approvals, alerts and reports'],
+ sitePortal:['Site Management Portal','Site modules and workflow'],
+ cicpaPortal:['CICPA Management','Manage CICPA passes, locations and expiry status'],
  employees:['Employee List','Search, filter and manage employee records'],
  form:['Employee Form','Add or update employee information'],
  review:['Manager Review','Approve or request corrections'],
@@ -653,22 +713,29 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   document.getElementById('pageTitle').textContent=pageMeta[id][0];document.getElementById('pageSubtitle').textContent=pageMeta[id][1];
-  if(id==='employeeDashboard')renderDashboard();if(id==='employees')renderEmployees();if(id==='review')renderReview();if(id==='notifications')renderNotifications();
+  if(id==='employeeDashboard')renderDashboard();if(id==='cicpaPortal')renderCicpa();if(id==='employees')renderEmployees();if(id==='review')renderReview();if(id==='notifications')renderNotifications();
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>b.dataset.page==='form'?openNew():showPage(b.dataset.page));
 
 
 function openEmployeePortal(){
   document.querySelectorAll('.employee-nav').forEach(el=>el.classList.remove('hidden'));
-  document.querySelectorAll('.site-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
   renderDashboard();
   showPage('employeeDashboard');
 }
 function openSitePortal(){
-  document.querySelectorAll('.employee-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.employee-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.site-nav').forEach(el=>el.classList.remove('hidden'));
   showPage('sitePortal');
 }
+
+function openCicpaPortal(){
+  document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.cicpa-nav').forEach(el=>el.classList.remove('hidden'));
+  showPage('cicpaPortal');
+}
+
 function returnPortalHome(){
   document.querySelectorAll('.employee-nav,.site-nav').forEach(el=>el.classList.add('hidden'));
   showPage('dashboard');
@@ -767,58 +834,15 @@ employeeForm.onsubmit=e=>{
   const actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);
   let saved={...(old||{}),...rec,id:editingId||String(Date.now()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),submittedByRole:currentUser.role,pendingActionId:actionId,history:[...(old?.history||[]),{action:old?'Edited':'Added',by:currentUser.name,role:currentUser.role,date:new Date().toLocaleString(),changes,actionId}]};
   if(old)employees=employees.map(x=>x.id===editingId?saved:x);else employees.push(saved);
-  // Every record created or edited by Admin must be submitted to Admin Manager.
-  // Use a normalized role check so harmless spacing/case differences cannot break the workflow.
-  const submitterRole=String(currentUser?.role||'').trim().toLowerCase();
-  const requiresManagerApproval=submitterRole==='admin';
-
-  if(requiresManagerApproval){
-    saved.approvalStatus='Under Review';
-    saved.submittedByRole='Admin';
-    saved.pendingActionId=actionId;
-    saved.managerComment='';
-    saved.reviewedBy='';
-    saved.reviewedAt='';
-
-    // Close any older open manager-review notifications for the same employee,
-    // then create a fresh notification for this exact change action.
-    notifications.forEach(n=>{
-      if(n.recipientRole==='Admin Manager'&&n.employeeId===saved.employeeId&&n.status==='Under Review'){
-        n.status='Superseded';
-        n.read=true;
-      }
-    });
-
-    addNotification(
-      old?'Employee Data Changed':'New Employee Added',
-      saved,
-      `${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for manager approval.`,
-      'Admin Manager',
-      'Under Review',
-      actionId
-    );
-    if(missingNow.length){
-      addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`,'Admin Manager','Under Review',actionId);
-    }
+  if(currentUser.role==='Admin'){
+    addNotification('Approval',saved,`${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for your review.`, 'Admin Manager','Under Review',actionId);
+    if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`, 'Admin Manager','Under Review',actionId);
   }
-
-  // Re-save the final version after approval fields and notifications are updated.
-  if(old)employees=employees.map(x=>x.id===saved.id?saved:x);
-  else{
-    const idx=employees.findIndex(x=>x.id===saved.id);
-    if(idx>=0)employees[idx]=saved;
-  }
-
   persist();editingId=null;saveAttempt=0;showPage('employees');
 };
 
 function renderReview(){
-  // PendingActionId is the reliable indicator that a record is waiting for manager review.
-  // submittedByRole is kept as a fallback for older saved records.
-  let q=employees.filter(e=>
-    e.approvalStatus==='Under Review' &&
-    (Boolean(e.pendingActionId) || String(e.submittedByRole||'').trim().toLowerCase()==='admin')
-  );
+  let q=employees.filter(e=>e.approvalStatus==='Under Review'&&e.submittedByRole==='Admin');
   reviewQueue.innerHTML=q.map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">Changed by ${esc(e.updatedBy)} on ${esc(e.updatedAt)}</span></div><button class="btn primary" onclick="openReview('${e.id}')">Review</button></div>`).join('')||'<p class="muted">No records under review.</p>';
 }
 function openReview(id){let e=employees.find(x=>x.id===id),last=(e.history||[]).slice(-1)[0];reviewContent.innerHTML=`<h2>Review: ${esc(e.nameEnglish)} (${esc(e.employeeId)})</h2><p>Submitted by <b>${esc(e.updatedBy)}</b> on ${esc(e.updatedAt)}</p>${last?.changes?.length?`<table class="diff"><tr><th>Information</th><th>Old Value</th><th>New Value</th></tr>${last.changes.map(c=>`<tr><td>${esc(c.field)}</td><td class="old">${esc(c.old)}</td><td class="new">${esc(c.new)}</td></tr>`).join('')}</table>`:'<p>This is a new employee record.</p>'}<p><input id="reviewComment" class="input grow" placeholder="Review comment"></p><button class="btn success" onclick="decide('${id}','Approved')">Approve</button> <button class="btn warn" onclick="decide('${id}','Correction Required')">Correction Required</button>`;reviewModal.classList.add('show')}
@@ -876,6 +900,10 @@ function downloadTemplate(){let headers=fields.map(f=>f[0]);downloadBlob(new Blo
 function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function previewBulk(){let file=bulkFile.files[0];if(!file){alert('Please select a CSV file.');return}let r=new FileReader();r.onload=()=>{let lines=r.result.split(/\r?\n/).filter(Boolean),headers=lines[0].split(','),rows=lines.slice(1).map(line=>{let vals=line.split(','),o={};headers.forEach((h,i)=>o[h.trim()]=vals[i]?.trim()||'');return o});bulkRows=rows;bulkPreview.innerHTML=`<p><b>Total rows:</b> ${rows.length}</p><button class="btn success" onclick="importBulk()">Upload Records</button>`};r.readAsText(file)}
 function importBulk(){let added=0;bulkRows.forEach(o=>{if(!o.employeeId||employees.some(e=>e.employeeId===o.employeeId))return;let actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);let e={...o,id:String(Date.now()+Math.random()),approvalStatus:'Under Review',updatedBy:currentUser.name,updatedAt:new Date().toLocaleString(),submittedByRole:currentUser.role,pendingActionId:actionId,history:[{action:'Added through bulk upload',by:currentUser.name,role:currentUser.role,date:new Date().toLocaleString(),actionId}]};employees.push(e);added++;if(currentUser.role==='Admin')addNotification('Approval',e,'Employee added through bulk upload and waiting for your review.','Admin Manager','Under Review',actionId)});persist();alert(added+' employee(s) uploaded.');showPage('employees')}
+
+
+document.getElementById('cicpaForm').addEventListener('submit',e=>{e.preventDefault();if(!cicpaEmployeeId.value){alert('Please search and select a valid employee first.');return}const passes=collectCicpaPasses();if(!passes.length){alert('Please add at least one CICPA number.');return}const locations=[...document.querySelectorAll('.cicpa-location')].map(x=>x.value.trim()).filter(Boolean);const data={id:cicpaEditId.value||String(Date.now()),employeeId:cicpaEmployeeId.value,employeeName:cicpaEmployeeName.value,locations,passes,updatedAt:new Date().toLocaleString()};const i=cicpaRecords.findIndex(x=>String(x.id)===String(data.id));if(i>=0)cicpaRecords[i]=data;else cicpaRecords.push(data);persistCicpa();closeModal('cicpaModal');renderCicpa()});
+document.getElementById('cicpaSearch').addEventListener('input',renderCicpa);document.getElementById('cicpaStatusFilter').addEventListener('change',renderCicpa);
 
 buildForm();
 persist();

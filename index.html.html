@@ -282,6 +282,19 @@ td.expiry-date-soon,
   }
 }
 
+
+.cicpa-summary-card{
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.cicpa-summary-card:hover,
+.cicpa-summary-card:focus{
+  transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(15,23,42,.14);
+  border-color:#d4a017;
+  outline:none;
+}
+
 </style>
 </head>
 <body>
@@ -427,9 +440,9 @@ td.expiry-date-soon,
         <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
         <div class="hero"><div><h2>CICPA Management Portal</h2><p>Search an employee by ID, assign locations and manage up to three CICPA passes.</p></div><button class="btn gold" onclick="openCicpaForm()">+ Add CICPA</button></div>
         <div class="cicpa-summary">
-          <div class="kpi"><div class="label">Total Active CICPA</div><div class="value" id="cicpaActive">0</div><div class="note">Valid and not cancelled</div></div>
-          <div class="kpi"><div class="label">Near to Expire</div><div class="value" id="cicpaSoon">0</div><div class="note">Expires within 30 days</div></div>
-          <div class="kpi"><div class="label">Expired CICPA</div><div class="value" id="cicpaExpired">0</div><div class="note">Expiry date passed</div></div>
+          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Active')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Active')}"><div class="label">Total Active CICPA</div><div class="value" id="cicpaActive">0</div><div class="note">Click to view active list</div></div>
+          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Near to Expire')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Near to Expire')}"><div class="label">Near to Expire</div><div class="value" id="cicpaSoon">0</div><div class="note">Click to view expiring list</div></div>
+          <div class="kpi cicpa-summary-card" role="button" tabindex="0" onclick="openCicpaSummaryList('Expired')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCicpaSummaryList('Expired')}"><div class="label">Expired CICPA</div><div class="value" id="cicpaExpired">0</div><div class="note">Click to view expired list</div></div>
         </div>
         <div class="toolbar">
           <input class="input grow" id="cicpaSearch" placeholder="Search employee ID, name, CICPA number or location">
@@ -711,6 +724,15 @@ function renderCicpa(){
  const rows=all.filter(x=>{const r=x.record,p=x.pass;return (!sf||x.status===sf)&&(!q||[r.employeeId,r.employeeName,(p.locations||[]).join(' '),p.number,p.type].join(' ').toLowerCase().includes(q))});
  document.getElementById('cicpaBody').innerHTML=rows.map(x=>{const r=x.record,p=x.pass,cl=x.status==='Expired'?'cicpa-expired-row':x.status==='Near to Expire'?'cicpa-soon-row':'';return `<tr class="${cl}"><td>${esc(r.employeeName)}</td><td>${esc(r.employeeId)}</td><td>${esc((p.locations||[]).join(', ')||'-')}</td><td><b>${esc(p.number)}</b></td><td>${esc(p.type||'-')}</td><td>${esc(p.applicationDate||'-')}</td><td>${esc(p.issueDate||'-')}</td><td>${esc(p.expiryDate||'-')}</td><td><span class="pill cicpa-status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${p.cancelled?esc(p.cancellationDate||'Cancelled'):'-'}</td><td><button class="btn light" onclick="editCicpa('${r.id}')">Edit</button> <button class="btn danger" onclick="deleteCicpaPass('${r.id}',${x.index})">Delete</button></td></tr>`}).join('')||'<tr><td colspan="11" class="muted">No CICPA records found.</td></tr>';
  renderCicpaLocationManagement();
+}
+function openCicpaSummaryList(status){
+  const statusFilter=document.getElementById('cicpaStatusFilter');
+  const searchInput=document.getElementById('cicpaSearch');
+  if(searchInput) searchInput.value='';
+  if(statusFilter) statusFilter.value=status;
+  renderCicpa();
+  const table=document.getElementById('cicpaBody')?.closest('.table-wrap');
+  if(table) table.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function clearCicpaFilters(){document.getElementById('cicpaSearch').value='';document.getElementById('cicpaStatusFilter').value='';renderCicpa()}
 function openCicpaForm(){const f=document.getElementById('cicpaForm');f.reset();document.getElementById('cicpaEditId').value='';document.getElementById('cicpaEmployeeId').value='';document.getElementById('cicpaEmployeeName').value='';document.getElementById('cicpaPasses').innerHTML='';document.getElementById('cicpaEmpInfo').classList.remove('show');document.getElementById('cicpaFormTitle').textContent='Add Employee CICPA';document.getElementById('cicpaModal').classList.add('show')}

@@ -207,6 +207,38 @@ td.expiry-date-soon,
 }
 .expiry-doc-list{margin:8px 0 0;padding-left:18px}
 .expiry-doc-list li{margin:5px 0}
+
+.login-options{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 18px;
+  margin:12px 0 14px;
+  align-items:center
+}
+.login-option{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-size:14px;
+  color:var(--text);
+  cursor:pointer;
+  user-select:none
+}
+.login-option input{
+  width:16px;
+  height:16px;
+  cursor:pointer
+}
+.password-wrap button{
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  top:6px
+}
+
 </style>
 </head>
 <body>
@@ -236,8 +268,18 @@ td.expiry-date-soon,
         <label>Password</label>
         <div class="password-wrap">
           <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password">
-          <button type="button" onclick="togglePassword()">Show</button>
+          <button type="button" id="passwordToggleBtn" onclick="togglePassword()" aria-label="Show password" title="Show/Hide Password">👁️</button>
         </div>
+      </div>
+      <div class="login-options">
+        <label class="login-option">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember Me</span>
+        </label>
+        <label class="login-option">
+          <input type="checkbox" id="keepSignedIn">
+          <span>Keep Me Signed In</span>
+        </label>
       </div>
       <button class="login-btn" onclick="login()">Sign In</button>
       <div id="loginMsg" class="login-msg"></div>
@@ -400,8 +442,33 @@ function login(){
     document.getElementById('loginMsg').textContent='Invalid username or password.';
     return;
   }
+
   currentUser={username:u,...user};
-  sessionStorage.setItem('rg_current_user',JSON.stringify(currentUser));
+  document.getElementById('loginMsg').textContent='';
+
+  const rememberMe=document.getElementById('rememberMe').checked;
+  const keepSignedIn=document.getElementById('keepSignedIn').checked;
+
+  if(rememberMe){
+    localStorage.setItem('rg_saved_username',u);
+    localStorage.setItem('rg_saved_password',p);
+    localStorage.setItem('rg_remember_me','true');
+  }else{
+    localStorage.removeItem('rg_saved_username');
+    localStorage.removeItem('rg_saved_password');
+    localStorage.removeItem('rg_remember_me');
+  }
+
+  if(keepSignedIn){
+    localStorage.setItem('rg_current_user',JSON.stringify(currentUser));
+    localStorage.setItem('rg_keep_signed_in','true');
+    sessionStorage.removeItem('rg_current_user');
+  }else{
+    sessionStorage.setItem('rg_current_user',JSON.stringify(currentUser));
+    localStorage.removeItem('rg_current_user');
+    localStorage.removeItem('rg_keep_signed_in');
+  }
+
   applyUser();
 }
 function applyUser(){
@@ -417,16 +484,67 @@ function applyUser(){
   renderDashboard();
 }
 function logout(){
-  sessionStorage.removeItem('rg_current_user');currentUser=null;
+  sessionStorage.removeItem('rg_current_user');
+  localStorage.removeItem('rg_current_user');
+  localStorage.removeItem('rg_keep_signed_in');
+  currentUser=null;
   document.getElementById('portalApp').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('loginPass').value='';
+
+  if(localStorage.getItem('rg_remember_me')==='true'){
+    document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
+    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
+    document.getElementById('rememberMe').checked=true;
+  }else{
+    document.getElementById('loginPass').value='';
+  }
+
+  document.getElementById('keepSignedIn').checked=false;
 }
 function togglePassword(){
   const p=document.getElementById('loginPass');
-  p.type=p.type==='password'?'text':'password';
+  const btn=document.getElementById('passwordToggleBtn');
+  const showing=p.type==='text';
+  p.type=showing?'password':'text';
+  if(btn){
+    btn.textContent=showing?'👁️':'🙈';
+    btn.setAttribute('aria-label',showing?'Show password':'Hide password');
+  }
 }
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+
+(function restoreLoginState(){
+  const remembered=localStorage.getItem('rg_remember_me')==='true';
+  if(remembered){
+    document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
+    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
+    document.getElementById('rememberMe').checked=true;
+  }
+
+  const persistentUser=localStorage.getItem('rg_current_user');
+  const sessionUser=sessionStorage.getItem('rg_current_user');
+
+  if(localStorage.getItem('rg_keep_signed_in')==='true' && persistentUser){
+    try{
+      currentUser=JSON.parse(persistentUser);
+      document.getElementById('keepSignedIn').checked=true;
+      applyUser();
+      return;
+    }catch(error){
+      localStorage.removeItem('rg_current_user');
+      localStorage.removeItem('rg_keep_signed_in');
+    }
+  }
+
+  if(sessionUser){
+    try{
+      currentUser=JSON.parse(sessionUser);
+      applyUser();
+    }catch(error){
+      sessionStorage.removeItem('rg_current_user');
+    }
+  }
+})();
 
 const fields=[
 ['nameEnglish','Employee Name English','general','text',1],['nameArabic','Employee Name Arabic','general','text'],['designation','Actual Designation','general','text',1],['employeeId','Employee ID','general','text',1],['company','Company Name','general','select',1,['RELIANCE GULF','RELIANCE INTERNATIONAL']],
@@ -827,8 +945,7 @@ function showExpiryDetails(type){
     detail.innerHTML=html;
     modal.classList.add('show');
   }else{
-    alert(rows.map(x=>`${x.employeeName} - ${x.document} - ${x.expiryDate}`).join('
-')||'No document expiry records found.');
+    alert(rows.map(x=>`${x.employeeName} - ${x.document} - ${x.expiryDate}`).join('\n')||'No document expiry records found.');
   }
 }
 

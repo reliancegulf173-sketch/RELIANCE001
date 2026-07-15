@@ -241,6 +241,47 @@ td.expiry-date-soon,
   top:6px
 }
 
+
+/* CICPA modal scrolling fix */
+#cicpaModal {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 20px;
+}
+#cicpaModal .modal-box {
+  position: relative;
+  width: min(1100px, 96vw);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 25px 80px rgba(0,0,0,.25);
+}
+#cicpaModal .modal-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 5;
+  border: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eef2f5;
+  cursor: pointer;
+  font-size: 22px;
+}
+@media (max-width: 700px) {
+  #cicpaModal { padding: 8px; }
+  #cicpaModal .modal-box {
+    width: 100%;
+    max-height: calc(100vh - 16px);
+    padding: 14px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -676,8 +717,69 @@ function openCicpaForm(){const f=document.getElementById('cicpaForm');f.reset();
 function findCicpaEmployee(){const id=document.getElementById('cicpaEmployeeSearch').value.trim();const e=employees.find(x=>String(x.employeeId||x.employeeCode||'').trim().toLowerCase()===id.toLowerCase());if(!e){document.getElementById('cicpaEmployeeId').value='';document.getElementById('cicpaEmployeeName').value='';document.getElementById('cicpaEmpInfo').classList.remove('show');alert('Employee Code not found in Employee Portal.');return}document.getElementById('cicpaEmployeeId').value=e.employeeId||e.employeeCode;document.getElementById('cicpaEmployeeName').value=e.nameEnglish||e.nameArabic||'Employee';document.getElementById('cicpaEmpNameView').textContent=e.nameEnglish||e.nameArabic||'-';document.getElementById('cicpaEmpCodeView').textContent=e.employeeId||e.employeeCode||'-';document.getElementById('cicpaEmpCompanyView').textContent=e.company||'-';document.getElementById('cicpaEmpDesignationView').textContent=e.designation||'-';document.getElementById('cicpaEmpInfo').classList.add('show');const existing=cicpaRecords.find(r=>String(r.employeeId).toLowerCase()===String(e.employeeId||e.employeeCode).toLowerCase());document.getElementById('cicpaPasses').innerHTML='';if(existing){document.getElementById('cicpaEditId').value=existing.id;(existing.passes||[]).forEach(addCicpaPass)}else{document.getElementById('cicpaEditId').value=''}}
 function cicpaLocationOptions(selected=''){return '<option value="">Select CICPA Location</option>'+managedCicpaLocations.map(x=>`<option value="${esc(x)}" ${x===selected?'selected':''}>${esc(x)}</option>`).join('')}
 function addPassLocation(host,value=''){if(host.querySelectorAll('.cicpa-location').length>=5){alert('Maximum 5 locations are allowed for one CICPA.');return}const row=document.createElement('div');row.className='cicpa-location-row';row.innerHTML=`<div class="form-group"><label>Location ${host.querySelectorAll('.cicpa-location').length+1}</label><select class="cicpa-location" required>${cicpaLocationOptions(value)}</select></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Remove</button>`;host.appendChild(row)}
-function addCicpaPass(p={}){const holder=document.getElementById('cicpaPasses');if(!document.getElementById('cicpaEmployeeId').value){alert('Please search employee first.');return}if(holder.children.length>=3){alert('Maximum 3 CICPA passes are allowed for one employee.');return}const d=document.createElement('div');d.className='cicpa-pass-box';d.innerHTML=`<div class="cicpa-pass-grid"><div class="form-group"><label>CICPA Number *</label><input class="cp-number" value="${esc(p.number||'')}" required></div><div class="form-group"><label>CICPA Type *</label><select class="cp-type" required><option value="">Select</option><option ${p.type==='Temporary'?'selected':''}>Temporary</option><option ${p.type==='Permanent'?'selected':''}>Permanent</option><option ${p.type==='Vehicle'?'selected':''}>Vehicle</option><option ${p.type==='Other'?'selected':''}>Other</option></select></div><div class="form-group"><label>Application Date</label><input class="cp-application" type="date" value="${esc(p.applicationDate||'')}"></div><div class="form-group"><label>Issue Date</label><input class="cp-issue" type="date" value="${esc(p.issueDate||'')}"></div><div class="form-group"><label>Expiry Date *</label><input class="cp-expiry" type="date" value="${esc(p.expiryDate||'')}" required></div><div class="form-group"><label>Status</label><select class="cp-cancelled" onchange="this.closest('.cicpa-pass-box').querySelector('.cp-cancel-date-wrap').style.display=this.value==='Yes'?'block':'none'"><option value="No" ${!p.cancelled?'selected':''}>Active</option><option value="Yes" ${p.cancelled?'selected':''}>Cancelled</option></select></div><div class="form-group cp-cancel-date-wrap" style="display:${p.cancelled?'block':'none'}"><label>Cancellation Date</label><input class="cp-cancel-date" type="date" value="${esc(p.cancellationDate||'')}"></div></div><div class="pass-locations"><h4>CICPA Locations</h4><div class="pass-location-list"></div><button type="button" class="btn light add-location-btn">+ Add More Location</button></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Delete This CICPA</button>`;holder.appendChild(d);const host=d.querySelector('.pass-location-list');const locs=p.locations&&p.locations.length?p.locations:[''];locs.forEach(v=>addPassLocation(host,v));d.querySelector('.add-location-btn').onclick=()=>addPassLocation(host,'')}
-function collectCicpaPasses(){return [...document.querySelectorAll('#cicpaPasses .cicpa-pass-box')].map(b=>({number:b.querySelector('.cp-number').value.trim(),type:b.querySelector('.cp-type').value,applicationDate:b.querySelector('.cp-application').value,issueDate:b.querySelector('.cp-issue').value,expiryDate:b.querySelector('.cp-expiry').value,cancelled:b.querySelector('.cp-cancelled').value==='Yes',cancellationDate:b.querySelector('.cp-cancel-date').value,locations:[...b.querySelectorAll('.cicpa-location')].map(x=>x.value).filter(Boolean)})).filter(p=>p.number)}
+function addCicpaPass(p={}){
+  const holder=document.getElementById('cicpaPasses');
+  if(!document.getElementById('cicpaEmployeeId').value){alert('Please search employee first.');return}
+  if(holder.children.length>=3){alert('Maximum 3 CICPA passes are allowed for one employee.');return}
+  const d=document.createElement('div');
+  d.className='cicpa-pass-box';
+  const typeValue=(p.type==='Onshore'||p.type==='Offshore')?p.type:'';
+  d.innerHTML=`<div class="cicpa-pass-grid">
+    <div class="form-group">
+      <label>CICPA Number *</label>
+      <input class="cp-number" value="${esc(p.number||'')}" required>
+    </div>
+    <div class="form-group">
+      <label>CICPA Type *</label>
+      <select class="cp-type" required>
+        <option value="">Select CICPA Type</option>
+        <option value="Onshore" ${typeValue==='Onshore'?'selected':''}>Onshore</option>
+        <option value="Offshore" ${typeValue==='Offshore'?'selected':''}>Offshore</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Issue Date</label>
+      <input class="cp-issue" type="date" value="${esc(p.issueDate||'')}">
+    </div>
+    <div class="form-group">
+      <label>Expiry Date *</label>
+      <input class="cp-expiry" type="date" value="${esc(p.expiryDate||'')}" required>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;margin-top:28px">
+        <input class="cp-cancelled" type="checkbox" ${p.cancelled?'checked':''}
+          onchange="this.closest('.cicpa-pass-box').querySelector('.cp-cancel-date-wrap').style.display=this.checked?'block':'none'">
+        CICPA Cancelled
+      </label>
+    </div>
+    <div class="form-group cp-cancel-date-wrap" style="display:${p.cancelled?'block':'none'}">
+      <label>Cancellation Date</label>
+      <input class="cp-cancel-date" type="date" value="${esc(p.cancellationDate||'')}">
+    </div>
+  </div>
+  <div class="pass-locations">
+    <h4>CICPA Locations</h4>
+    <div class="pass-location-list"></div>
+    <button type="button" class="btn light add-location-btn">+ Add More Location</button>
+  </div>
+  <button type="button" class="btn danger" onclick="this.parentElement.remove()">Delete This CICPA</button>`;
+  holder.appendChild(d);
+  const host=d.querySelector('.pass-location-list');
+  const locs=p.locations&&p.locations.length?p.locations:[''];
+  locs.forEach(v=>addPassLocation(host,v));
+  d.querySelector('.add-location-btn').onclick=()=>addPassLocation(host,'');
+}
+function collectCicpaPasses(){
+  return [...document.querySelectorAll('#cicpaPasses .cicpa-pass-box')].map(b=>({
+    number:b.querySelector('.cp-number').value.trim(),
+    type:b.querySelector('.cp-type').value,
+    issueDate:b.querySelector('.cp-issue').value,
+    expiryDate:b.querySelector('.cp-expiry').value,
+    cancelled:b.querySelector('.cp-cancelled').checked,
+    cancellationDate:b.querySelector('.cp-cancel-date').value,
+    locations:[...b.querySelectorAll('.cicpa-location')].map(x=>x.value).filter(Boolean)
+  })).filter(p=>p.number)
+}
 function editCicpa(id){const r=cicpaRecords.find(x=>String(x.id)===String(id));if(!r)return;openCicpaForm();document.getElementById('cicpaEmployeeSearch').value=r.employeeId;findCicpaEmployee();document.getElementById('cicpaEditId').value=r.id;document.getElementById('cicpaFormTitle').textContent='Edit Employee CICPA'}
 function deleteCicpaPass(id,index){if(!confirm('Delete this CICPA pass?'))return;const r=cicpaRecords.find(x=>String(x.id)===String(id));if(!r)return;r.passes.splice(index,1);if(!r.passes.length)cicpaRecords=cicpaRecords.filter(x=>x!==r);persistCicpa();renderCicpa()}
 function deleteSelectedEmployeeCicpa(){const eid=document.getElementById('cicpaEmployeeId').value;if(!eid){alert('Please search employee first.');return}const r=cicpaRecords.find(x=>String(x.employeeId).toLowerCase()===String(eid).toLowerCase());if(!r){alert('No CICPA record found for this employee.');return}if(!confirm('Delete all CICPA passes for this employee?'))return;cicpaRecords=cicpaRecords.filter(x=>x!==r);persistCicpa();closeModal('cicpaModal');renderCicpa()}
@@ -685,7 +787,7 @@ function addManagedCicpaLocation(){const input=document.getElementById('newCicpa
 function editManagedCicpaLocation(i){const old=managedCicpaLocations[i],v=prompt('Edit CICPA location:',old);if(v===null||!v.trim())return;const nv=v.trim();managedCicpaLocations[i]=nv;cicpaRecords.forEach(r=>(r.passes||[]).forEach(p=>p.locations=(p.locations||[]).map(x=>x===old?nv:x)));persistCicpa();renderCicpa()}
 function deleteManagedCicpaLocation(i){const v=managedCicpaLocations[i];if(!confirm(`Delete location "${v}"?`))return;managedCicpaLocations.splice(i,1);persistCicpa();renderCicpaLocationManagement()}
 function renderCicpaLocationManagement(){const h=document.getElementById('cicpaLocationList');if(!h)return;h.innerHTML=managedCicpaLocations.map((x,i)=>`<span class="location-chip"><b>${esc(x)}</b><button type="button" onclick="editManagedCicpaLocation(${i})">✎</button><button type="button" onclick="deleteManagedCicpaLocation(${i})">×</button></span>`).join('')}
-function exportCicpaExcel(){const rows=allCicpaPasses();if(!rows.length){alert('No CICPA data to export.');return}const table='<table border="1"><tr><th>Employee</th><th>Employee ID</th><th>Locations</th><th>CICPA Number</th><th>Type</th><th>Application Date</th><th>Issue Date</th><th>Expiry Date</th><th>Status</th><th>Cancellation Date</th></tr>'+rows.map(x=>`<tr><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.employeeId)}</td><td>${esc((x.pass.locations||[]).join(', '))}</td><td>${esc(x.pass.number)}</td><td>${esc(x.pass.type)}</td><td>${esc(x.pass.applicationDate)}</td><td>${esc(x.pass.issueDate)}</td><td>${esc(x.pass.expiryDate)}</td><td>${esc(x.status)}</td><td>${esc(x.pass.cancellationDate||'')}</td></tr>`).join('')+'</table>';downloadBlob(new Blob(['\ufeff',table],{type:'application/vnd.ms-excel'}),'CICPA_Management_Report.xls')}
+function exportCicpaExcel(){const rows=allCicpaPasses();if(!rows.length){alert('No CICPA data to export.');return}const table='<table border="1"><tr><th>Employee</th><th>Employee ID</th><th>Locations</th><th>CICPA Number</th><th>Type</th><th>Issue Date</th><th>Expiry Date</th><th>Cancellation Date</th></tr>'+rows.map(x=>`<tr><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.employeeId)}</td><td>${esc((x.pass.locations||[]).join(', '))}</td><td>${esc(x.pass.number)}</td><td>${esc(x.pass.type)}</td><td>${esc(x.pass.issueDate)}</td><td>${esc(x.pass.expiryDate)}</td><td>${esc(x.pass.cancellationDate||'')}</td></tr>`).join('')+'</table>';downloadBlob(new Blob(['\ufeff',table],{type:'application/vnd.ms-excel'}),'CICPA_Management_Report.xls')}
 
 function buildForm(){
   const map={general:'generalGrid',identity:'identityGrid',other:'otherGrid',cert:'certGrid',document:'documentGrid'};

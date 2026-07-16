@@ -318,6 +318,40 @@ td.expiry-date-soon,
 @media(max-width:900px){.sce-form-grid{grid-template-columns:1fr 1fr}.sce-certificate-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.sce-form-grid,.sce-certificate-row{grid-template-columns:1fr}}
 
+
+/* Leave Management Portal */
+.leave-card:before{background:rgba(124,58,237,.12)!important}.leave-card .portal-card-icon{background:linear-gradient(135deg,#5b21b6,#8b5cf6)!important}
+.leave-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.leave-tab.active{background:var(--navy2);color:#fff}
+.leave-kpi{cursor:pointer;transition:.2s ease}.leave-kpi:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(17,40,64,.14)}
+.leave-form-grid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:14px}.leave-form-grid .span-2{grid-column:span 2}.leave-form-grid .span-3{grid-column:1/-1}
+.leave-employee-info{display:none;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#f8fbff}.leave-employee-info.show{display:block}
+.leave-info-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px}.leave-info-grid>div{padding:10px;background:#fff;border:1px solid var(--line);border-radius:10px}.leave-info-grid small{display:block;color:var(--muted)}
+.leave-status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.leave-approved{background:#dcfce7;color:#166534}.leave-pending{background:#fef3c7;color:#92400e}.leave-rejected{background:#fee2e2;color:#991b1b}.leave-returned{background:#dbeafe;color:#1e40af}.leave-overdue{background:#ffe4e6;color:#9f1239}
+.leave-alert{border-left:4px solid var(--warning);background:#fff;padding:12px 14px;border-radius:10px;margin:9px 0;box-shadow:var(--shadow)}
+.leave-audit{font-size:12px;color:var(--muted);line-height:1.55;max-width:280px;white-space:normal}
+@media(max-width:900px){.leave-form-grid{grid-template-columns:1fr 1fr}.leave-info-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.leave-form-grid{grid-template-columns:1fr}.leave-form-grid .span-2,.leave-form-grid .span-3{grid-column:auto}.leave-info-grid{grid-template-columns:1fr}}
+
+</style>
+
+<style id="clientPortalStyles">
+.client-card:before{background:rgba(14,116,144,.12)!important}.client-card .portal-card-icon{background:linear-gradient(135deg,#0e7490,#06b6d4)!important}
+.client-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.client-tab.active{background:#0e7490;color:#fff}
+.client-kpi{cursor:pointer}.client-kpi:hover{transform:translateY(-2px)}
+.client-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.client-form-grid .full{grid-column:1/-1}
+.client-doc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.client-alert-expired{background:#fee2e2!important;color:#991b1b!important;font-weight:700}
+.client-alert-soon{background:#ffedd5!important;color:#9a3412!important;font-weight:700}
+.client-alert-missing{background:#fff1f2!important;border-color:#dc2626!important}
+.client-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.client-detail-item{padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;word-break:break-word}
+.client-detail-item b{display:block;font-size:11px;color:#64748b;margin-bottom:4px}
+.client-history{max-height:260px;overflow:auto}
+.client-history-item{padding:9px 10px;border-left:3px solid #0e7490;background:#f8fafc;margin-bottom:7px;border-radius:6px;font-size:12px}
+@media(max-width:900px){.client-form-grid,.client-detail-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.client-form-grid,.client-detail-grid,.client-doc-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -429,7 +463,193 @@ td.expiry-date-soon,
             <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
             <span class="enter">Open Subcontractor Portal →</span>
           </div>
+          <div class="portal-card leave-card" onclick="openLeavePortal()">
+            <div class="portal-card-icon">🏖️</div>
+            <h3>Leave Management Portal</h3>
+            <p>Manage worker leave, paid and unpaid days, return dates, notifications, history and reports.</p>
+            <span class="enter">Open Leave Portal →</span>
+          </div>
+
+          <div class="portal-card client-card" onclick="openClientPortal()">
+            <div class="portal-card-icon">🏢</div>
+            <h3>Client Management Portal</h3>
+            <p>Manage clients, trade-license documents, linked projects, expiry alerts, reports and activity history.</p>
+            <span class="enter">Open Client Portal →</span>
+          </div>
+
+
         </div>
+      </section>
+
+
+
+      <section id="clientPortal" class="page">
+        <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
+        <div class="hero">
+          <div><h2>Client Management Portal</h2><p>Client records, linked projects, document expiry monitoring and reports.</p></div>
+          <div class="quick"><button class="btn gold" onclick="showClientModule('addClient')">+ Add New Client</button><button class="btn primary" onclick="showClientModule('addProject')">+ Add New Project</button></div>
+        </div>
+        <div class="client-tabs">
+          <button id="clientTabDashboard" class="btn client-tab active" onclick="showClientModule('dashboard')">Dashboard</button>
+          <button id="clientTabClients" class="btn client-tab light" onclick="showClientModule('clients')">Client List</button>
+          <button id="clientTabProjects" class="btn client-tab light" onclick="showClientModule('projects')">Project List</button>
+          <button id="clientTabAddClient" class="btn client-tab light" onclick="showClientModule('addClient')">Add Client</button>
+          <button id="clientTabAddProject" class="btn client-tab light" onclick="showClientModule('addProject')">Add Project</button>
+          <button id="clientTabReports" class="btn client-tab light" onclick="showClientModule('reports')">Reports</button>
+        </div>
+
+        <div id="clientDashboardModule">
+          <div class="kpis">
+            <div class="kpi client-kpi" onclick="clientQuickFilter='all';showClientModule('clients')"><div class="label">Total Clients</div><div class="value" id="clientTotalClients">0</div><div class="note">All client records</div></div>
+            <div class="kpi client-kpi" onclick="clientQuickFilter='active';showClientModule('clients')"><div class="label">Active Clients</div><div class="value" id="clientActiveClients">0</div><div class="note">Current active clients</div></div>
+            <div class="kpi client-kpi" onclick="clientQuickFilter='soon';showClientModule('clients')"><div class="label">License Expiring ≤30 Days</div><div class="value" id="clientSoonClients">0</div><div class="note">Click to view list</div></div>
+            <div class="kpi client-kpi" onclick="clientQuickFilter='expired';showClientModule('clients')"><div class="label">Expired Licenses</div><div class="value" id="clientExpiredClients">0</div><div class="note">Immediate attention</div></div>
+            <div class="kpi client-kpi" onclick="showClientModule('projects')"><div class="label">Total Projects</div><div class="value" id="clientTotalProjects">0</div><div class="note">Linked to clients</div></div>
+            <div class="kpi client-kpi" onclick="projectQuickFilter='Active';showClientModule('projects')"><div class="label">Active Projects</div><div class="value" id="clientActiveProjects">0</div><div class="note">Currently active</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel"><h3>Client Notifications</h3><div id="clientNotifications"></div></div>
+            <div class="panel"><h3>Client & Project Summary</h3><div id="clientProjectSummary"></div></div>
+          </div>
+        </div>
+
+        <div id="clientClientsModule" class="hidden">
+          <div class="toolbar">
+            <input id="clientSearch" class="input grow" placeholder="Search client name, code, license, contact, mobile or email" oninput="renderClientList()">
+            <select id="clientStatusFilter" class="input" onchange="renderClientList()"><option value="all">All Client Status</option><option>Active</option><option>Inactive</option></select>
+            <select id="clientExpiryFilter" class="input" onchange="renderClientList()"><option value="all">All License Expiry</option><option value="soon">Expiring ≤30 Days</option><option value="expired">Expired</option><option value="missing">Missing Expiry Date</option></select>
+            <button class="btn success" onclick="exportClientsExcel()">Export Excel</button><button class="btn danger" onclick="printClients()">PDF / Print</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Client Code</th><th>Client Name</th><th>Address</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>Trade License No.</th><th>License Expiry</th><th>VAT No.</th><th>Status</th><th>Documents</th><th>Projects</th><th>Actions</th></tr></thead><tbody id="clientListBody"></tbody></table></div>
+        </div>
+
+        <div id="clientProjectsModule" class="hidden">
+          <div class="toolbar">
+            <input id="projectSearch" class="input grow" placeholder="Search project, code, client, location, emirate, contract or PO" oninput="renderProjectList()">
+            <select id="projectClientFilter" class="input" onchange="renderProjectList()"><option value="all">All Clients</option></select>
+            <select id="projectStatusFilter" class="input" onchange="renderProjectList()"><option value="all">All Project Status</option><option>Active</option><option>Completed</option></select>
+            <button class="btn success" onclick="exportProjectsExcel()">Export Excel</button><button class="btn danger" onclick="printProjects()">PDF / Print</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Project Code</th><th>Project Name</th><th>Client</th><th>Site Location</th><th>State / Emirate</th><th>Start Date</th><th>Completion Date</th><th>Contract No.</th><th>PO No.</th><th>Contract Value</th><th>Invoice / SOA Email</th><th>Contact Person</th><th>Status</th><th>Actions</th></tr></thead><tbody id="projectListBody"></tbody></table></div>
+        </div>
+
+        <div id="clientAddClientModule" class="hidden">
+          <div class="panel"><h3 id="clientFormTitle">Add New Client</h3>
+            <form id="clientForm" onsubmit="saveClient(event)">
+              <input type="hidden" id="clientEditId">
+              <div class="client-form-grid">
+                <label>Client Code<input id="clientCode" class="input" readonly placeholder="Automatically generated"></label>
+                <label>Client Name *<input id="clientName" class="input" required></label>
+                <label>Company Address *<input id="clientAddress" class="input" required></label>
+                <label>Contact Person Name *<input id="clientContact" class="input" required></label>
+                <label>Mobile Number *<input id="clientMobile" class="input" required></label>
+                <label>Email Address *<input id="clientEmail" type="email" class="input" required></label>
+                <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
+                <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>
+                <label>VAT Registration Number<input id="clientVatNo" class="input"></label>
+                <label>Client Status<select id="clientStatus" class="input"><option>Active</option><option>Inactive</option></select></label>
+                <label class="full">Remarks<textarea id="clientRemarks" class="input" rows="3"></textarea></label>
+              </div>
+              <h4>Document Upload</h4>
+              <div class="client-doc-grid">
+                <label>Trade License<input id="clientDocLicense" type="file" class="input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></label>
+                <label>VAT Certificate<input id="clientDocVat" type="file" class="input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></label>
+                <label>Company Profile<input id="clientDocProfile" type="file" class="input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></label>
+                <label>Other Documents<input id="clientDocOther" type="file" class="input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></label>
+              </div>
+              <p class="muted">Uploaded document names are retained in browser storage. Large file contents cannot be permanently stored in normal browser local storage.</p>
+              <div class="toolbar"><button type="submit" class="btn success">Save Client</button><button type="button" class="btn light" onclick="resetClientForm()">Clear</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="clientAddProjectModule" class="hidden">
+          <div class="panel"><h3 id="projectFormTitle">Add New Project</h3>
+            <form id="projectForm" onsubmit="saveProject(event)">
+              <input type="hidden" id="projectEditId">
+              <div class="client-form-grid">
+                <label>Project Code<input id="projectCode" class="input" readonly placeholder="Automatically generated"></label>
+                <label>Project Name *<input id="projectName" class="input" required></label>
+                <label>Client Name *<select id="projectClientId" class="input" required onchange="updateSelectedClientProjects()"><option value="">Select Client</option></select></label>
+                <label>Site Location *<input id="projectLocation" class="input" required></label>
+                <label>Project State / Emirate *<input id="projectEmirate" class="input" required></label>
+                <label>Project Start Date<input id="projectStart" type="date" class="input"></label>
+                <label>Project Completion Date<input id="projectCompletion" type="date" class="input"></label>
+                <label>Contract Number<input id="projectContractNo" class="input"></label>
+                <label>Purchase Order Number<input id="projectPoNo" class="input"></label>
+                <label>Contract Value<input id="projectValue" type="number" step="0.01" min="0" class="input"></label>
+                <label>Email for Invoice and SOA<input id="projectInvoiceEmail" type="email" class="input"></label>
+                <label>Client Contact Person<input id="projectContact" class="input"></label>
+                <label>Project Status<select id="projectStatus" class="input"><option>Active</option><option>Completed</option></select></label>
+                <label class="full">Scope of Work<textarea id="projectScope" class="input" rows="3"></textarea></label>
+                <label class="full">Remarks<textarea id="projectRemarks" class="input" rows="3"></textarea></label>
+                <label class="full">Upload Contract / PO / Project Documents<input id="projectDocuments" type="file" multiple class="input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"></label>
+              </div>
+              <div id="selectedClientProjects" class="panel hidden"></div>
+              <div class="toolbar"><button type="submit" class="btn success">Save Project</button><button type="button" class="btn light" onclick="resetProjectForm()">Clear</button></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="clientReportsModule" class="hidden">
+          <div class="grid-2">
+            <div class="panel"><h3>Client List Report</h3><p>Each client field is exported in a separate column.</p><button class="btn success" onclick="exportClientsExcel()">Export Excel</button> <button class="btn danger" onclick="printClients()">PDF / Print</button></div>
+            <div class="panel"><h3>Project List Report</h3><p>Each project field is exported in a separate column.</p><button class="btn success" onclick="exportProjectsExcel()">Export Excel</button> <button class="btn danger" onclick="printProjects()">PDF / Print</button></div>
+          </div>
+        </div>
+      </section>
+
+      <div id="clientViewModal" class="modal"><div class="modal-card client-modal-card"><button class="close" onclick="closeClientModal()">×</button><div id="clientViewContent"></div></div></div>
+
+      <section id="leavePortal" class="page">
+        <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
+        <div class="hero"><div><h2>Leave Management Portal</h2><p>Worker leave records linked directly with the Employee Management Portal.</p></div><div class="quick"><button class="btn gold" onclick="showLeaveModule('add')">+ Add Leave Record</button></div></div>
+        <div class="leave-tabs">
+          <button id="leaveTabDashboard" class="btn leave-tab active" onclick="showLeaveModule('dashboard')">Dashboard</button>
+          <button id="leaveTabAdd" class="btn leave-tab light" onclick="showLeaveModule('add')">Add Leave</button>
+          <button id="leaveTabHistory" class="btn leave-tab light" onclick="showLeaveModule('history')">Employee Leave History</button>
+          <button id="leaveTabReports" class="btn leave-tab light" onclick="showLeaveModule('reports')">Reports</button>
+        </div>
+
+        <div id="leaveDashboardModule">
+          <div class="kpis">
+            <div class="kpi leave-kpi" onclick="setLeaveQuickFilter('all')"><div class="label">Total Employees</div><div class="value" id="leaveTotalEmployees">0</div><div class="note">Employee Portal records</div></div>
+            <div class="kpi leave-kpi" onclick="setLeaveQuickFilter('today')"><div class="label">On Leave Today</div><div class="value" id="leaveToday">0</div><div class="note">Click for company-wise list</div></div>
+            <div class="kpi leave-kpi" onclick="setLeaveQuickFilter('return15')"><div class="label">Returning Within 15 Days</div><div class="value" id="leaveReturn15">0</div><div class="note">Company-wise</div></div>
+            <div class="kpi leave-kpi" onclick="setLeaveQuickFilter('going7')"><div class="label">Going on Leave Within 7 Days</div><div class="value" id="leaveGoing7">0</div><div class="note">Company-wise</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel"><h3>Automatic Notifications</h3><div id="leaveNotifications"></div></div>
+            <div class="panel"><h3>Company-wise Summary</h3><div id="leaveCompanySummary"></div></div>
+          </div>
+          <div class="toolbar">
+            <input id="leaveSearch" class="input grow" placeholder="Search employee code, name, company, project or designation" oninput="renderLeaveTable()">
+            <select id="leaveTypeFilter" class="input" onchange="renderLeaveTable()"><option value="all">All Leave Types</option></select>
+            <select id="leaveStatusFilter" class="input" onchange="renderLeaveTable()"><option value="all">All Status</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Returned</option><option>Overdue</option></select>
+            <input id="leaveDateFrom" type="date" class="input" onchange="renderLeaveTable()"><input id="leaveDateTo" type="date" class="input" onchange="renderLeaveTable()">
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Company</th><th>Designation</th><th>Leave Type</th><th>Leave Period</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th><th>Action</th></tr></thead><tbody id="leaveTableBody"></tbody></table></div>
+        </div>
+
+        <div id="leaveAddModule" class="hidden">
+          <div class="panel"><h3 id="leaveFormTitle">Add Leave Record</h3>
+            <div class="toolbar"><input id="leaveEmployeeCode" class="input grow" placeholder="Enter Employee Code"><button class="btn primary" onclick="findLeaveEmployee()">Search Employee</button></div>
+            <div id="leaveEmployeeInfo" class="leave-employee-info"><div class="leave-info-grid"><div><small>Employee Name</small><b id="leaveEmpName">-</b></div><div><small>Employee Code</small><b id="leaveEmpCode">-</b></div><div><small>Designation</small><b id="leaveEmpDesignation">-</b></div><div><small>Company</small><b id="leaveEmpCompany">-</b></div><div><small>Joining Date</small><b id="leaveEmpJoining">-</b></div></div></div>
+            <input type="hidden" id="leaveSelectedEmployeeId"><input type="hidden" id="leaveEditingId">
+            <div class="leave-form-grid">
+              <label>Leave Type<select id="leaveType" class="input"></select></label><label>Leave Start Date<input id="leaveStart" type="date" class="input" onchange="calculateLeaveDays()"></label><label>Leave End Date<input id="leaveEnd" type="date" class="input" onchange="calculateLeaveDays()"></label>
+              <label>Ticket Date<input id="leaveTicketDate" type="date" class="input"></label><label>Rejoining Date<input id="leaveRejoining" type="date" class="input" onchange="calculateLeaveDays()"></label><label>Total Leave Days<input id="leaveTotalDays" class="input" readonly></label>
+              <label class="leave-paid-field">Paid Leave Days<input id="leavePaidDays" type="number" min="0" class="input" value="0" oninput="calculateLeaveDays()"></label><label>Unpaid Leave Days<input id="leaveUnpaidDays" class="input" readonly></label><label>Ticket Provided<select id="leaveTicketProvided" class="input"><option>Company</option><option>Self</option><option>One Way Company</option><option>One Way Self</option><option>Not Applicable</option></select></label>
+              <label class="leave-settlement-field">Settlement Amount Paid<input id="leaveSettlementAmount" type="number" min="0" step="0.01" class="input" placeholder="0.00"></label><label class="leave-settlement-field">Paid Date<input id="leaveSettlementPaidDate" type="date" class="input"></label><label class="leave-settlement-field">Mode of Payment<select id="leaveSettlementMode" class="input"><option value="">Select Mode</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option><option>Exchange House</option><option>Other</option></select></label>
+              <label>Emergency Contact Number<input id="leaveEmergencyContact" class="input"></label><label class="span-2">Leave Address<input id="leaveAddress" class="input"></label><label class="span-2">Remarks<textarea id="leaveRemarks" class="input" rows="3"></textarea></label><label>Attachment<input id="leaveAttachment" type="file" class="input"><small>File name is saved in browser storage.</small></label>
+              <label>Status<select id="leaveRecordStatus" class="input"><option>Pending</option><option>Approved</option><option>Rejected</option></select></label><label class="span-2">Approval / Audit Comment<input id="leaveAuditComment" class="input" placeholder="Add comment for approval, rejection or correction"></label>
+            </div>
+            <div class="toolbar"><button class="btn primary" onclick="saveLeaveRecord()">Save Leave Record</button><button class="btn light" onclick="resetLeaveForm()">Clear</button></div>
+          </div>
+        </div>
+
+        <div id="leaveHistoryModule" class="hidden"><div class="panel"><h3>Employee Leave Profile & Step-by-Step History</h3><div class="toolbar"><input id="leaveHistorySearch" class="input grow" placeholder="Search employee code or name" oninput="renderLeaveHistory()"></div><div id="leaveHistoryContent"></div></div></div>
+        <div id="leaveReportsModule" class="hidden"><div class="panel"><h3>Leave Reports</h3><div class="toolbar"><select id="leaveReportType" class="input"><option value="monthly">Monthly Leave Report</option><option value="history">Employee Leave History</option><option value="current">Workers Currently on Leave</option><option value="company">Company-wise Leave Report</option></select><input id="leaveReportMonth" type="month" class="input"><button class="btn primary" onclick="exportLeaveExcel()">Export Excel</button><button class="btn light" onclick="exportLeavePDF()">Export PDF</button></div><div id="leaveReportPreview"></div></div></div>
       </section>
 
       <section id="subcontractorPortal" class="page">
@@ -786,7 +1006,7 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 const fields=[
 ['nameEnglish','Employee Name English','general','text',1],['nameArabic','Employee Name Arabic','general','text'],['designation','Actual Designation','general','text',1],['employeeId','Employee ID','general','text',1],['company','Company Name','general','select',1,['RELIANCE GULF','RELIANCE INTERNATIONAL']],
 ['passportNumber','Passport Number','identity','text',1],['passportIssue','Passport Issue Date','identity','date'],['passportExpiry','Passport Expiry Date','identity','date',1],['visaStatus','Visa Status','identity','select',1,['Visit Visa Applied','Employment Visa Outside Sent','Visa Completed']],['unifiedNumber','Unified Number','identity','text'],['emiratesId','Emirates ID Number','identity','text'],['residenceFile','Residence File Number','identity','text'],['idIssue','ID Issue Date','identity','date'],['idExpiry','ID Expiry Date','identity','date'],
-['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['workingStatus','Working Status','other','select',1,['Active','Inactive']],['cancellationDate','Cancellation Date','other','date'],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],
+['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['bloodGroup','Blood Group','other','select',0,['O−','O+','A−','A+','B−','B+','AB−','AB+']],['nationality','Nationality','other','select',0,['Indian','Pakistani','Bangladeshi','Nepali','Sri Lankan','Filipino','Emirati (UAE)','Egyptian','Sudanese','Afghan','Indonesian','Jordanian','Syrian','Yemeni','Omani','Saudi Arabian','Bahraini','Kuwaiti','Qatari','Lebanese','Iraqi','Iranian','Ethiopian','Kenyan','Ugandan','Ghanaian','Nigerian','Other']],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['workingStatus','Working Status','other','select',1,['Active','Inactive']],['cancellationDate','Cancellation Date','other','date'],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],
 ['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],['otherCertExpiry','Other Certificate Expiry','cert','date'],['otherCertRemark','Other Certificate Remark','cert','text'],
 ['docPassport','Passport Document','document','select',0,['Save in Folder','Pending']],['docEmirates','Emirates ID Document','document','select',0,['Save in Folder','Pending']],['docLabour','Approved Labour Contract','document','select',0,['Save in Folder','Pending']],['docOffer','Offer Letter','document','select',0,['Save in Folder','Pending']],['docMedical','ADNOC Medical Document','document','select',0,['Save in Folder','Pending']]
 ];
@@ -1497,5 +1717,140 @@ document.getElementById('scEmployeeForm').addEventListener('submit',function(e){
 
 window.addEventListener('load',()=>{try{renderSubcontractors();refreshSceCompanyOptions();renderScEmployees();}catch(e){console.error(e);}});
 </script>
+
+<script>
+// ===== Leave Management Portal =====
+const LEAVE_STORAGE_KEY='rg_leave_records_v1';
+const LEAVE_TYPES_KEY='rg_leave_types_v1';
+let leaveRecords=[];let leaveTypes=[];let leaveQuickFilter='all';
+try{leaveRecords=JSON.parse(localStorage.getItem(LEAVE_STORAGE_KEY)||'[]');if(!Array.isArray(leaveRecords))leaveRecords=[];}catch(e){leaveRecords=[];}
+try{leaveTypes=JSON.parse(localStorage.getItem(LEAVE_TYPES_KEY)||'[]');if(!Array.isArray(leaveTypes)||!leaveTypes.length)leaveTypes=['Annual Leave','Emergency Leave','Leave Encashment','Official Duty'];}catch(e){leaveTypes=['Annual Leave','Emergency Leave','Leave Encashment','Official Duty'];}
+function leavePersist(){localStorage.setItem(LEAVE_STORAGE_KEY,JSON.stringify(leaveRecords));localStorage.setItem(LEAVE_TYPES_KEY,JSON.stringify(leaveTypes));}
+function leaveDate(v){return v?new Date(v+'T00:00:00'):null}function leaveTodayDate(){const d=new Date();d.setHours(0,0,0,0);return d}function leaveDaysFromToday(v){const d=leaveDate(v);return d?Math.round((d-leaveTodayDate())/86400000):99999}
+function leaveEmployeeByCode(code){return (employees||[]).find(e=>String(e.employeeId||'').trim().toLowerCase()===String(code||'').trim().toLowerCase())}
+function leaveEmployeeById(id){return (employees||[]).find(e=>String(e.employeeId||'')===String(id||''))}
+function leaveCurrentStatus(r){const today=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate||r.endDate);if(r.status==='Rejected')return'Rejected';if(r.status==='Pending')return'Pending';if(s&&re&&today>s&&today>re)return r.returnConfirmed?'Returned':'Overdue';return r.status||'Approved'}
+function syncEmployeeLeaveStatuses(){let changed=false;(employees||[]).forEach(e=>{const active=leaveRecords.filter(r=>r.employeeId===e.employeeId&&r.status==='Approved').sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate))).find(r=>{const t=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate);return s&&re&&t>=s&&t<re});const should=active?'On Leave':'Idle';if(active&&e.siteStatus!==should){e.siteStatus=should;changed=true}else if(!active&&e.siteStatus==='On Leave'){e.siteStatus='Idle';changed=true}});if(changed&&typeof persist==='function')persist()}
+function openLeavePortal(){document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));syncEmployeeLeaveStatuses();showPage('leavePortal');showLeaveModule('dashboard')}
+function showLeaveModule(module){['dashboard','add','history','reports'].forEach(x=>{document.getElementById('leave'+x.charAt(0).toUpperCase()+x.slice(1)+'Module')?.classList.toggle('hidden',x!==module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('active',x===module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('light',x!==module)});refreshLeaveTypeOptions();if(module==='dashboard')renderLeaveDashboard();if(module==='history')renderLeaveHistory();if(module==='reports')renderLeaveReportPreview()}
+function refreshLeaveTypeOptions(){['leaveType','leaveTypeFilter'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const selected=el.value;el.innerHTML=(id==='leaveTypeFilter'?'<option value="all">All Leave Types</option>':'')+leaveTypes.map(x=>'<option>'+esc(x)+'</option>').join('');if([...el.options].some(o=>o.value===selected))el.value=selected})}
+function findLeaveEmployee(){const e=leaveEmployeeByCode(document.getElementById('leaveEmployeeCode').value);if(!e){alert('Employee Code not found in Employee Management Portal.');document.getElementById('leaveEmployeeInfo').classList.remove('show');return}document.getElementById('leaveSelectedEmployeeId').value=e.employeeId;document.getElementById('leaveEmpName').textContent=e.nameEnglish||'-';document.getElementById('leaveEmpCode').textContent=e.employeeId||'-';document.getElementById('leaveEmpDesignation').textContent=e.designation||'-';document.getElementById('leaveEmpCompany').textContent=e.company||'-';document.getElementById('leaveEmpJoining').textContent=e.joiningDate||'-';document.getElementById('leaveEmployeeInfo').classList.add('show')}
+function calculateLeaveDays(){const s=leaveDate(document.getElementById('leaveStart').value),re=leaveDate(document.getElementById('leaveRejoining').value),end=leaveDate(document.getElementById('leaveEnd').value);let total=0;if(s&&(re||end)){const last=re||end;total=Math.max(0,Math.round((last-s)/86400000));if(!re&&end)total+=1}document.getElementById('leaveTotalDays').value=total;const paid=Math.max(0,Number(document.getElementById('leavePaidDays').value||0));document.getElementById('leaveUnpaidDays').value=Math.max(0,total-paid)}
+function saveLeaveRecord(){const employeeId=document.getElementById('leaveSelectedEmployeeId').value,e=leaveEmployeeById(employeeId);if(!e){alert('Please search and select an employee first.');return}const start=document.getElementById('leaveStart').value,end=document.getElementById('leaveEnd').value,rejoin=document.getElementById('leaveRejoining').value;if(!start||!end||!rejoin){alert('Leave Start Date, Leave End Date and Rejoining Date are required.');return}calculateLeaveDays();const id=document.getElementById('leaveEditingId').value;const old=id?leaveRecords.find(r=>String(r.id)===String(id)):null;const actor=currentUser?.name||'System',now=new Date().toLocaleString(),status=document.getElementById('leaveRecordStatus').value,comment=document.getElementById('leaveAuditComment').value.trim();const audit=old?.audit?[...old.audit]:[];audit.push({action:old?'Edited':'Created',by:actor,role:currentUser?.role||'',date:now,comment});if(status!==old?.status)audit.push({action:status,by:actor,role:currentUser?.role||'',date:now,comment});const file=document.getElementById('leaveAttachment').files[0];const accountRole=['Admin Manager','Accounts','Account Manager'].includes(currentUser?.role);const settlementAmount=accountRole?Number(document.getElementById('leaveSettlementAmount').value||0):Number(old?.settlementAmount||0);const settlementPaidDate=accountRole?document.getElementById('leaveSettlementPaidDate').value:(old?.settlementPaidDate||'');const settlementMode=accountRole?document.getElementById('leaveSettlementMode').value:(old?.settlementMode||'');const rec={id:old?.id||Date.now(),employeeId:e.employeeId,employeeName:e.nameEnglish||'',designation:e.designation||'',company:e.company||'',project:e.project||e.site||'',joiningDate:e.joiningDate||'',leaveType:document.getElementById('leaveType').value,startDate:start,endDate:end,ticketDate:document.getElementById('leaveTicketDate').value,rejoiningDate:rejoin,totalDays:Number(document.getElementById('leaveTotalDays').value||0),paidDays:Number(document.getElementById('leavePaidDays').value||0),unpaidDays:Number(document.getElementById('leaveUnpaidDays').value||0),ticketProvided:document.getElementById('leaveTicketProvided').value,settlementAmount,settlementPaidDate,settlementMode,remarks:document.getElementById('leaveRemarks').value,attachmentName:file?.name||old?.attachmentName||'',emergencyContact:document.getElementById('leaveEmergencyContact').value,leaveAddress:document.getElementById('leaveAddress').value,status,audit,createdBy:old?.createdBy||actor,createdAt:old?.createdAt||now,updatedBy:actor,updatedAt:now};if(old)Object.assign(old,rec);else leaveRecords.unshift(rec);const settlementComplete=rec.settlementAmount>0&&rec.settlementPaidDate&&rec.settlementMode;addNotification('Leave Settlement',e,settlementComplete?`Leave settlement of AED ${rec.settlementAmount.toFixed(2)} was recorded. Paid on ${rec.settlementPaidDate} by ${rec.settlementMode}.`:`Leave record created/updated for ${rec.employeeName}. Please review and update settlement amount, paid date and mode of payment.`,'Admin Manager',settlementComplete?'Completed':'Open',String(rec.id));leavePersist();persist();syncEmployeeLeaveStatuses();resetLeaveForm();showLeaveModule('dashboard')}
+function resetLeaveForm(){['leaveEmployeeCode','leaveSelectedEmployeeId','leaveEditingId','leaveStart','leaveEnd','leaveTicketDate','leaveRejoining','leaveTotalDays','leaveUnpaidDays','leaveRemarks','leaveEmergencyContact','leaveAddress','leaveAuditComment','leaveSettlementAmount','leaveSettlementPaidDate','leaveSettlementMode'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('leavePaidDays').value=0;document.getElementById('leaveEmployeeInfo').classList.remove('show');document.getElementById('leaveRecordStatus').value='Pending';document.getElementById('leaveFormTitle').textContent='Add Leave Record'}
+function editLeaveRecord(id){const r=leaveRecords.find(x=>x.id===id);if(!r)return;showLeaveModule('add');document.getElementById('leaveEditingId').value=r.id;document.getElementById('leaveEmployeeCode').value=r.employeeId;findLeaveEmployee();const map={leaveType:r.leaveType,leaveStart:r.startDate,leaveEnd:r.endDate,leaveTicketDate:r.ticketDate,leaveRejoining:r.rejoiningDate,leavePaidDays:r.paidDays,leaveTicketProvided:r.ticketProvided,leaveSettlementAmount:r.settlementAmount||'',leaveSettlementPaidDate:r.settlementPaidDate||'',leaveSettlementMode:r.settlementMode||'',leaveRemarks:r.remarks,leaveEmergencyContact:r.emergencyContact,leaveAddress:r.leaveAddress,leaveRecordStatus:r.status};Object.entries(map).forEach(([id,v])=>document.getElementById(id).value=v??'');calculateLeaveDays();document.getElementById('leaveFormTitle').textContent='Edit Leave Record'}
+function deleteLeaveRecord(id){if(!confirm('Delete this leave record?'))return;leaveRecords=leaveRecords.filter(x=>x.id!==id);leavePersist();syncEmployeeLeaveStatuses();renderLeaveDashboard()}
+function setLeaveQuickFilter(f){leaveQuickFilter=f;renderLeaveTable()}
+function leaveFilteredRecords(){const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=ds<=0&&dr>0;let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
+function renderLeaveDashboard(){syncEmployeeLeaveStatuses();document.getElementById('leaveTotalEmployees').textContent=(employees||[]).length;document.getElementById('leaveToday').textContent=leaveRecords.filter(r=>leaveDaysFromToday(r.startDate)<=0&&leaveDaysFromToday(r.rejoiningDate)>0&&r.status==='Approved').length;document.getElementById('leaveReturn15').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.rejoiningDate);return d>=0&&d<=15&&r.status==='Approved'}).length;document.getElementById('leaveGoing7').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.startDate);return d>=0&&d<=7&&r.status==='Approved'}).length;const alerts=[];leaveRecords.forEach(r=>{const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(r.status==='Approved'&&ret>=0&&ret<=15)alerts.push(`${r.employeeName} (${r.company}) is returning in ${ret} day(s).`);if(r.status==='Approved'&&go>=0&&go<=7)alerts.push(`${r.employeeName} (${r.company}) is going on leave in ${go} day(s).`);if(r.status==='Approved'&&ret<0&&!r.returnConfirmed)alerts.push(`${r.employeeName} has not returned after the leave expiry date.`)});document.getElementById('leaveNotifications').innerHTML=alerts.length?alerts.map(x=>'<div class="leave-alert">'+esc(x)+'</div>').join(''):'<p class="muted">No leave alerts.</p>';const companies={};const companyField=(typeof fields!=='undefined'?fields.find(f=>f[0]==='company'):null);const employeePortalCompanies=(companyField&&Array.isArray(companyField[5])?companyField[5]:['RELIANCE GULF','RELIANCE INTERNATIONAL']);employeePortalCompanies.forEach(company=>{const name=String(company||'').trim();if(name)companies[name]={totalEmployees:0,today:0,return15:0,going7:0}});(employees||[]).forEach(e=>{const company=String(e.company||e.companyName||'').trim();if(company&&!companies[company])companies[company]={totalEmployees:0,today:0,return15:0,going7:0};if(company)companies[company].totalEmployees++});leaveRecords.forEach(r=>{if(r.status!=='Approved')return;const company=String(r.company||'Unassigned').trim()||'Unassigned';companies[company]=companies[company]||{totalEmployees:0,today:0,return15:0,going7:0};const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(go<=0&&ret>0)companies[company].today++;if(ret>=0&&ret<=15)companies[company].return15++;if(go>=0&&go<=7)companies[company].going7++});document.getElementById('leaveCompanySummary').innerHTML=Object.keys(companies).length?'<div class="table-wrap"><table><thead><tr><th>Company Name</th><th>Total Employees</th><th>On Leave Today</th><th>Returning ≤15 Days</th><th>Going ≤7 Days</th></tr></thead><tbody>'+Object.entries(companies).sort((a,b)=>a[0].localeCompare(b[0])).map(([c,v])=>`<tr><td><b>${esc(c)}</b></td><td>${v.totalEmployees}</td><td>${v.today}</td><td>${v.return15}</td><td>${v.going7}</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">No company names are available in the Employee Portal.</p>';renderLeaveTable()}
+function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="12" style="text-align:center">No leave records found.</td></tr>'}
+function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySearch')?.value||'').toLowerCase();const groups={};leaveRecords.filter(r=>!q||[r.employeeId,r.employeeName].join(' ').toLowerCase().includes(q)).forEach(r=>(groups[r.employeeId]??=[]).push(r));document.getElementById('leaveHistoryContent').innerHTML=Object.entries(groups).map(([id,rs])=>{const e=leaveEmployeeById(id)||rs[0];rs.sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));return `<div class="panel" style="margin:14px 0"><h3>${esc(e.employeeName||e.nameEnglish)} <small>(${esc(id)})</small></h3><p>${esc(e.company||'')} · ${esc(e.designation||'')} · Joining: ${esc(e.joiningDate||'-')}</p><div class="table-wrap"><table><thead><tr><th>Step</th><th>Leave Type</th><th>Went on Leave</th><th>Returned / Rejoining</th><th>Total Days</th><th>Paid</th><th>Unpaid</th><th>Status</th><th>Audit Trail</th></tr></thead><tbody>${rs.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)}</td><td>${esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${r.paidDays}</td><td>${r.unpaidDays}</td><td>${esc(leaveCurrentStatus(r))}</td><td class="leave-audit">${(r.audit||[]).map(a=>`${esc(a.action)} by ${esc(a.by)} — ${esc(a.date)}${a.comment?'<br>'+esc(a.comment):''}`).join('<hr>')}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')||'<p class="muted">No employee leave history found.</p>'}
+function addLeaveType(){const v=document.getElementById('newLeaveType').value.trim();if(!v)return;if(leaveTypes.some(x=>x.toLowerCase()===v.toLowerCase())){alert('This leave type already exists.');return}leaveTypes.push(v);leavePersist();document.getElementById('newLeaveType').value='';renderLeaveTypes();refreshLeaveTypeOptions()}
+function removeLeaveType(i){if(confirm('Remove this leave type?')){leaveTypes.splice(i,1);leavePersist();renderLeaveTypes();refreshLeaveTypeOptions()}}
+function renderLeaveTypes(){document.getElementById('leaveTypeList').innerHTML=leaveTypes.map((x,i)=>`<span class="location-chip">${esc(x)} <button onclick="removeLeaveType(${i})">×</button></span>`).join('')}
+function getLeaveReportRecords(){const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords];if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&leaveDaysFromToday(r.rejoiningDate)>0&&r.status==='Approved');return rows}
+function renderLeaveReportPreview(){const el=document.getElementById('leaveReportPreview');if(el)el.innerHTML='<p class="muted">Select a report and use Export Excel or Export PDF.</p>'}
+function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,r.rejoiningDate,r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
+function exportLeaveExcel(){const rows=[['Employee Code','Employee Name','Company','Designation','Leave Type','Start Date','End Date','Rejoining Date','Total Days','Paid Days','Unpaid Days','Ticket Provided','Status'],...leaveCsvRows()];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='leave-report.csv';a.click();URL.revokeObjectURL(a.href)}
+function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w.document.write(`<html><head><title>Leave Report</title><style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #999;padding:5px;text-align:left}h2{text-align:center}</style></head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+// Extend existing page controller without changing existing portal logic.
+if(typeof pageMeta!=='undefined')pageMeta.leavePortal=['Leave Management Portal','Worker leave, return dates, history and reports'];
+function applyLeaveRoleVisibility(){const role=currentUser?.role;document.querySelectorAll('.leave-paid-field').forEach(x=>x.style.display=['Admin','Admin Manager','Accounts','HR/Admin'].includes(role)?'block':'none');document.querySelectorAll('.leave-settlement-field').forEach(x=>x.style.display=['Admin Manager','Accounts','Account Manager'].includes(role)?'block':'none')}
+const originalShowPage=showPage;showPage=function(id){originalShowPage(id);if(id==='leavePortal'){applyLeaveRoleVisibility();syncEmployeeLeaveStatuses();renderLeaveDashboard()}};
+document.addEventListener('DOMContentLoaded',()=>{refreshLeaveTypeOptions();syncEmployeeLeaveStatuses();applyLeaveRoleVisibility()});
+</script>
+
+
+<script id="clientPortalScript">
+// ===== Client Management Portal =====
+const CLIENT_STORAGE_KEY='rg_clients_v1', PROJECT_STORAGE_KEY='rg_client_projects_v1', CLIENT_HISTORY_KEY='rg_client_activity_v1';
+let clientRecords=[], projectRecords=[], clientActivities=[], clientQuickFilter='all', projectQuickFilter='all';
+try{clientRecords=JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY)||'[]');if(!Array.isArray(clientRecords))clientRecords=[]}catch(e){clientRecords=[]}
+try{projectRecords=JSON.parse(localStorage.getItem(PROJECT_STORAGE_KEY)||'[]');if(!Array.isArray(projectRecords))projectRecords=[]}catch(e){projectRecords=[]}
+try{clientActivities=JSON.parse(localStorage.getItem(CLIENT_HISTORY_KEY)||'[]');if(!Array.isArray(clientActivities))clientActivities=[]}catch(e){clientActivities=[]}
+function clientPersist(){localStorage.setItem(CLIENT_STORAGE_KEY,JSON.stringify(clientRecords));localStorage.setItem(PROJECT_STORAGE_KEY,JSON.stringify(projectRecords));localStorage.setItem(CLIENT_HISTORY_KEY,JSON.stringify(clientActivities))}
+function cEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function cToday(){const d=new Date();d.setHours(0,0,0,0);return d}
+function cDate(v){return v?new Date(v+'T00:00:00'):null}
+function cDays(v){const d=cDate(v);return d?Math.ceil((d-cToday())/86400000):null}
+function cFmt(v){if(v===null||v===undefined||v==='')return '';return new Intl.NumberFormat('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v)||0)}
+function clientUser(){return (window.currentUser&&currentUser.name)||document.getElementById('currentUserName')?.textContent||'System User'}
+function clientLog(entityType,entityId,action,comments=''){clientActivities.unshift({id:Date.now()+Math.random(),entityType,entityId,action,comments,user:clientUser(),date:new Date().toLocaleString()});clientActivities=clientActivities.slice(0,1000)}
+function nextClientCode(){let max=clientRecords.reduce((m,x)=>Math.max(m,parseInt(String(x.code||'').replace(/\D/g,''))||0),0);return 'CL-'+String(max+1).padStart(4,'0')}
+function nextProjectCode(){let max=projectRecords.reduce((m,x)=>Math.max(m,parseInt(String(x.code||'').replace(/\D/g,''))||0),0);return 'PRJ-'+String(max+1).padStart(4,'0')}
+function fileNames(id){const el=document.getElementById(id);return el&&el.files?Array.from(el.files).map(f=>f.name):[]}
+function clientDocsText(c){return [c.docs?.license&&'Trade License',c.docs?.vat&&'VAT Certificate',c.docs?.profile&&'Company Profile',...(c.docs?.other||[])].filter(Boolean).join(', ')||'Missing'}
+function clientMissing(c){return !c.name||!c.address||!c.contact||!c.mobile||!c.email||!c.licenseNo||!c.licenseExpiry||!c.docs?.license||!c.docs?.vat}
+function clientExpiryClass(c){const d=cDays(c.licenseExpiry);return d===null?'client-alert-missing':d<0?'client-alert-expired':d<=30?'client-alert-soon':''}
+function openClientPortal(){showPage('clientPortal');showClientModule('dashboard')}
+function showClientModule(name){
+  const map={dashboard:'clientDashboardModule',clients:'clientClientsModule',projects:'clientProjectsModule',addClient:'clientAddClientModule',addProject:'clientAddProjectModule',reports:'clientReportsModule'};
+  Object.values(map).forEach(id=>document.getElementById(id)?.classList.add('hidden'));document.getElementById(map[name])?.classList.remove('hidden');
+  document.querySelectorAll('.client-tab').forEach(b=>{b.classList.remove('active');b.classList.add('light')});
+  const key=name[0].toUpperCase()+name.slice(1),tab=document.getElementById('clientTab'+key);if(tab){tab.classList.add('active');tab.classList.remove('light')}
+  if(name==='dashboard')renderClientDashboard();if(name==='clients')renderClientList();if(name==='projects')renderProjectList();if(name==='addClient'){if(!clientEditId.value)clientCode.value=nextClientCode()}if(name==='addProject'){refreshClientOptions();if(!projectEditId.value)projectCode.value=nextProjectCode()}if(name==='reports'){renderClientDashboard()}
+}
+function renderClientDashboard(){
+  const active=clientRecords.filter(x=>x.status==='Active').length,soon=clientRecords.filter(x=>{let d=cDays(x.licenseExpiry);return d!==null&&d>=0&&d<=30}).length,expired=clientRecords.filter(x=>{let d=cDays(x.licenseExpiry);return d!==null&&d<0}).length;
+  clientTotalClients.textContent=clientRecords.length;clientActiveClients.textContent=active;clientSoonClients.textContent=soon;clientExpiredClients.textContent=expired;clientTotalProjects.textContent=projectRecords.length;clientActiveProjects.textContent=projectRecords.filter(x=>x.status==='Active').length;
+  const notes=[];
+  clientRecords.forEach(c=>{let d=cDays(c.licenseExpiry);if(d===null)notes.push(`<div class="notice danger"><b>${cEsc(c.name)}</b>: Trade license expiry date is missing.</div>`);else if(d<0)notes.push(`<div class="notice danger"><b>${cEsc(c.name)}</b>: Trade license expired ${Math.abs(d)} day(s) ago.</div>`);else if(d<=30)notes.push(`<div class="notice warning"><b>${cEsc(c.name)}</b>: Trade license expires in ${d} day(s).</div>`);if(clientMissing(c))notes.push(`<div class="notice warning"><b>${cEsc(c.name)}</b>: Mandatory information or client documents are missing.</div>`)});
+  clientNotifications.innerHTML=notes.join('')||'<div class="empty">No client alerts.</div>';
+  clientProjectSummary.innerHTML=clientRecords.length?'<div class="table-wrap"><table><thead><tr><th>Client</th><th>Status</th><th>Total Projects</th><th>Active</th><th>Completed</th></tr></thead><tbody>'+clientRecords.map(c=>{let ps=projectRecords.filter(p=>p.clientId===c.id);return `<tr><td>${cEsc(c.name)}</td><td>${cEsc(c.status)}</td><td>${ps.length}</td><td>${ps.filter(p=>p.status==='Active').length}</td><td>${ps.filter(p=>p.status==='Completed').length}</td></tr>`}).join('')+'</tbody></table></div>':'<div class="empty">No clients added.</div>';
+  refreshClientOptions()
+}
+function filteredClients(){
+  let q=(clientSearch?.value||'').toLowerCase(),status=clientStatusFilter?.value||'all',expiry=clientExpiryFilter?.value||'all';
+  return clientRecords.filter(c=>{let d=cDays(c.licenseExpiry),hay=[c.code,c.name,c.address,c.contact,c.mobile,c.email,c.licenseNo,c.vatNo].join(' ').toLowerCase();let okQ=!q||hay.includes(q),okS=status==='all'||c.status===status,okE=expiry==='all'||(expiry==='soon'&&d!==null&&d>=0&&d<=30)||(expiry==='expired'&&d!==null&&d<0)||(expiry==='missing'&&d===null),okQuick=clientQuickFilter==='all'||(clientQuickFilter==='active'&&c.status==='Active')||(clientQuickFilter==='soon'&&d!==null&&d>=0&&d<=30)||(clientQuickFilter==='expired'&&d!==null&&d<0);return okQ&&okS&&okE&&okQuick})
+}
+function renderClientList(){
+  const rows=filteredClients();clientListBody.innerHTML=rows.map(c=>{let docs=clientDocsText(c),pc=projectRecords.filter(p=>p.clientId===c.id).length,miss=clientMissing(c);return `<tr class="${miss?'client-alert-missing':''}"><td>${cEsc(c.code)}</td><td>${cEsc(c.name)}</td><td>${cEsc(c.address)}</td><td>${cEsc(c.contact)}</td><td>${cEsc(c.mobile)}</td><td>${cEsc(c.email)}</td><td>${cEsc(c.licenseNo)}</td><td class="${clientExpiryClass(c)}">${cEsc(c.licenseExpiry||'Missing')}</td><td>${cEsc(c.vatNo)}</td><td>${cEsc(c.status)}</td><td>${cEsc(docs)}</td><td>${pc}</td><td><button class="mini" onclick="viewClient('${c.id}')">View</button> <button class="mini" onclick="editClient('${c.id}')">Edit</button> <button class="mini danger" onclick="deleteClient('${c.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="13" class="empty">No client records found.</td></tr>';clientQuickFilter='all'
+}
+function resetClientForm(){clientForm.reset();clientEditId.value='';clientCode.value=nextClientCode();clientFormTitle.textContent='Add New Client'}
+function saveClient(e){
+  e.preventDefault();let id=clientEditId.value,lic=clientLicenseNo.value.trim(),duplicate=clientRecords.find(c=>c.licenseNo.trim().toLowerCase()===lic.toLowerCase()&&c.id!==id);if(duplicate){alert('A client with the same Trade License Number already exists.');return}
+  let old=id?clientRecords.find(c=>c.id===id):null,docs={license:fileNames('clientDocLicense')[0]||old?.docs?.license||'',vat:fileNames('clientDocVat')[0]||old?.docs?.vat||'',profile:fileNames('clientDocProfile')[0]||old?.docs?.profile||'',other:fileNames('clientDocOther').length?fileNames('clientDocOther'):(old?.docs?.other||[])};
+  let rec={id:id||String(Date.now()),code:clientCode.value||nextClientCode(),name:clientName.value.trim(),address:clientAddress.value.trim(),contact:clientContact.value.trim(),mobile:clientMobile.value.trim(),email:clientEmail.value.trim(),licenseNo:lic,licenseExpiry:clientLicenseExpiry.value,vatNo:clientVatNo.value.trim(),status:clientStatus.value,remarks:clientRemarks.value.trim(),docs,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  if(id)clientRecords=clientRecords.map(c=>c.id===id?rec:c);else clientRecords.push(rec);clientLog('client',rec.id,id?'Edited client':'Created client',rec.name);clientPersist();resetClientForm();renderClientDashboard();showClientModule('clients')
+}
+function editClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;clientEditId.value=c.id;clientCode.value=c.code;clientName.value=c.name;clientAddress.value=c.address;clientContact.value=c.contact;clientMobile.value=c.mobile;clientEmail.value=c.email;clientLicenseNo.value=c.licenseNo;clientLicenseExpiry.value=c.licenseExpiry;clientVatNo.value=c.vatNo||'';clientStatus.value=c.status;clientRemarks.value=c.remarks||'';clientFormTitle.textContent='Edit Client – '+c.name;showClientModule('addClient')}
+function deleteClient(id){let c=clientRecords.find(x=>x.id===id),count=projectRecords.filter(p=>p.clientId===id).length;if(!c)return;if(count){alert('This client has linked projects. Delete or reassign those projects first.');return}if(confirm('Delete client '+c.name+'?')){clientRecords=clientRecords.filter(x=>x.id!==id);clientLog('client',id,'Deleted client',c.name);clientPersist();renderClientList();renderClientDashboard()}}
+function refreshClientOptions(){
+  const opts='<option value="">Select Client</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)} (${cEsc(c.code)})</option>`).join('');
+  if(projectClientId){let v=projectClientId.value;projectClientId.innerHTML=opts;projectClientId.value=v}
+  if(projectClientFilter){let v=projectClientFilter.value;projectClientFilter.innerHTML='<option value="all">All Clients</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)}</option>`).join('');projectClientFilter.value=v||'all'}
+}
+function updateSelectedClientProjects(){let id=projectClientId.value,c=clientRecords.find(x=>x.id===id),ps=projectRecords.filter(p=>p.clientId===id);if(!c){selectedClientProjects.classList.add('hidden');return}projectContact.value=projectContact.value||c.contact;projectInvoiceEmail.value=projectInvoiceEmail.value||c.email;selectedClientProjects.classList.remove('hidden');selectedClientProjects.innerHTML=`<h4>Existing Projects for ${cEsc(c.name)}</h4>`+(ps.length?ps.map(p=>`<div>${cEsc(p.code)} — ${cEsc(p.name)} — ${cEsc(p.status)}</div>`).join(''):'<div class="muted">No projects currently linked.</div>')}
+function resetProjectForm(){projectForm.reset();projectEditId.value='';projectCode.value=nextProjectCode();projectFormTitle.textContent='Add New Project';selectedClientProjects.classList.add('hidden');refreshClientOptions()}
+function saveProject(e){
+  e.preventDefault();let id=projectEditId.value,old=id?projectRecords.find(p=>p.id===id):null,rec={id:id||String(Date.now()),code:projectCode.value||nextProjectCode(),name:projectName.value.trim(),clientId:projectClientId.value,location:projectLocation.value.trim(),emirate:projectEmirate.value.trim(),start:projectStart.value,completion:projectCompletion.value,contractNo:projectContractNo.value.trim(),poNo:projectPoNo.value.trim(),value:projectValue.value,invoiceEmail:projectInvoiceEmail.value.trim(),contact:projectContact.value.trim(),status:projectStatus.value,scope:projectScope.value.trim(),remarks:projectRemarks.value.trim(),documents:fileNames('projectDocuments').length?fileNames('projectDocuments'):(old?.documents||[]),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  if(id)projectRecords=projectRecords.map(p=>p.id===id?rec:p);else projectRecords.push(rec);clientLog('project',rec.id,id?'Edited project':'Created project',rec.name);clientPersist();resetProjectForm();renderClientDashboard();showClientModule('projects')
+}
+function filteredProjects(){
+  let q=(projectSearch?.value||'').toLowerCase(),cid=projectClientFilter?.value||'all',status=projectStatusFilter?.value||'all';
+  return projectRecords.filter(p=>{let c=clientRecords.find(x=>x.id===p.clientId),hay=[p.code,p.name,c?.name,p.location,p.emirate,p.contractNo,p.poNo,p.invoiceEmail,p.contact].join(' ').toLowerCase();return(!q||hay.includes(q))&&(cid==='all'||p.clientId===cid)&&(status==='all'||p.status===status)&&(projectQuickFilter==='all'||p.status===projectQuickFilter)})
+}
+function renderProjectList(){
+  refreshClientOptions();let rows=filteredProjects();projectListBody.innerHTML=rows.map(p=>{let c=clientRecords.find(x=>x.id===p.clientId);return `<tr><td>${cEsc(p.code)}</td><td>${cEsc(p.name)}</td><td>${cEsc(c?.name||'Missing Client')}</td><td>${cEsc(p.location)}</td><td>${cEsc(p.emirate)}</td><td>${cEsc(p.start)}</td><td>${cEsc(p.completion)}</td><td>${cEsc(p.contractNo)}</td><td>${cEsc(p.poNo)}</td><td>${cFmt(p.value)}</td><td>${cEsc(p.invoiceEmail)}</td><td>${cEsc(p.contact)}</td><td>${cEsc(p.status)}</td><td><button class="mini" onclick="viewProject('${p.id}')">View</button> <button class="mini" onclick="editProject('${p.id}')">Edit</button> <button class="mini danger" onclick="deleteProject('${p.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="14" class="empty">No project records found.</td></tr>';projectQuickFilter='all'
+}
+function editProject(id){let p=projectRecords.find(x=>x.id===id);if(!p)return;refreshClientOptions();projectEditId.value=p.id;projectCode.value=p.code;projectName.value=p.name;projectClientId.value=p.clientId;projectLocation.value=p.location;projectEmirate.value=p.emirate;projectStart.value=p.start||'';projectCompletion.value=p.completion||'';projectContractNo.value=p.contractNo||'';projectPoNo.value=p.poNo||'';projectValue.value=p.value||'';projectInvoiceEmail.value=p.invoiceEmail||'';projectContact.value=p.contact||'';projectStatus.value=p.status;projectScope.value=p.scope||'';projectRemarks.value=p.remarks||'';projectFormTitle.textContent='Edit Project – '+p.name;showClientModule('addProject');projectClientId.value=p.clientId;updateSelectedClientProjects()}
+function deleteProject(id){let p=projectRecords.find(x=>x.id===id);if(p&&confirm('Delete project '+p.name+'?')){projectRecords=projectRecords.filter(x=>x.id!==id);clientLog('project',id,'Deleted project',p.name);clientPersist();renderProjectList();renderClientDashboard()}}
+function activityHtml(type,id){let a=clientActivities.filter(x=>x.entityType===type&&x.entityId===id);return a.length?a.map(x=>`<div class="client-history-item"><b>${cEsc(x.action)}</b> — ${cEsc(x.user)}<br>${cEsc(x.date)}${x.comments?'<br>'+cEsc(x.comments):''}</div>`).join(''):'<div class="muted">No activity history.</div>'}
+function viewClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;let ps=projectRecords.filter(p=>p.clientId===id);clientViewContent.innerHTML=`<h2>${cEsc(c.name)}</h2><div class="client-detail-grid">${[['Client Code',c.code],['Address',c.address],['Contact Person',c.contact],['Mobile',c.mobile],['Email',c.email],['Trade License',c.licenseNo],['License Expiry',c.licenseExpiry],['VAT Number',c.vatNo],['Status',c.status],['Documents',clientDocsText(c)],['Remarks',c.remarks]].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Linked Projects (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="client-history-item"><b>${cEsc(p.code)} — ${cEsc(p.name)}</b><br>${cEsc(p.location)} | ${cEsc(p.status)} | Value: ${cFmt(p.value)}</div>`).join(''):'<div class="muted">No linked projects.</div>'}<h3>Activity History</h3><div class="client-history">${activityHtml('client',id)}</div>`;clientViewModal.classList.add('show')}
+function viewProject(id){let p=projectRecords.find(x=>x.id===id),c=clientRecords.find(x=>x.id===p?.clientId);if(!p)return;clientViewContent.innerHTML=`<h2>${cEsc(p.name)}</h2><div class="client-detail-grid">${[['Project Code',p.code],['Client',c?.name],['Location',p.location],['State / Emirate',p.emirate],['Start Date',p.start],['Completion Date',p.completion],['Contract Number',p.contractNo],['PO Number',p.poNo],['Contract Value',cFmt(p.value)],['Invoice / SOA Email',p.invoiceEmail],['Contact Person',p.contact],['Status',p.status],['Scope of Work',p.scope],['Remarks',p.remarks],['Documents',(p.documents||[]).join(', ')||'Missing']].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Activity History</h3><div class="client-history">${activityHtml('project',id)}</div>`;clientViewModal.classList.add('show')}
+function closeClientModal(){clientViewModal.classList.remove('show')}
+function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Person':c.contact,'Mobile Number':c.mobile,'Email Address':c.email,'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
+function projectExportRows(){return filteredProjects().map(p=>{let c=clientRecords.find(x=>x.id===p.clientId);return {'Project Code':p.code,'Project Name':p.name,'Client Name':c?.name||'','Client Code':c?.code||'','Site Location':p.location,'Project State / Emirate':p.emirate,'Project Start Date':p.start,'Project Completion Date':p.completion,'Contract Number':p.contractNo,'Purchase Order Number':p.poNo,'Contract Value':p.value,'Email for Invoice and SOA':p.invoiceEmail,'Client Contact Person':p.contact,'Project Status':p.status,'Scope of Work':p.scope,'Remarks':p.remarks,'Project Documents':(p.documents||[]).join('; ')}})}
+function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records available to export.');return}let h=Object.keys(rows[0]),table='<table><thead><tr>'+h.map(x=>`<th>${cEsc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')+'</tbody></table>',html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\\@;vertical-align:top}</style></head><body><h2>${cEsc(title)}</h2>${table}</body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
+function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
+function exportProjectsExcel(){exportHtmlExcel(projectExportRows(),'Project List','Project_List.xls')}
+function printRows(rows,title){if(!rows.length){alert('No records available.');return}let h=Object.keys(rows[0]),w=window.open('','_blank');if(!w){alert('Please allow pop-ups.');return}w.document.write(`<html><head><title>${cEsc(title)}</title><style>@page{size:A3 landscape;margin:8mm}body{font-family:Arial;font-size:8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:4px;text-align:left;vertical-align:top}h2{text-align:center}</style></head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function printClients(){printRows(clientExportRows(),'Client List Report')}
+function printProjects(){printRows(projectExportRows(),'Project List Report')}
+if(typeof pageMeta!=='undefined')pageMeta.clientPortal=['Client Management Portal','Clients, projects, documents and expiry notifications'];
+const clientOriginalShowPage=showPage;showPage=function(id){clientOriginalShowPage(id);if(id==='clientPortal'){renderClientDashboard();showClientModule('dashboard')}};
+document.addEventListener('DOMContentLoaded',()=>{refreshClientOptions();renderClientDashboard();resetClientForm();resetProjectForm()});
+</script>
+
 </body>
 </html>

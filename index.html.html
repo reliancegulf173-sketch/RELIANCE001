@@ -856,7 +856,7 @@ th{background:#edf3f8;color:#294d6a}
           <button class="btn site-tab light" data-site-module="daily" onclick="showSiteModule('daily')">Daily / Date-wise</button>
           <button class="btn site-tab light" data-site-module="notifications" onclick="showSiteModule('notifications')">Notifications</button>
         </div>
-        <div id="siteDashboardModule" class="site-module">
+        <div id="siteDashboardModule" class="site-module"><div class="notice blue"><b>Site Management Dashboard</b><br>Mobilization, demobilization, live manpower, history, reporting and notifications are active.</div>
           <div class="metrics site-metrics">
             <div class="kpi" onclick="siteQuickFilter='all';showSiteModule('mobilized')"><div class="label">Total Mobilized</div><div class="value" id="siteTotalMobilized">0</div><div class="note">All mobilization cycles</div></div>
             <div class="kpi" onclick="siteQuickFilter='company';showSiteModule('mobilized')"><div class="label">Company Employees</div><div class="value" id="siteCompanyCount">0</div><div class="note">Currently mobilized</div></div>
@@ -1292,7 +1292,22 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   document.getElementById('pageTitle').textContent=pageMeta[id][0];document.getElementById('pageSubtitle').textContent=pageMeta[id][1];
-  if(id==='employeeDashboard')renderDashboard();if(id==='cicpaPortal')renderCicpa();if(id==='subcontractorPortal')renderSubcontractors();if(id==='employees')renderEmployees();if(id==='review')renderReview();if(id==='notifications')renderNotifications();
+  if(id==='employeeDashboard')renderDashboard();
+  if(id==='cicpaPortal')renderCicpa();
+  if(id==='subcontractorPortal')renderSubcontractors();
+  if(id==='employees')renderEmployees();
+  if(id==='review')renderReview();
+  if(id==='notifications')renderNotifications();
+  if(id==='sitePortal'){
+    try{
+      siteRefreshDropdowns();
+      showSiteModule('dashboard');
+    }catch(err){
+      console.error('Site Management Portal initialization failed:',err);
+      const host=document.getElementById('siteDashboardModule');
+      if(host) host.insertAdjacentHTML('afterbegin','<div class="notice red"><b>Site Portal Error</b><br>Please reopen the latest ERP file. Error: '+String(err.message||err)+'</div>');
+    }
+  }
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>b.dataset.page==='form'?openNew():showPage(b.dataset.page));
 
@@ -1980,7 +1995,7 @@ function renderSiteDashboard(){const active=siteActiveRecords(),m=siteToday().sl
 function siteExportRows(kind){if(kind==='active')return siteActiveFiltered();if(kind==='history')return siteHistoryFiltered();if(kind==='monthly')return siteMonthlyRows().map(r=>({...r,estimatedCost:(r.workingDays*Number(r.rate||0)).toFixed(2)}));if(kind==='daily')return siteDailyRows();return []}
 function exportSiteExcel(kind){const rows=siteExportRows(kind);if(!rows.length){alert('No records available to export.');return}exportHtmlExcel(rows,'Site Management '+kind+' Report','Site_Management_'+kind+'_Report.xls')}
 function printSiteReport(kind){const rows=siteExportRows(kind);if(!rows.length){alert('No records available.');return}printRows(rows,'Site Management '+kind+' Report')}
-const siteBaseShowPage=showPage;showPage=function(id){siteBaseShowPage(id);if(id==='sitePortal'){siteRefreshDropdowns();showSiteModule('dashboard')}};
+// Site Portal initialization is handled directly inside showPage().
 document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('siteReportMonth'))siteReportMonth.value=siteToday().slice(0,7);if(document.getElementById('siteDatePreset'))siteApplyDatePreset();renderSiteDashboard()});
 
 </script>

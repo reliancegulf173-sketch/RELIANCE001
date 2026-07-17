@@ -501,7 +501,8 @@ th{background:#edf3f8;color:#294d6a}
           <div class="portal-card site" onclick="openSitePortal()">
             <div class="portal-card-icon">🏗</div>
             <h3>Site Management Portal</h3>
-            <p>Site modules, headings and workflow will be added after detailed discussion and approval.</p>
+            <p>Manage employee mobilization, demobilization, live manpower, site history, notifications and professional reports.</p>
+            <div style="margin:10px 0"><span class="pill approved">ACTIVE</span></div>
             <span class="enter">Open Site Portal →</span>
           </div>
           <div class="portal-card cicpa-card" onclick="openCicpaPortal()">
@@ -1321,6 +1322,8 @@ function openEmployeePortal(){
 function openSitePortal(){
   document.querySelectorAll('.employee-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.site-nav').forEach(el=>el.classList.remove('hidden'));
+  const page=document.getElementById('sitePortal');
+  if(!page){alert('Site Management Portal is unavailable in this file.');return}
   showPage('sitePortal');
 }
 
@@ -1969,7 +1972,7 @@ function siteProject(id){return (typeof projectRecords!=='undefined'&&projectRec
 function siteDays(a,b){if(!a)return 0;const x=new Date(a+'T00:00:00'),y=new Date((b||siteToday())+'T00:00:00');return Math.max(0,Math.floor((y-x)/86400000)+1)}
 function siteSetEmployeeStatus(key,working,site){const e=siteEmployeeByKey(key);if(!e)return;if(e.source==='company'){e.ref.workingStatus=working;e.ref.siteStatus=site;persist()}else{e.ref.workingStatus=working;e.ref.siteStatus=site;scePersist()}}
 function showSiteModule(name){document.querySelectorAll('.site-module').forEach(x=>x.classList.add('hidden'));document.getElementById('site'+name[0].toUpperCase()+name.slice(1)+'Module')?.classList.remove('hidden');document.querySelectorAll('.site-tab').forEach(x=>{const a=x.dataset.siteModule===name;x.classList.toggle('active',a);x.classList.toggle('light',!a)});if(name==='dashboard')renderSiteDashboard();if(name==='mobilized')renderSiteActive();if(name==='history')renderSiteHistory();if(name==='monthly')renderSiteMonthly();if(name==='daily')renderSiteDaily();if(name==='notifications')renderSiteNotifications()}
-function siteRefreshDropdowns(){const cf=document.getElementById('siteClientFilter'),mc=document.getElementById('siteMobClient');const opts=(clientRecords||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cf){const v=cf.value;cf.innerHTML='<option value="all">All Clients</option>'+opts;cf.value=[...cf.options].some(o=>o.value===v)?v:'all'}if(mc)mc.innerHTML='<option value="">Select Client</option>'+opts;siteClientChanged()}
+function siteRefreshDropdowns(){const cf=document.getElementById('siteClientFilter'),mc=document.getElementById('siteMobClient');const clients=Array.isArray(clientRecords)?clientRecords:[],opts=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cf){const v=cf.value;cf.innerHTML='<option value="all">All Clients</option>'+opts;cf.value=[...cf.options].some(o=>o.value===v)?v:'all'}if(mc){const v=mc.value;mc.innerHTML='<option value="">Select Client</option>'+opts;mc.value=[...mc.options].some(o=>o.value===v)?v:''}siteClientChanged();if(mc&&!mc.value){if(siteMobProject)siteMobProject.innerHTML='<option value="">Select Project</option>';if(siteMobLocation)siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}}
 function siteClientChanged(){const c=document.getElementById('siteClientFilter')?.value||'all',p=document.getElementById('siteProjectFilter');if(!p)return;const v=p.value;p.innerHTML='<option value="all">All Projects</option>'+projectRecords.filter(x=>c==='all'||String(x.clientId)===String(c)).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');p.value=[...p.options].some(o=>o.value===v)?v:'all'}
 function openSiteMobilization(){siteSelectedEmployee=null;document.getElementById('siteMobilizeForm').reset();siteMobHours.value=10;siteSelectedEmployeeKey.value='';siteEmployeeInfo.classList.add('hidden');siteEmployeeCodeSearch.value='';siteRefreshDropdowns();siteMobDate.value=siteToday();document.getElementById('siteMobilizeModal').classList.add('show')}
 function siteFindEmployee(){const code=siteEmployeeCodeSearch.value.trim().toLowerCase(),e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}const active=siteActiveRecords().find(r=>r.employeeKey===e.key);if(active){alert(`Employee is already mobilized.\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nDemobilize the employee before assigning another site.`);return}siteSelectedEmployee=e;siteSelectedEmployeeKey.value=e.key;siteMobCraft.value=e.trade;siteEmployeeInfo.innerHTML=`<b>${esc(e.name)} (${esc(e.code)})</b><br>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;siteEmployeeInfo.classList.remove('hidden')}
@@ -1996,7 +1999,7 @@ function siteExportRows(kind){if(kind==='active')return siteActiveFiltered();if(
 function exportSiteExcel(kind){const rows=siteExportRows(kind);if(!rows.length){alert('No records available to export.');return}exportHtmlExcel(rows,'Site Management '+kind+' Report','Site_Management_'+kind+'_Report.xls')}
 function printSiteReport(kind){const rows=siteExportRows(kind);if(!rows.length){alert('No records available.');return}printRows(rows,'Site Management '+kind+' Report')}
 // Site Portal initialization is handled directly inside showPage().
-document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('siteReportMonth'))siteReportMonth.value=siteToday().slice(0,7);if(document.getElementById('siteDatePreset'))siteApplyDatePreset();renderSiteDashboard()});
+document.addEventListener('DOMContentLoaded',()=>{try{if(siteReportMonth)siteReportMonth.value=siteToday().slice(0,7);if(siteDatePreset)siteApplyDatePreset();if(siteTotalMobilized)renderSiteDashboard()}catch(err){console.error('Site Management startup error:',err)}});
 
 </script>
 

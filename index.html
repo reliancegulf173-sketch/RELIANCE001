@@ -1163,14 +1163,19 @@ function isNotApplicableRemark(value){
   const normalized=String(value??'').trim().toUpperCase().replace(/[.\s]/g,'');
   return normalized==='N/A'||normalized==='NA';
 }
+const technicalCertificateRemarkMap={
+  h2sExpiry:'h2sRemark',
+  ataExpiry:'ataRemark',
+  riggerExpiry:'riggerRemark',
+  scaffolderExpiry:'scaffolderRemark'
+};
+function isTechnicalCertificateNotApplicable(employee,expiryKey){
+  const remarkKey=technicalCertificateRemarkMap[expiryKey];
+  return !!remarkKey&&isNotApplicableRemark(employee?.[remarkKey]);
+}
 function missing(e){
   const result=[];
-  const certificateRemarkMap={
-    h2sExpiry:'h2sRemark',
-    ataExpiry:'ataRemark',
-    riggerExpiry:'riggerRemark',
-    scaffolderExpiry:'scaffolderRemark'
-  };
+  const certificateRemarkMap=technicalCertificateRemarkMap;
   fields.forEach(f=>{
     const key=f[0],label=f[1];
     if(key==='cancellationDate'){
@@ -1184,7 +1189,7 @@ function missing(e){
   return [...new Set(result)];
 }
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
-function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate])].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
+function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry,'passportExpiry'],['Emirates ID',e.idExpiry,'idExpiry'],['Labour Card',e.labourExpiry,'labourExpiry'],['IOLE',e.ioleExpiry,'ioleExpiry'],['H2S',e.h2sExpiry,'h2sExpiry'],['ATA Training',e.ataExpiry,'ataExpiry'],['Rigger Certificate',e.riggerExpiry,'riggerExpiry'],['Scaffolder Certificate',e.scaffolderExpiry,'scaffolderExpiry'],['ADNOC Medical',e.adnocMedicalExpiry,'adnocMedicalExpiry'],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate,''])].forEach(x=>{if(x[2]&&isTechnicalCertificateNotApplicable(e,x[2]))return;let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
 function addNotification(type,e,message,recipientRole='All',status='Open',actionId=''){
   notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status,recipientRole,actionId});
 }
@@ -1655,6 +1660,7 @@ function getDocumentExpiryItems(){
   const items=[];
   employees.forEach(e=>{
     expiryFields.forEach(f=>{
+      if(isTechnicalCertificateNotApplicable(e,f[0]))return;
       const raw=e[f[0]];
       if(!raw)return;
       const d=new Date(raw);

@@ -56,6 +56,12 @@ button,input,select{font:inherit}
 
 .main{min-width:0}
 .topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+.portal-back-btn{display:none;align-items:center;gap:7px;border:1px solid var(--line);background:#f8fafc;color:var(--text);padding:9px 13px;border-radius:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
+.portal-back-btn:hover{background:#eef2f7;transform:translateX(-1px)}
+.portal-back-btn.show{display:inline-flex}
+@media(max-width:700px){.portal-back-btn{padding:8px 10px}.portal-back-btn .back-label{display:none}.topbar-left{gap:8px}}
+
 .page-title h1{margin:0;font-size:22px}
 .page-title small{color:var(--muted)}
 .top-actions{display:flex;align-items:center;gap:12px}
@@ -313,6 +319,7 @@ td.expiry-date-soon,
 .sce-soon{background:#ffedd5!important;color:#9a3412;font-weight:700}
 .sce-valid{color:inherit}
 .sce-certificate-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr 1.2fr auto;gap:8px;align-items:end;padding:12px;border:1px solid #dbe3ee;border-radius:12px;margin-bottom:10px;background:#f8fafc}
+#employeeAdditionalCertificates .sce-certificate-row{grid-template-columns:1.4fr 1fr 1fr 1.2fr auto}
 .sce-doc-list{font-size:12px;line-height:1.5;min-width:180px}
 .sce-modal-card{width:min(1180px,96vw);max-height:92vh;overflow:auto}
 @media(max-width:900px){.sce-form-grid{grid-template-columns:1fr 1fr}.sce-certificate-row{grid-template-columns:1fr 1fr}}
@@ -385,6 +392,15 @@ th{background:#edf3f8;color:#294d6a}
 
 /* Site Management Portal */
 .site-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.site-tab.active{background:#123c69;color:#fff}.site-metrics{grid-template-columns:repeat(6,minmax(145px,1fr))}.site-filterbar{flex-wrap:wrap}.site-modal{max-width:1050px}.site-summary-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #e7e7e7}.site-alert{cursor:pointer}.site-alert:hover{transform:translateY(-1px)}@media(max-width:1100px){.site-metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.site-metrics{grid-template-columns:1fr}}
+
+.dashboard-filter-card{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.dashboard-filter-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(23,50,77,.12);border-color:#9fb6cc}
+.dashboard-filter-card:focus{outline:3px solid rgba(26,115,232,.22);outline-offset:2px}
+
+.employee-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #d9e2ec;background:#f3f6f9;flex:0 0 auto}
+.employee-photo.large{width:88px;height:88px;border-radius:16px}
+.employee-name-with-photo{display:flex;align-items:center;gap:10px;min-width:180px}
+.photo-preview{display:flex;align-items:center;gap:12px;margin-top:8px}
 </style>
 
 <style id="clientPortalStyles">
@@ -473,7 +489,12 @@ th{background:#edf3f8;color:#294d6a}
 
   <main class="main">
     <header class="topbar">
-      <div class="page-title"><h1 id="pageTitle">Dashboard</h1><small id="pageSubtitle">Employee portal overview</small></div>
+      <div class="topbar-left">
+        <button id="portalBackBtn" class="portal-back-btn" type="button" onclick="appGoBack()" aria-label="Go back">
+          <span aria-hidden="true">←</span><span class="back-label">Back</span>
+        </button>
+        <div class="page-title"><h1 id="pageTitle">Dashboard</h1><small id="pageSubtitle">Employee portal overview</small></div>
+      </div>
       
       <div class="top-actions">
         <button class="bell" onclick="showPage('notifications')">🔔<span class="badge" id="unreadBadge">0</span></button>
@@ -800,7 +821,7 @@ th{background:#edf3f8;color:#294d6a}
           <div id="sceFormError" class="sce-error"></div>
           <form id="scEmployeeForm">
             <div class="sce-form-grid">
-              <div class="form-group"><label>Employee Name *</label><input id="sceName" class="input" required></div>
+              <div class="form-group"><label>Employee Name *</label><input id="sceName" class="input" required></div><div class="form-group"><label>Employee Photo</label><input id="scePhoto" type="file" class="input" accept="image/*" onchange="previewEmployeePhoto(this,'scePhotoPreview')"><div id="scePhotoPreview" class="photo-preview"></div></div>
               <div class="form-group"><label>Employee Code *</label><input id="sceCode" class="input" required></div>
               <div class="form-group"><label>Subcontractor Company *</label><select id="sceCompany" class="input" required></select></div>
               <div class="form-group"><label>Designation / Trade *</label><input id="sceTrade" class="input" required></div>
@@ -831,14 +852,14 @@ th{background:#edf3f8;color:#294d6a}
           <div class="quick"><button class="btn gold" onclick="openNew()">+ Add Employee</button><button class="btn light" onclick="showPage('employees')">View Employee List</button></div>
         </div>
         <div class="kpis">
-          <div class="kpi"><div class="label">Total Employees</div><div class="value" id="mTotal">0</div><div class="note">Both companies combined</div></div>
-          <div class="kpi"><div class="label">Active Employees</div><div class="value" id="mActive">0</div><div class="note">Current working status</div></div>
-          <div class="kpi"><div class="label">Inactive Employees</div><div class="value" id="mInactive">0</div><div class="note">Employment cancelled</div></div>
-          <div class="kpi"><div class="label">On Site</div><div class="value" id="mOnsite">0</div><div class="note">Currently mobilized</div></div>
-          <div class="kpi"><div class="label">On Leave</div><div class="value" id="mOnLeave">0</div><div class="note">Currently on leave</div></div>
-          <div class="kpi"><div class="label">Idle</div><div class="value" id="mIdle">0</div><div class="note">Available / not assigned</div></div>
-          <div class="kpi"><div class="label">Under Review</div><div class="value" id="mReview">0</div><div class="note">Manager approval pending</div></div>
-          <div class="kpi"><div class="label">Missing Information</div><div class="value" id="mMissing">0</div><div class="note">Incomplete employee records</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('all')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('all')"><div class="label">Total Employees</div><div class="value" id="mTotal">0</div><div class="note">Both companies combined</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('active')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('active')"><div class="label">Active Employees</div><div class="value" id="mActive">0</div><div class="note">Current working status</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('inactive')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('inactive')"><div class="label">Inactive Employees</div><div class="value" id="mInactive">0</div><div class="note">Employment cancelled</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('onsite')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('onsite')"><div class="label">On Site</div><div class="value" id="mOnsite">0</div><div class="note">Currently mobilized</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('onleave')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('onleave')"><div class="label">On Leave</div><div class="value" id="mOnLeave">0</div><div class="note">Currently on leave</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('idle')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('idle')"><div class="label">Idle</div><div class="value" id="mIdle">0</div><div class="note">Available / not assigned</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('review')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('review')"><div class="label">Under Review</div><div class="value" id="mReview">0</div><div class="note">Manager approval pending</div></div>
+          <div class="kpi dashboard-filter-card" role="button" tabindex="0" onclick="openEmployeeList('missing')" onkeydown="if(event.key==='Enter'||event.key===' ')openEmployeeList('missing')"><div class="label">Missing Information</div><div class="value" id="mMissing">0</div><div class="note">Incomplete employee records</div></div>
         </div>
         <div class="grid-2">
           <div class="card"><h3>Recent Employees</h3><div id="recentEmployees"></div></div>
@@ -934,10 +955,10 @@ th{background:#edf3f8;color:#294d6a}
 
       <section id="form" class="page">
         <form id="employeeForm">
-          <div class="form-section"><h3>General Information</h3><div class="form-grid" id="generalGrid"></div></div>
+          <div class="form-section"><h3>General Information</h3><div class="form-grid" id="generalGrid"></div><div class="form-group" style="margin-top:14px"><label>Employee Photo</label><input id="employeePhoto" type="file" class="input" accept="image/*" onchange="previewEmployeePhoto(this,'employeePhotoPreview')"><div id="employeePhotoPreview" class="photo-preview"></div></div></div>
           <div class="form-section"><h3>Passport, Visa & Emirates ID</h3><div class="form-grid" id="identityGrid"></div></div>
           <div class="form-section"><h3>Labour & Other Details</h3><div class="form-grid" id="otherGrid"></div></div>
-          <div class="form-section"><h3>Technical Certificates</h3><div class="form-grid" id="certGrid"></div></div>
+          <div class="form-section"><h3>Technical Certificates</h3><div class="form-grid" id="certGrid"></div><div style="margin-top:16px"><h3 style="margin:0 0 10px">Additional Certificates</h3><div id="employeeAdditionalCertificates"></div><button type="button" class="btn light" onclick="addEmployeeCertificate()">+ Add More</button></div></div>
           <div class="form-section"><h3>Document Status</h3><div class="form-grid" id="documentGrid"></div></div>
           <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send for Review</button></div>
         </form>
@@ -1092,7 +1113,7 @@ const fields=[
 ['nameEnglish','Employee Name English','general','text',1],['nameArabic','Employee Name Arabic','general','text'],['designation','Actual Designation','general','text',1],['employeeId','Employee ID','general','text',1],['company','Company Name','general','select',1,['RELIANCE GULF','RELIANCE INTERNATIONAL']],
 ['passportNumber','Passport Number','identity','text',1],['passportIssue','Passport Issue Date','identity','date'],['passportExpiry','Passport Expiry Date','identity','date',1],['visaStatus','Visa Status','identity','select',1,['Visit Visa Applied','Employment Visa Outside Sent','Visa Completed']],['visaTrade','Trade (As per Visa)','identity','text'],['unifiedNumber','Unified Number','identity','text'],['emiratesId','Emirates ID Number','identity','text'],['residenceFile','Residence File Number','identity','text'],['idIssue','ID Issue Date','identity','date'],['idExpiry','ID Expiry Date','identity','date'],
 ['labourNumber','Labour Card Number','other','text'],['labourIssue','Labour Card Issue Date','other','date'],['labourExpiry','Labour Card Expiry Date','other','date'],['joiningDate','Date of Joining','other','date',1],['dob','Date of Birth','other','date'],['maritalStatus','Marital Status','other','select',0,['Married','Unmarried']],['religion','Religion','other','select',0,['Muslim','Hindu','Christian','Sikh','Other']],['bloodGroup','Blood Group','other','select',0,['O−','O+','A−','A+','B−','B+','AB−','AB+']],['nationality','Nationality','other','select',0,['Indian','Pakistani','Bangladeshi','Nepali','Sri Lankan','Filipino','Emirati (UAE)','Egyptian','Sudanese','Afghan','Indonesian','Jordanian','Syrian','Yemeni','Omani','Saudi Arabian','Bahraini','Kuwaiti','Qatari','Lebanese','Iraqi','Iranian','Ethiopian','Kenyan','Ugandan','Ghanaian','Nigerian','Other']],['homeContact','Home Country Contact','other','text'],['uaeContact','UAE Contact Number','other','text',1],['ioleExpiry','IOLE Expiry Date','other','date'],['email','Email','other','email'],['workingStatus','Working Status','other','select',1,['Active','Inactive']],['cancellationDate','Cancellation Date','other','date'],['siteStatus','Site Status','other','select',1,['On Site','On Leave','Idle']],
-['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],['otherCertExpiry','Other Certificate Expiry','cert','date'],['otherCertRemark','Other Certificate Remark','cert','text'],
+['h2sExpiry','H2S Expiry Date','cert','date'],['h2sRemark','H2S Remark','cert','text'],['ataExpiry','ATA Training Expiry','cert','date'],['ataRemark','ATA Remark','cert','text'],['riggerExpiry','Rigger Certificate Expiry','cert','date'],['riggerRemark','Rigger Remark','cert','text'],['scaffolderExpiry','Scaffolder Certificate Expiry','cert','date'],['scaffolderRemark','Scaffolder Remark','cert','text'],['adnocMedicalExpiry','ADNOC Medical Expiry','cert','date'],['adnocMedicalType','ADNOC Medical Type','cert','select',0,['Onshore','Offshore']],
 ['docPassport','Passport Document','document','select',0,['Save in Folder','Pending']],['docEmirates','Emirates ID Document','document','select',0,['Save in Folder','Pending']],['docLabour','Approved Labour Contract','document','select',0,['Save in Folder','Pending']],['docOffer','Offer Letter','document','select',0,['Save in Folder','Pending']],['docMedical','ADNOC Medical Document','document','select',0,['Save in Folder','Pending']]
 ];
 const listColumns=[
@@ -1100,6 +1121,7 @@ const listColumns=[
   ['approvalStatus','Approval Status'],
   ['updatedBy','Updated By'],
   ['updatedAt','Updated At'],
+  ['additionalCertificates','Additional Certificates'],
   ['missingFields','Missing Information']
 ];
 
@@ -1133,20 +1155,36 @@ function persist(){
   }
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
+function fileToDataUrl(file){return new Promise((resolve,reject)=>{if(!file){resolve('');return}const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Unable to read image'));reader.readAsDataURL(file);});}
+function employeePhotoHtml(photo,name,large=false){const safeName=esc(name||'Employee');return photo?`<img class="employee-photo${large?' large':''}" src="${photo}" alt="${safeName}">`:`<div class="employee-photo${large?' large':''}" style="display:grid;place-items:center;font-weight:800;color:#60758a">${safeName.charAt(0).toUpperCase()||'E'}</div>`;}
+function previewEmployeePhoto(input,previewId,existing=''){const host=document.getElementById(previewId);if(!host)return;const file=input.files&&input.files[0];if(!file){host.innerHTML=existing?employeePhotoHtml(existing,'Employee',true):'';return}fileToDataUrl(file).then(url=>host.innerHTML=employeePhotoHtml(url,'Employee',true)).catch(()=>host.innerHTML='<span class="muted">Unable to preview photo.</span>');}
+
+function isNotApplicableRemark(value){
+  const normalized=String(value??'').trim().toUpperCase().replace(/[.\s]/g,'');
+  return normalized==='N/A'||normalized==='NA';
+}
 function missing(e){
   const result=[];
+  const certificateRemarkMap={
+    h2sExpiry:'h2sRemark',
+    ataExpiry:'ataRemark',
+    riggerExpiry:'riggerRemark',
+    scaffolderExpiry:'scaffolderRemark'
+  };
   fields.forEach(f=>{
     const key=f[0],label=f[1];
     if(key==='cancellationDate'){
       if(e.workingStatus==='Inactive'&&!String(e[key]??'').trim())result.push(label);
       return;
     }
+    const remarkKey=certificateRemarkMap[key];
+    if(remarkKey&&isNotApplicableRemark(e[remarkKey]))return;
     if(!String(e[key]??'').trim())result.push(label);
   });
   return [...new Set(result)];
 }
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
-function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry]].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
+function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry],['Emirates ID',e.idExpiry],['Labour Card',e.labourExpiry],['IOLE',e.ioleExpiry],['H2S',e.h2sExpiry],['ATA Training',e.ataExpiry],['Rigger Certificate',e.riggerExpiry],['Scaffolder Certificate',e.scaffolderExpiry],['ADNOC Medical',e.adnocMedicalExpiry],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate])].forEach(x=>{let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
 function addNotification(type,e,message,recipientRole='All',status='Open',actionId=''){
   notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status,recipientRole,actionId});
 }
@@ -1269,6 +1307,36 @@ function buildForm(){
   const working=document.getElementById('workingStatus');
   if(working){working.addEventListener('change',toggleCancellationDate);toggleCancellationDate()}
 }
+function employeeCertificateRow(c={}){
+  const id='emp_cert_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  return `<div class="sce-certificate-row" data-employee-cert-id="${id}">
+    <div class="form-group"><label>Certificate Name</label><input class="input employee-cert-name" value="${esc(c.name||'')}" placeholder="Enter certificate name"></div>
+    <div class="form-group"><label>Certificate Number</label><input class="input employee-cert-number" value="${esc(c.number||'')}" placeholder="Enter certificate number"></div>
+    <div class="form-group"><label>Expiry Date</label><input type="date" class="input employee-cert-expiry" value="${esc(c.expiryDate||'')}"></div>
+    <div class="form-group"><label>Remark</label><input class="input employee-cert-remark" value="${esc(c.remark||'')}" placeholder="Enter remark"></div>
+    <button type="button" class="btn danger" onclick="this.closest('.sce-certificate-row').remove()">Delete</button>
+  </div>`;
+}
+function addEmployeeCertificate(c={}){
+  const host=document.getElementById('employeeAdditionalCertificates');
+  if(host)host.insertAdjacentHTML('beforeend',employeeCertificateRow(c));
+}
+function readEmployeeCertificates(){
+  return [...document.querySelectorAll('#employeeAdditionalCertificates .sce-certificate-row')].map(row=>({
+    name:row.querySelector('.employee-cert-name').value.trim(),
+    number:row.querySelector('.employee-cert-number').value.trim(),
+    expiryDate:row.querySelector('.employee-cert-expiry').value,
+    remark:row.querySelector('.employee-cert-remark').value.trim()
+  })).filter(c=>c.name||c.number||c.expiryDate||c.remark);
+}
+function loadEmployeeCertificates(items=[]){
+  const host=document.getElementById('employeeAdditionalCertificates');
+  if(!host)return;
+  host.innerHTML='';
+  (items||[]).forEach(addEmployeeCertificate);
+  if(!(items||[]).length)addEmployeeCertificate();
+}
+
 function toggleCancellationDate(){
   const working=document.getElementById('workingStatus'),date=document.getElementById('cancellationDate'),wrap=document.querySelector('.form-group[data-key="cancellationDate"]');
   if(!working||!date||!wrap)return;
@@ -1288,11 +1356,28 @@ const pageMeta={
  notifications:['Notifications','All system and employee alerts'],
  bulk:['Bulk Upload','Upload multiple employee records']
 };
+let currentAppPage='dashboard';
+function updateBackButton(){
+  const btn=document.getElementById('portalBackBtn');
+  if(btn)btn.classList.toggle('show',currentAppPage!=='dashboard');
+}
+function appGoBack(){
+  const employeeSubPages=['employees','form','review','notifications','bulk'];
+  if(employeeSubPages.includes(currentAppPage)){
+    showPage('employeeDashboard');
+    return;
+  }
+  returnPortalHome();
+}
 function showPage(id){
   if(id==='review'&&currentUser?.role!=='Admin Manager'){alert('Only Admin Manager can access Manager Review.');return}
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+  const target=document.getElementById(id);
+  if(!target){console.error('Page not found:',id);return}
+  currentAppPage=id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));target.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   document.getElementById('pageTitle').textContent=pageMeta[id][0];document.getElementById('pageSubtitle').textContent=pageMeta[id][1];
+  updateBackButton();
   if(id==='employeeDashboard')renderDashboard();
   if(id==='cicpaPortal')renderCicpa();
   if(id==='subcontractorPortal')renderSubcontractors();
@@ -1352,6 +1437,19 @@ function renderDashboard(){
   dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
   updateBadge();
 }
+function openEmployeeList(type){
+  clearFilters();
+  if(type==='active')filterWorkingStatus.value='Active';
+  else if(type==='inactive')filterWorkingStatus.value='Inactive';
+  else if(type==='onsite')filterSiteStatus.value='On Site';
+  else if(type==='onleave')filterSiteStatus.value='On Leave';
+  else if(type==='idle')filterSiteStatus.value='Idle';
+  else if(type==='review')filterApproval.value='Under Review';
+  else if(type==='missing')filterSpecial.value='missing';
+  showPage('employees');
+  renderEmployees();
+}
+
 function getFiltered(){
   let q=search.value.toLowerCase(),co=filterCompany.value,ws=filterWorkingStatus.value,ss=filterSiteStatus.value,ap=filterApproval.value,sp=filterSpecial.value;
   return employees.filter(e=>(!q||[e.nameEnglish,e.employeeId,e.company,e.designation,e.workingStatus,e.siteStatus,e.visaTrade,e.maritalStatus,e.religion].join(' ').toLowerCase().includes(q))&&(!co||e.company===co)&&(!ws||e.workingStatus===ws)&&(!ss||e.siteStatus===ss)&&(!ap||e.approvalStatus===ap)&&(!sp||(sp==='missing'&&missing(e).length)||(sp==='expiry'&&expiryInfo(e).some(x=>x.days>=0&&x.days<=60))||(sp==='expired'&&expiryInfo(e).some(x=>x.days<0))));
@@ -1363,8 +1461,10 @@ function renderEmployees(){
     const missingNames=missing(e);
     return `<tr>${listColumns.map(c=>{
       const key=c[0];
-      let raw=key==='missingFields'?missingNames.join(', '):(e[key]??'');
+      let raw=key==='missingFields'?missingNames.join(', '):key==='additionalCertificates'?(e.additionalCertificates||[]).map(c=>[c.name,c.number,c.expiryDate,c.remark].filter(Boolean).join(' | ')).join('; '):(e[key]??'');
       let v=String(raw).trim();
+
+      if(key==='nameEnglish'){return `<td><div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.nameEnglish)}<b>${esc(v||'Not Filled')}</b></div></td>`;}
 
       if(key==='employeeId'){
         return `<td class="${v?'':'empty-cell'}"><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v||'Not Filled')}</span></td>`;
@@ -1395,12 +1495,12 @@ function renderEmployees(){
 ['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
 function clearFilters(){['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).value='');renderEmployees()}
 function specialFilter(v){showPage('employees');filterSpecial.value=v;renderEmployees()}
-function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));showPage('form');toggleCancellationDate()}
-function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});showPage('form');toggleCancellationDate()}
+function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.getElementById('employeePhotoPreview').innerHTML='';document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));loadEmployeeCertificates([]);showPage('form');toggleCancellationDate()}
+function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});document.getElementById('employeePhoto').value='';document.getElementById('employeePhotoPreview').innerHTML=e.photo?employeePhotoHtml(e.photo,e.nameEnglish,true):'';loadEmployeeCertificates(e.additionalCertificates||[]);showPage('form');toggleCancellationDate()}
 function viewEmployee(id){
   let e=employees.find(x=>x.id===id);
   const missingNames=missing(e);
-  detailContent.innerHTML=`<h2>${esc(e.nameEnglish||'Not Filled')} <small>(${esc(e.employeeId||'Not Filled')})</small></h2>
+  detailContent.innerHTML=`<div class="employee-name-with-photo" style="margin-bottom:12px">${employeePhotoHtml(e.photo,e.nameEnglish,true)}<h2>${esc(e.nameEnglish||'Not Filled')} <small>(${esc(e.employeeId||'Not Filled')})</small></h2></div>
   <p><span class="pill ${e.approvalStatus==='Approved'?'approved':e.approvalStatus==='Correction Required'?'correction':'review'}">${esc(e.approvalStatus||'Not Filled')}</span></p>
   <div class="form-grid">${fields.map(f=>{
     const value=String(e[f[0]]??'').trim();
@@ -1426,9 +1526,12 @@ function viewEmployee(id){
 }
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 
-employeeForm.onsubmit=e=>{
+employeeForm.onsubmit=async e=>{
   e.preventDefault();let rec={},missingNow=[];
   fields.forEach(f=>{let el=document.getElementById(f[0]);rec[f[0]]=el.value.trim();let wrap=document.querySelector(`.form-group[data-key="${f[0]}"]`);wrap.classList.remove('missing');if(f[4]&&!rec[f[0]]){missingNow.push(f[1]);wrap.classList.add('missing')}});
+  rec.additionalCertificates=readEmployeeCertificates();
+  const existingPhoto=editingId?(employees.find(x=>x.id===editingId)?.photo||''):'';
+  rec.photo=document.getElementById('employeePhoto').files[0]?await fileToDataUrl(document.getElementById('employeePhoto').files[0]):existingPhoto;
   if(rec.workingStatus==='Inactive'&&!rec.cancellationDate){missingNow.push('Cancellation Date');document.querySelector('.form-group[data-key="cancellationDate"]').classList.add('missing')}
   let duplicate=employees.find(x=>x.id!==editingId&&(x.employeeId===rec.employeeId||(rec.emiratesId&&x.emiratesId===rec.emiratesId)));
   if(duplicate){alert(duplicate.employeeId===rec.employeeId?'Already have this Employee ID.':'Already have this Emirates ID.');return}
@@ -1737,7 +1840,7 @@ function sceCertRow(c={}){const id='cert_'+Date.now()+'_'+Math.random().toString
 function addSceCertificate(c={}){document.getElementById('sceCertificates').insertAdjacentHTML('beforeend',sceCertRow(c));}
 function sceCertTypeChanged(sel){const row=sel.closest('.sce-certificate-row'),v=sel.value;row.querySelector('.sce-cert-type-wrap').classList.toggle('hidden',v!=='ADNOC Medical');row.querySelector('.sce-cert-other-wrap').classList.toggle('hidden',v!=='Other');}
 function readSceCertificates(){return [...document.querySelectorAll('#sceCertificates .sce-certificate-row')].map(row=>{const f=row.querySelector('.sce-cert-upload');return{name:row.querySelector('.sce-cert-name').value,type:row.querySelector('.sce-cert-type').value,otherName:row.querySelector('.sce-cert-other').value.trim(),number:row.querySelector('.sce-cert-number').value.trim(),issueDate:row.querySelector('.sce-cert-issue').value,expiryDate:row.querySelector('.sce-cert-expiry').value,fileName:f.files[0]?.name||row.querySelector('small').textContent.trim()};}).filter(c=>c.name||c.number||c.expiryDate);}
-function openScEmployeeForm(id=null){sceEditingId=id;refreshSceCompanyOptions();const r=id?scEmployees.find(x=>x.id===id):null;document.getElementById('sceFormTitle').textContent=r?'Edit Subcontractor Employee':'Add Subcontractor Employee';document.getElementById('sceFormError').classList.remove('show');document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const vals={sceName:r?.name||'',sceCode:r?.code||'',sceCompany:r?.companyId||'',sceTrade:r?.trade||'',sceNationality:r?.nationality||'',sceMobile:r?.mobile||'',scePassport:r?.passport||'',scePassportExpiry:r?.passportExpiry||'',sceVisa:r?.visa||'',sceUnified:r?.unified||'',sceEid:r?.eid||'',sceEidExpiry:r?.eidExpiry||'',sceWorkingStatus:r?.workingStatus||'Active',sceTwpStatus:r?.twpStatus||'Documents Pending',sceTwpCard:r?.twpCard||'',sceTwpExpiry:r?.twpExpiry||''};Object.entries(vals).forEach(([k,v])=>document.getElementById(k).value=v);document.getElementById('sceCertificates').innerHTML='';(r?.certificates||[]).forEach(addSceCertificate);if(!(r?.certificates||[]).length)addSceCertificate();toggleSceTwpFields();document.getElementById('scEmployeeModal').classList.add('show');}
+function openScEmployeeForm(id=null){sceEditingId=id;refreshSceCompanyOptions();const r=id?scEmployees.find(x=>x.id===id):null;document.getElementById('sceFormTitle').textContent=r?'Edit Subcontractor Employee':'Add Subcontractor Employee';document.getElementById('sceFormError').classList.remove('show');document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const vals={sceName:r?.name||'',sceCode:r?.code||'',sceCompany:r?.companyId||'',sceTrade:r?.trade||'',sceNationality:r?.nationality||'',sceMobile:r?.mobile||'',scePassport:r?.passport||'',scePassportExpiry:r?.passportExpiry||'',sceVisa:r?.visa||'',sceUnified:r?.unified||'',sceEid:r?.eid||'',sceEidExpiry:r?.eidExpiry||'',sceWorkingStatus:r?.workingStatus||'Active',sceTwpStatus:r?.twpStatus||'Documents Pending',sceTwpCard:r?.twpCard||'',sceTwpExpiry:r?.twpExpiry||''};Object.entries(vals).forEach(([k,v])=>document.getElementById(k).value=v);document.getElementById('sceCertificates').innerHTML='';(r?.certificates||[]).forEach(addSceCertificate);if(!(r?.certificates||[]).length)addSceCertificate();toggleSceTwpFields();document.getElementById('scePhoto').value='';document.getElementById('scePhotoPreview').innerHTML=r?.photo?employeePhotoHtml(r.photo,r.name,true):'';document.getElementById('scEmployeeModal').classList.add('show');}
 function closeScEmployeeForm(){document.getElementById('scEmployeeModal').classList.remove('show');sceEditingId=null;}
 function sceMissingFields(r){const m=[];[['name','Employee Name'],['code','Employee Code'],['companyId','Subcontractor Company'],['trade','Designation / Trade'],['nationality','Nationality'],['mobile','Mobile Number'],['passport','Passport Number'],['passportExpiry','Passport Expiry Date'],['unified','Unified Number'],['eid','Emirates ID Number'],['eidExpiry','Emirates ID Expiry Date']].forEach(([k,l])=>{if(!r[k])m.push(l+' Missing');});if(r.twpStatus==='Approved'){if(!r.twpCard)m.push('TWP Card Number Missing');if(!r.twpExpiry)m.push('TWP Card Expiry Date Missing');}return m;}
 function sceAllDates(r){const a=[['Passport',r.passport,r.passportExpiry],['Emirates ID',r.eid,r.eidExpiry]];if(r.twpStatus==='Approved')a.push(['TWP Card',r.twpCard,r.twpExpiry]);(r.certificates||[]).forEach(c=>a.push([c.name==='Other'?(c.otherName||'Other Certificate'):c.name,c.number,c.expiryDate]));return a.filter(x=>x[2]);}
@@ -1745,7 +1848,7 @@ function sceOverallExpiry(r){const states=sceAllDates(r).map(x=>scExpiryState(x[
 function sceDateHtml(date){if(!date)return '<span class="sce-missing">Missing</span>';const s=scExpiryState(date),d=scDays(date),label=s==='expired'?`Expired ${Math.abs(d)}d`:s==='soon'?`${d}d left`:'Valid';return `<span class="sce-${s}">${scEscape(date)}<br><small>${label}</small></span>`;}
 function filterScEmployees(kind){document.getElementById('sceStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';document.getElementById('sceExpiryFilter').value=['soon','expired','missing'].includes(kind)?kind:'all';renderScEmployees();document.getElementById('sceTableBody').scrollIntoView({behavior:'smooth'});}
 function deleteScEmployee(id){const r=scEmployees.find(x=>x.id===id);if(r&&confirm(`Delete employee ${r.name}?`)){scEmployees=scEmployees.filter(x=>x.id!==id);scePersist();renderScEmployees();}}
-function renderScEmployees(){refreshSceCompanyOptions();const q=sceNorm(document.getElementById('sceSearch')?.value),cf=document.getElementById('sceCompanyFilter')?.value||'all',sf=document.getElementById('sceStatusFilter')?.value||'all',tf=document.getElementById('sceTwpFilter')?.value||'all',ef=document.getElementById('sceExpiryFilter')?.value||'all';document.getElementById('sceTotal').textContent=scEmployees.length;document.getElementById('sceActive').textContent=scEmployees.filter(x=>x.workingStatus==='Active').length;document.getElementById('sceInactive').textContent=scEmployees.filter(x=>x.workingStatus==='Inactive').length;document.getElementById('sceSoon').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='soon').length;document.getElementById('sceExpired').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='expired').length;document.getElementById('sceMissing').textContent=scEmployees.filter(x=>sceMissingFields(x).length).length;const rows=scEmployees.filter(x=>{const hay=sceNorm([x.name,x.code,sceCompanyName(x.companyId),x.trade,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));});document.getElementById('sceTableBody').innerHTML=rows.map(x=>{const certs=(x.certificates||[]).map(c=>`<div>${scEscape(c.name==='Other'?(c.otherName||'Other'):c.name)}: ${scEscape(c.number||'-')}<br>${sceDateHtml(c.expiryDate)}</div>`).join('')||'<span class="muted">None</span>';return `<tr><td><b>${scEscape(x.name)}</b></td><td><b>${scEscape(x.code)}</b></td><td>${scEscape(sceCompanyName(x.companyId))}</td><td>${scEscape(x.trade)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.passport)}<br>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.eid)}<br>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${x.workingStatus}</span></td><td>${scEscape(x.twpStatus)}${x.twpStatus==='Approved'?`<br>${scEscape(x.twpCard)}<br>${sceDateHtml(x.twpExpiry)}`:''}</td><td class="sce-doc-list">${certs}</td><td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td></tr>`;}).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor employee records found.</td></tr>';}
+function renderScEmployees(){refreshSceCompanyOptions();const q=sceNorm(document.getElementById('sceSearch')?.value),cf=document.getElementById('sceCompanyFilter')?.value||'all',sf=document.getElementById('sceStatusFilter')?.value||'all',tf=document.getElementById('sceTwpFilter')?.value||'all',ef=document.getElementById('sceExpiryFilter')?.value||'all';document.getElementById('sceTotal').textContent=scEmployees.length;document.getElementById('sceActive').textContent=scEmployees.filter(x=>x.workingStatus==='Active').length;document.getElementById('sceInactive').textContent=scEmployees.filter(x=>x.workingStatus==='Inactive').length;document.getElementById('sceSoon').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='soon').length;document.getElementById('sceExpired').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='expired').length;document.getElementById('sceMissing').textContent=scEmployees.filter(x=>sceMissingFields(x).length).length;const rows=scEmployees.filter(x=>{const hay=sceNorm([x.name,x.code,sceCompanyName(x.companyId),x.trade,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));});document.getElementById('sceTableBody').innerHTML=rows.map(x=>{const certs=(x.certificates||[]).map(c=>`<div>${scEscape(c.name==='Other'?(c.otherName||'Other'):c.name)}: ${scEscape(c.number||'-')}<br>${sceDateHtml(c.expiryDate)}</div>`).join('')||'<span class="muted">None</span>';return `<tr><td><div class="employee-name-with-photo">${employeePhotoHtml(x.photo,x.name)}<b>${scEscape(x.name)}</b></div></td><td><b>${scEscape(x.code)}</b></td><td>${scEscape(sceCompanyName(x.companyId))}</td><td>${scEscape(x.trade)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.passport)}<br>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.eid)}<br>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${x.workingStatus}</span></td><td>${scEscape(x.twpStatus)}${x.twpStatus==='Approved'?`<br>${scEscape(x.twpCard)}<br>${sceDateHtml(x.twpExpiry)}`:''}</td><td class="sce-doc-list">${certs}</td><td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td></tr>`;}).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor employee records found.</td></tr>';}
 
 function getFilteredScEmployees(){
   const q=sceNorm(document.getElementById('sceSearch')?.value);
@@ -1815,7 +1918,7 @@ function exportScEmployeesPDF(){
   w.document.close();
 }
 
-document.getElementById('scEmployeeForm').addEventListener('submit',function(e){e.preventDefault();const data={name:sceName.value.trim(),code:sceCode.value.trim(),companyId:sceCompany.value,trade:sceTrade.value.trim(),nationality:sceNationality.value.trim(),mobile:sceMobile.value.trim(),passport:scePassport.value.trim(),passportExpiry:scePassportExpiry.value,visa:sceVisa.value.trim(),unified:sceUnified.value.trim(),eid:sceEid.value.trim(),eidExpiry:sceEidExpiry.value,workingStatus:sceWorkingStatus.value,twpStatus:sceTwpStatus.value,twpCard:sceTwpStatus.value==='Approved'?sceTwpCard.value.trim():'',twpExpiry:sceTwpStatus.value==='Approved'?sceTwpExpiry.value:'',twpFileName:sceTwpUpload.files[0]?.name||'',certificates:readSceCertificates()};document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const checks=[['code','sceCode','Employee Code'],['passport','scePassport','Passport Number'],['unified','sceUnified','Unified Number'],['eid','sceEid','Emirates ID Number'],['twpCard','sceTwpCard','TWP Card Number']];const dup=[];checks.forEach(([k,id,l])=>{if(data[k]&&scEmployees.some(x=>x.id!==sceEditingId&&sceNorm(x[k])===sceNorm(data[k]))){dup.push(l);document.getElementById(id).classList.add('sce-duplicate');}});if(dup.length){const existing=scEmployees.find(x=>checks.some(([k])=>data[k]&&sceNorm(x[k])===sceNorm(data[k])));const box=document.getElementById('sceFormError');box.textContent=`Duplicate ${dup.join(', ')}. Existing employee: ${existing?.name||''} (${existing?.code||''}). Record cannot be saved.`;box.classList.add('show');return;}const old=sceEditingId?scEmployees.find(x=>x.id===sceEditingId):null;const rec={...(old||{}),...data,id:sceEditingId||String(Date.now()),updatedAt:new Date().toLocaleString()};scEmployees=sceEditingId?scEmployees.map(x=>x.id===sceEditingId?rec:x):[...scEmployees,rec];scePersist();closeScEmployeeForm();renderScEmployees();});
+document.getElementById('scEmployeeForm').addEventListener('submit',async function(e){e.preventDefault();const oldPhoto=sceEditingId?(scEmployees.find(x=>x.id===sceEditingId)?.photo||''):'';const photo=scePhoto.files[0]?await fileToDataUrl(scePhoto.files[0]):oldPhoto;const data={photo,name:sceName.value.trim(),code:sceCode.value.trim(),companyId:sceCompany.value,trade:sceTrade.value.trim(),nationality:sceNationality.value.trim(),mobile:sceMobile.value.trim(),passport:scePassport.value.trim(),passportExpiry:scePassportExpiry.value,visa:sceVisa.value.trim(),unified:sceUnified.value.trim(),eid:sceEid.value.trim(),eidExpiry:sceEidExpiry.value,workingStatus:sceWorkingStatus.value,twpStatus:sceTwpStatus.value,twpCard:sceTwpStatus.value==='Approved'?sceTwpCard.value.trim():'',twpExpiry:sceTwpStatus.value==='Approved'?sceTwpExpiry.value:'',twpFileName:sceTwpUpload.files[0]?.name||'',certificates:readSceCertificates()};document.querySelectorAll('#scEmployeeForm .sce-duplicate').forEach(x=>x.classList.remove('sce-duplicate'));const checks=[['code','sceCode','Employee Code'],['passport','scePassport','Passport Number'],['unified','sceUnified','Unified Number'],['eid','sceEid','Emirates ID Number'],['twpCard','sceTwpCard','TWP Card Number']];const dup=[];checks.forEach(([k,id,l])=>{if(data[k]&&scEmployees.some(x=>x.id!==sceEditingId&&sceNorm(x[k])===sceNorm(data[k]))){dup.push(l);document.getElementById(id).classList.add('sce-duplicate');}});if(dup.length){const existing=scEmployees.find(x=>checks.some(([k])=>data[k]&&sceNorm(x[k])===sceNorm(data[k])));const box=document.getElementById('sceFormError');box.textContent=`Duplicate ${dup.join(', ')}. Existing employee: ${existing?.name||''} (${existing?.code||''}). Record cannot be saved.`;box.classList.add('show');return;}const old=sceEditingId?scEmployees.find(x=>x.id===sceEditingId):null;const rec={...(old||{}),...data,id:sceEditingId||String(Date.now()),updatedAt:new Date().toLocaleString()};scEmployees=sceEditingId?scEmployees.map(x=>x.id===sceEditingId?rec:x):[...scEmployees,rec];scePersist();closeScEmployeeForm();renderScEmployees();});
 
 window.addEventListener('load',()=>{try{renderSubcontractors();refreshSceCompanyOptions();renderScEmployees();}catch(e){console.error(e);}});
 </script>
@@ -1964,7 +2067,7 @@ function sitePersist(){localStorage.setItem(SITE_STORAGE_KEY,JSON.stringify(site
 function siteToday(){return new Date().toISOString().slice(0,10)}
 function siteMonth(d){return String(d||'').slice(0,7)}
 function siteCompanyName(id){return (typeof subcontractors!=='undefined'&&subcontractors.find(x=>String(x.id)===String(id))?.name)||''}
-function siteAllEmployees(){const own=(employees||[]).map(e=>({key:'EMP:'+e.id,source:'company',ref:e,id:e.id,code:e.employeeId,name:e.nameEnglish,type:'Company Employee',subcontractor:'',trade:e.designation||e.visaTrade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));const subs=(typeof scEmployees==='undefined'?[]:scEmployees).map(e=>({key:'SUB:'+e.id,source:'subcontractor',ref:e,id:e.id,code:e.code,name:e.name,type:'Subcontractor Employee',subcontractor:siteCompanyName(e.companyId),trade:e.trade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));return own.concat(subs)}
+function siteAllEmployees(){const own=(employees||[]).map(e=>({key:'EMP:'+e.id,source:'company',ref:e,id:e.id,code:e.employeeId,name:e.nameEnglish,photo:e.photo||'',type:'Company Employee',subcontractor:'',trade:e.designation||e.visaTrade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));const subs=(typeof scEmployees==='undefined'?[]:scEmployees).map(e=>({key:'SUB:'+e.id,source:'subcontractor',ref:e,id:e.id,code:e.code,name:e.name,photo:e.photo||'',type:'Subcontractor Employee',subcontractor:siteCompanyName(e.companyId),trade:e.trade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));return own.concat(subs)}
 function siteEmployeeByKey(key){return siteAllEmployees().find(e=>e.key===key)}
 function siteActiveRecords(){return siteRecords.filter(r=>!r.demobilizationDate)}
 function siteClientName(id){return (typeof clientRecords!=='undefined'&&clientRecords.find(x=>String(x.id)===String(id))?.name)||''}
@@ -1975,7 +2078,7 @@ function showSiteModule(name){document.querySelectorAll('.site-module').forEach(
 function siteRefreshDropdowns(){const cf=document.getElementById('siteClientFilter'),mc=document.getElementById('siteMobClient');const clients=Array.isArray(clientRecords)?clientRecords:[],opts=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cf){const v=cf.value;cf.innerHTML='<option value="all">All Clients</option>'+opts;cf.value=[...cf.options].some(o=>o.value===v)?v:'all'}if(mc){const v=mc.value;mc.innerHTML='<option value="">Select Client</option>'+opts;mc.value=[...mc.options].some(o=>o.value===v)?v:''}siteClientChanged();if(mc&&!mc.value){if(siteMobProject)siteMobProject.innerHTML='<option value="">Select Project</option>';if(siteMobLocation)siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}}
 function siteClientChanged(){const c=document.getElementById('siteClientFilter')?.value||'all',p=document.getElementById('siteProjectFilter');if(!p)return;const v=p.value;p.innerHTML='<option value="all">All Projects</option>'+projectRecords.filter(x=>c==='all'||String(x.clientId)===String(c)).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');p.value=[...p.options].some(o=>o.value===v)?v:'all'}
 function openSiteMobilization(){siteSelectedEmployee=null;document.getElementById('siteMobilizeForm').reset();siteMobHours.value=10;siteSelectedEmployeeKey.value='';siteEmployeeInfo.classList.add('hidden');siteEmployeeCodeSearch.value='';siteRefreshDropdowns();siteMobDate.value=siteToday();document.getElementById('siteMobilizeModal').classList.add('show')}
-function siteFindEmployee(){const code=siteEmployeeCodeSearch.value.trim().toLowerCase(),e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}const active=siteActiveRecords().find(r=>r.employeeKey===e.key);if(active){alert(`Employee is already mobilized.\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nDemobilize the employee before assigning another site.`);return}siteSelectedEmployee=e;siteSelectedEmployeeKey.value=e.key;siteMobCraft.value=e.trade;siteEmployeeInfo.innerHTML=`<b>${esc(e.name)} (${esc(e.code)})</b><br>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;siteEmployeeInfo.classList.remove('hidden')}
+function siteFindEmployee(){const code=siteEmployeeCodeSearch.value.trim().toLowerCase(),e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}const active=siteActiveRecords().find(r=>r.employeeKey===e.key);if(active){alert(`Employee is already mobilized.\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nDemobilize the employee before assigning another site.`);return}siteSelectedEmployee=e;siteSelectedEmployeeKey.value=e.key;siteMobCraft.value=e.trade;siteEmployeeInfo.innerHTML=`<div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.name)}<b>${esc(e.name)} (${esc(e.code)})</b></div>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;siteEmployeeInfo.classList.remove('hidden')}
 function siteMobClientChanged(){const cid=siteMobClient.value;siteMobProject.innerHTML='<option value="">Select Project</option>'+projectRecords.filter(p=>String(p.clientId)===String(cid)).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}
 function siteMobProjectChanged(){const p=siteProject(siteMobProject.value);siteMobLocation.innerHTML='<option value="">Select Site Location</option>'+(p?.location?`<option value="${esc(p.location)}">${esc(p.location)}</option>`:'');if(p?.location)siteMobLocation.value=p.location}
 function saveSiteMobilization(e){e.preventDefault();const emp=siteEmployeeByKey(siteSelectedEmployeeKey.value);if(!emp){alert('Search and select an employee first.');return}if(siteActiveRecords().some(r=>r.employeeKey===emp.key)){alert('This employee is already active at another site. Demobilize first.');return}const p=siteProject(siteMobProject.value),c=clientRecords.find(x=>String(x.id)===String(siteMobClient.value));if(!c||!p||!siteMobLocation.value||!siteMobDate.value){alert('Client, Project, Site Location and Mobilization Date are mandatory.');return}if(String(p.clientId)!==String(c.id)){alert('Selected project does not belong to selected client.');return}const duplicate=siteRecords.some(r=>r.employeeKey===emp.key&&r.clientId===c.id&&r.projectId===p.id&&r.siteLocation===siteMobLocation.value&&r.mobilizationDate===siteMobDate.value);if(duplicate){alert('Duplicate mobilization record cannot be saved.');return}siteRecords.unshift({id:String(Date.now()),employeeKey:emp.key,employeeCode:emp.code,employeeName:emp.name,employeeType:emp.type,subcontractorCompany:emp.subcontractor,trade:siteMobCraft.value.trim(),nationality:emp.nationality,clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:siteMobLocation.value,mobilizationDate:siteMobDate.value,demobilizationDate:'',lastWorkingDate:'',demobilizationReason:'',rate:Number(siteMobRate.value||0),hoursPerDay:Number(siteMobHours.value||0),accommodation:siteMobAccommodation.value,food:siteMobFood.value,remarks:siteMobRemarks.value.trim(),workingStatus:'Active',siteStatus:'On Site',createdAt:new Date().toISOString()});siteSetEmployeeStatus(emp.key,'Active','On Site');sitePersist();closeModal('siteMobilizeModal');renderSiteDashboard();showSiteModule('mobilized')}

@@ -753,12 +753,14 @@ th{background:#edf3f8;color:#294d6a}
             <input id="scSearch" class="input grow" placeholder="Search name, code, license, VAT, contact..." oninput="renderSubcontractors()">
             <select id="scStatusFilter" class="input" onchange="renderSubcontractors()"><option value="all">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
             <select id="scExpiryFilter" class="input" onchange="renderSubcontractors()"><option value="all">All License Status</option><option value="soon">Expiring Within 30 Days</option><option value="expired">Expired</option><option value="valid">Valid</option></select>
+            <button class="btn success" onclick="exportSubcontractorsExcel()">Export Excel</button>
+            <button class="btn light" onclick="exportSubcontractorsPDF()">Export PDF</button>
             <button class="btn primary" onclick="openSubcontractorForm()">+ Add Subcontractor</button>
           </div>
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Code</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
+              <thead><tr><th>Name</th><th>Subcontractor Code</th><th>Type of Business</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
               <tbody id="scTableBody"></tbody>
             </table>
           </div>
@@ -800,7 +802,9 @@ th{background:#edf3f8;color:#294d6a}
           <form id="subcontractorForm">
             <div class="subcontractor-form-grid">
               <div class="form-group"><label>Subcontractor Name *</label><input id="scName" class="input" required></div>
-              <div class="form-group"><label>Subcontractor Code *</label><input id="scCode" class="input" required></div>
+              <div class="form-group"><label>Subcontractor Code *</label><input id="scCode" class="input" required readonly title="Generated automatically by the system"></div>
+              <div class="form-group"><label>Type of Business *</label><select id="scBusinessType" class="input" required onchange="toggleScOtherBusiness()"><option value="">Select Type of Business</option><option>Manpower Supply</option><option>Scaffolding Services</option><option>Equipment Rental</option><option>Transportation Services</option><option>Material Supplier</option><option>Camp Services</option><option>Medical Services</option><option>Other</option></select></div>
+              <div id="scOtherBusinessGroup" class="form-group hidden"><label>Other Type of Business *</label><input id="scOtherBusiness" class="input" placeholder="Enter Type of Business"></div>
               <div class="form-group"><label>Trade License Number *</label><input id="scLicense" class="input" required></div>
               <div class="form-group"><label>Trade License Expiry Date *</label><input id="scLicenseExpiry" type="date" class="input" required></div>
               <div class="form-group"><label>VAT Registration Number *</label><input id="scVat" class="input" required></div>
@@ -1799,6 +1803,22 @@ function scEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<
 function scDays(date){if(!date)return null;const d=new Date(date+'T00:00:00');const t=new Date();t.setHours(0,0,0,0);return Math.ceil((d-t)/86400000);}
 function scExpiryState(date){const d=scDays(date);if(d===null)return 'valid';if(d<0)return 'expired';if(d<=30)return 'soon';return 'valid';}
 function scPersist(){localStorage.setItem(SUBCONTRACTOR_STORAGE_KEY,JSON.stringify(subcontractors));}
+function generateSubcontractorCode(){
+  const maxNumber=subcontractors.reduce((max,r)=>{
+    const match=String(r.code||'').match(/^RG-(\d+)$/i);
+    return match?Math.max(max,parseInt(match[1],10)||0):max;
+  },0);
+  return `RG-${String(maxNumber+1).padStart(4,'0')}`;
+}
+function toggleScOtherBusiness(){
+  const isOther=document.getElementById('scBusinessType').value==='Other';
+  document.getElementById('scOtherBusinessGroup').classList.toggle('hidden',!isOther);
+  document.getElementById('scOtherBusiness').required=isOther;
+  if(!isOther)document.getElementById('scOtherBusiness').value='';
+}
+function getSubcontractorBusinessType(r){
+  return r.businessType==='Other'?(r.otherBusinessType||'Other'):(r.businessType||'');
+}
 function showSubcontractorModule(module){
   document.getElementById('scCompaniesModule').classList.toggle('hidden',module!=='companies');
   document.getElementById('scEmployeesModule').classList.toggle('hidden',module!=='employees');
@@ -1814,8 +1834,9 @@ function openSubcontractorForm(id=null){
   document.getElementById('scFormError').classList.remove('show');
   const r=id?subcontractors.find(x=>x.id===id):null;
   document.getElementById('scFormTitle').textContent=r?'Edit Subcontractor':'Add Subcontractor';
-  const values={scName:r?.name||'',scCode:r?.code||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scContact:r?.contact||'',scMobile:r?.mobile||'',scEmail:r?.email||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
+  const values={scName:r?.name||'',scCode:r?.code||generateSubcontractorCode(),scBusinessType:r?.businessType||'',scOtherBusiness:r?.otherBusinessType||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scContact:r?.contact||'',scMobile:r?.mobile||'',scEmail:r?.email||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
   Object.entries(values).forEach(([id,val])=>document.getElementById(id).value=val);
+  toggleScOtherBusiness();
   document.getElementById('subcontractorModal').classList.add('show');
 }
 function closeSubcontractorForm(){document.getElementById('subcontractorModal').classList.remove('show');scEditingId=null;}
@@ -1840,21 +1861,22 @@ function renderSubcontractors(){
   document.getElementById('scSoon').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='soon').length;
   document.getElementById('scExpired').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='expired').length;
   const rows=subcontractors.filter(x=>{
-    const hay=[x.name,x.code,x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
     return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
   });
   document.getElementById('scTableBody').innerHTML=rows.map(x=>{
     const state=scExpiryState(x.licenseExpiry),days=scDays(x.licenseExpiry);
     const label=state==='expired'?`Expired ${Math.abs(days)} day(s) ago`:state==='soon'?`${days} day(s) remaining`:'Valid';
-    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scEscape(x.contact)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.email)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
-  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
+    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(getSubcontractorBusinessType(x))}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scEscape(x.contact)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.email)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
+  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
 }
 
 document.getElementById('subcontractorForm').addEventListener('submit',function(e){
   e.preventDefault();
-  const data={name:scName.value.trim(),code:scCode.value.trim(),license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contact:scContact.value.trim(),mobile:scMobile.value.trim(),email:scEmail.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
+  const selectedBusinessType=scBusinessType.value;
+  const data={name:scName.value.trim(),code:scEditingId?scCode.value.trim():generateSubcontractorCode(),businessType:selectedBusinessType,otherBusinessType:selectedBusinessType==='Other'?scOtherBusiness.value.trim():'',license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contact:scContact.value.trim(),mobile:scMobile.value.trim(),email:scEmail.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
   document.querySelectorAll('#subcontractorForm .subcontractor-duplicate').forEach(x=>x.classList.remove('subcontractor-duplicate'));
-  const checks=[['code','scCode','Subcontractor Code'],['license','scLicense','Trade License Number'],['vat','scVat','VAT Registration Number']];
+  const checks=[['license','scLicense','Trade License Number'],['vat','scVat','VAT Registration Number']];
   const duplicateFields=[];
   checks.forEach(([key,id,label])=>{if(data[key]&&subcontractors.some(x=>x.id!==scEditingId&&String(x[key]).toLowerCase()===data[key].toLowerCase())){duplicateFields.push(label);document.getElementById(id).classList.add('subcontractor-duplicate');}});
   if(duplicateFields.length){const box=document.getElementById('scFormError');box.textContent='Duplicate entry found: '+duplicateFields.join(', ')+'. Record cannot be saved.';box.classList.add('show');return;}
@@ -1863,6 +1885,39 @@ document.getElementById('subcontractorForm').addEventListener('submit',function(
   subcontractors=scEditingId?subcontractors.map(x=>x.id===scEditingId?record:x):[...subcontractors,record];
   scPersist();closeSubcontractorForm();renderSubcontractors();
 });
+
+function subcontractorExportRows(){
+  return subcontractors.map(x=>({
+    'Subcontractor Name':x.name||'',
+    'Subcontractor Code':x.code||'',
+    'Type of Business':getSubcontractorBusinessType(x),
+    'Trade License Number':x.license||'',
+    'Trade License Expiry Date':x.licenseExpiry||'',
+    'VAT Registration Number':x.vat||'',
+    'Contact Person':x.contact||'',
+    'Mobile Number':x.mobile||'',
+    'Email Address':x.email||'',
+    'ICV Status':x.icv||'',
+    'Working Status':x.workingStatus||''
+  }));
+}
+function exportSubcontractorsExcel(){
+  const rows=subcontractorExportRows();
+  if(!rows.length){alert('No subcontractor data to export.');return;}
+  const headers=Object.keys(rows[0]);
+  const table=`<table border="1"><thead><tr>${headers.map(h=>`<th>${scEscape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${scEscape(r[h])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  downloadBlob(new Blob(['\ufeff',table],{type:'application/vnd.ms-excel'}),'Subcontractor_List.xls');
+}
+function exportSubcontractorsPDF(){
+  const rows=subcontractorExportRows();
+  if(!rows.length){alert('No subcontractor data to export.');return;}
+  const headers=Object.keys(rows[0]);
+  const table=`<table><thead><tr>${headers.map(h=>`<th>${scEscape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${scEscape(r[h])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const w=window.open('','_blank');
+  if(!w){alert('Please allow pop-ups to export the PDF.');return;}
+  w.document.write(`<!DOCTYPE html><html><head><title>Subcontractor List</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{text-align:center}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #999;padding:6px;text-align:left}th{background:#eee}@page{size:landscape;margin:10mm}</style></head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script></body></html>`);
+  w.document.close();
+}
 
 // ===== Subcontractor Employee Management =====
 const SC_EMP_STORAGE_KEY='relianceGulfSubcontractorEmployeesV1';

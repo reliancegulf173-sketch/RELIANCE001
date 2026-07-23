@@ -787,7 +787,7 @@ th{background:#edf3f8;color:#294d6a}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Employee Name</th><th>Employee Code</th><th>Subcontractor</th><th>Trade</th><th>Mobile</th><th>Passport</th><th>Emirates ID</th><th>Working Status</th><th>TWP</th><th>Other Certificates</th><th>Missing Information</th><th>Action</th></tr></thead>
+              <thead><tr id="sceTableHeadRow"></tr></thead>
               <tbody id="sceTableBody"></tbody>
             </table>
           </div>
@@ -1962,8 +1962,71 @@ function sceOverallExpiry(r){const states=sceAllDates(r).map(x=>scExpiryState(x[
 function sceDateHtml(date){if(!date)return '<span class="sce-missing">Missing</span>';const s=scExpiryState(date),d=scDays(date),label=s==='expired'?`Expired ${Math.abs(d)}d`:s==='soon'?`${d}d left`:'Valid';return `<span class="sce-${s}">${scEscape(date)}<br><small>${label}</small></span>`;}
 function filterScEmployees(kind){document.getElementById('sceStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';document.getElementById('sceExpiryFilter').value=['soon','expired','missing'].includes(kind)?kind:'all';renderScEmployees();document.getElementById('sceTableBody').scrollIntoView({behavior:'smooth'});}
 function deleteScEmployee(id){const r=scEmployees.find(x=>x.id===id);if(r&&confirm(`Delete employee ${r.name}?`)){scEmployees=scEmployees.filter(x=>x.id!==id);scePersist();renderScEmployees();}}
-function renderScEmployees(){refreshSceCompanyOptions();const q=sceNorm(document.getElementById('sceSearch')?.value),cf=document.getElementById('sceCompanyFilter')?.value||'all',sf=document.getElementById('sceStatusFilter')?.value||'all',tf=document.getElementById('sceTwpFilter')?.value||'all',ef=document.getElementById('sceExpiryFilter')?.value||'all';document.getElementById('sceTotal').textContent=scEmployees.length;document.getElementById('sceActive').textContent=scEmployees.filter(x=>x.workingStatus==='Active').length;document.getElementById('sceInactive').textContent=scEmployees.filter(x=>x.workingStatus==='Inactive').length;document.getElementById('sceSoon').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='soon').length;document.getElementById('sceExpired').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='expired').length;document.getElementById('sceMissing').textContent=scEmployees.filter(x=>sceMissingFields(x).length).length;const rows=scEmployees.filter(x=>{const hay=sceNorm([x.name,x.nameArabic,x.code,sceCompanyName(x.companyId),x.tradeEnglish,x.tradeArabic,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));});document.getElementById('sceTableBody').innerHTML=rows.map(x=>{const certs=(x.certificates||[]).map(c=>`<div>${scEscape(c.name==='Other'?(c.otherName||'Other'):c.name)}: ${scEscape(c.number||'-')}<br>${sceDateHtml(c.expiryDate)}</div>`).join('')||'<span class="muted">None</span>';return `<tr><td><div class="employee-name-with-photo">${employeePhotoHtml(x.photo,x.name)}<b>${scEscape(x.name)}</b></div></td><td><b>${scEscape(x.code)}</b></td><td>${scEscape(sceCompanyName(x.companyId))}</td><td>${scEscape(x.tradeEnglish||x.trade||'')}<br><span dir="rtl">${scEscape(x.tradeArabic||'')}</span></td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.passport)}<br>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.eid)}<br>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${x.workingStatus}</span></td><td>${scEscape(x.twpStatus)}${x.twpStatus==='Approved'?`<br>${scEscape(x.twpCard)}<br>${sceDateHtml(x.twpExpiry)}`:''}</td><td class="sce-doc-list">${certs}</td><td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td></tr>`;}).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor employee records found.</td></tr>';}
+function sceCertificateCell(c={}){
+  if(!c || !(c.name||c.number||c.issueDate||c.expiryDate||c.fileName)) return '';
+  const name=c.name==='Other'?(c.otherName||'Other'):(c.name||'');
+  return [
+    name?`<b>${scEscape(name)}</b>`:'',
+    c.type?`Type: ${scEscape(c.type)}`:'',
+    c.number?`No.: ${scEscape(c.number)}`:'',
+    c.issueDate?`Issue: ${sceDateHtml(c.issueDate)}`:'',
+    c.expiryDate?`Expiry: ${sceDateHtml(c.expiryDate)}`:'',
+    c.fileName?`File: ${scEscape(c.fileName)}`:''
+  ].filter(Boolean).join('<br>');
+}
+function sceCertificateExportText(c={}){
+  if(!c || !(c.name||c.number||c.issueDate||c.expiryDate||c.fileName)) return '';
+  const name=c.name==='Other'?(c.otherName||'Other'):(c.name||'');
+  return [
+    name?`Name: ${name}`:'',
+    c.type?`Type: ${c.type}`:'',
+    c.number?`Number: ${c.number}`:'',
+    c.issueDate?`Issue Date: ${c.issueDate}`:'',
+    c.expiryDate?`Expiry Date: ${c.expiryDate}`:'',
+    c.fileName?`File: ${c.fileName}`:''
+  ].filter(Boolean).join('\n');
+}
+function renderScEmployees(){
+  const q=sceNorm(document.getElementById('sceSearch')?.value);
+  const cf=document.getElementById('sceCompanyFilter')?.value||'all';
+  const sf=document.getElementById('sceStatusFilter')?.value||'all';
+  const tf=document.getElementById('sceTwpFilter')?.value||'all';
+  const ef=document.getElementById('sceExpiryFilter')?.value||'all';
+  document.getElementById('sceTotal').textContent=scEmployees.length;
+  document.getElementById('sceActive').textContent=scEmployees.filter(x=>x.workingStatus==='Active').length;
+  document.getElementById('sceInactive').textContent=scEmployees.filter(x=>x.workingStatus==='Inactive').length;
+  document.getElementById('sceSoon').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='soon').length;
+  document.getElementById('sceExpired').textContent=scEmployees.filter(x=>sceOverallExpiry(x)==='expired').length;
+  document.getElementById('sceMissing').textContent=scEmployees.filter(x=>sceMissingFields(x).length).length;
 
+  const employees=scEmployees.filter(x=>{
+    const hay=sceNorm([x.name,x.nameArabic,x.code,sceCompanyName(x.companyId),x.tradeEnglish,x.tradeArabic,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));
+    return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
+  });
+
+  const maxCertificates=Math.max(1,...employees.map(x=>(x.certificates||[]).length));
+  const baseHeaders=['Employee Name','Name in Arabic','Employee Code','Subcontractor Company','Trade in Arabic','Trade in English','Date of Birth','Blood Type','Nationality','Mobile Number','Passport Number','Passport Expiry Date','Visa Number','Unified Number','Emirates ID Number','Emirates ID Expiry Date','Working Status','TWP Status','TWP Card Number','TWP Card Expiry Date','TWP Card File'];
+  const certHeaders=Array.from({length:maxCertificates},(_,i)=>`Certificate ${i+1}`);
+  const endHeaders=['Missing Information','Last Updated','Action'];
+  document.getElementById('sceTableHeadRow').innerHTML=[...baseHeaders,...certHeaders,...endHeaders].map(h=>`<th>${scEscape(h)}</th>`).join('');
+
+  const rows=employees.map(x=>{
+    const certCells=Array.from({length:maxCertificates},(_,i)=>`<td>${sceCertificateCell((x.certificates||[])[i]||{})}</td>`).join('');
+    return `<tr>
+      <td><div class="employee-name-with-photo">${employeePhotoHtml(x.photo,x.name)}<b>${scEscape(x.name||'')}</b></div></td>
+      <td dir="rtl">${scEscape(x.nameArabic||'')}</td><td><b>${scEscape(x.code||'')}</b></td><td>${scEscape(sceCompanyName(x.companyId)||'')}</td>
+      <td dir="rtl">${scEscape(x.tradeArabic||'')}</td><td>${scEscape(x.tradeEnglish||x.trade||'')}</td><td>${scEscape(x.dob||'')}</td><td>${scEscape(x.bloodType||'')}</td><td>${scEscape(x.nationality||'')}</td>
+      <td>${scEscape(x.mobile||'')}</td><td>${scEscape(x.passport||'')}</td><td>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.visa||'')}</td><td>${scEscape(x.unified||'')}</td>
+      <td>${scEscape(x.eid||'')}</td><td>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus||'')}</span></td>
+      <td>${scEscape(x.twpStatus||'')}</td><td>${scEscape(x.twpCard||'')}</td><td>${sceDateHtml(x.twpExpiry)}</td><td>${scEscape(x.twpFileName||'')}</td>
+      ${certCells}
+      <td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td>
+      <td>${scEscape(x.updatedAt||'')}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td>
+    </tr>`;
+  });
+  const totalColumns=baseHeaders.length+maxCertificates+endHeaders.length;
+  document.getElementById('sceTableBody').innerHTML=rows.join('')||`<tr><td colspan="${totalColumns}" style="text-align:center;padding:28px" class="muted">No subcontractor employee records found.</td></tr>`;
+}
 function getFilteredScEmployees(){
   const q=sceNorm(document.getElementById('sceSearch')?.value);
   const cf=document.getElementById('sceCompanyFilter')?.value||'all';
@@ -1976,47 +2039,21 @@ function getFilteredScEmployees(){
   });
 }
 function scEmployeeExportRows(){
-  // Export only the subcontractor-employee list shown in the Employee section.
-  const rows=[];
-  getFilteredScEmployees().forEach(x=>{
-    const certs=(x.certificates||[]);
-    const max=Math.max(1,certs.length);
-    for(let i=0;i<max;i++){
-      const c=certs[i]||{};
-      rows.push({
-        'Employee Name':x.name||'',
-        'Name in Arabic':x.nameArabic||'',
-        'Employee Code':x.code||'',
-        'Subcontractor Company':sceCompanyName(x.companyId)||'',
-        'Trade in Arabic as per ID Card':x.tradeArabic||'',
-        'Trade in English as per ID Card':x.tradeEnglish||x.trade||'',
-        'Date of Birth':x.dob||'',
-        'Blood Type':x.bloodType||'',
-        'Nationality':x.nationality||'',
-        'Mobile Number':x.mobile||'',
-        'Passport Number':x.passport||'',
-        'Passport Expiry Date':x.passportExpiry||'',
-        'Visa Number':x.visa||'',
-        'Unified Number':x.unified||'',
-        'Emirates ID Number':x.eid||'',
-        'Emirates ID Expiry Date':x.eidExpiry||'',
-        'Working Status':x.workingStatus||'',
-        'TWP Status':x.twpStatus||'',
-        'TWP Card Number':x.twpCard||'',
-        'TWP Card Expiry Date':x.twpExpiry||'',
-        'TWP Card File':x.twpFileName||'',
-        'Certificate Name':c.name==='Other'?(c.otherName||'Other'):(c.name||''),
-        'Certificate Type':c.type||'',
-        'Certificate Number':c.number||'',
-        'Certificate Issue Date':c.issueDate||'',
-        'Certificate Expiry Date':c.expiryDate||'',
-        'Certificate File':c.fileName||'',
-        'Missing Information':sceMissingFields(x).join(', '),
-        'Last Updated':x.updatedAt||''
-      });
-    }
+  const employees=getFilteredScEmployees();
+  const maxCertificates=Math.max(1,...employees.map(x=>(x.certificates||[]).length));
+  return employees.map(x=>{
+    const row={
+      'Employee Name':x.name||'','Name in Arabic':x.nameArabic||'','Employee Code':x.code||'','Subcontractor Company':sceCompanyName(x.companyId)||'',
+      'Trade in Arabic as per ID Card':x.tradeArabic||'','Trade in English as per ID Card':x.tradeEnglish||x.trade||'','Date of Birth':x.dob||'','Blood Type':x.bloodType||'','Nationality':x.nationality||'',
+      'Mobile Number':x.mobile||'','Passport Number':x.passport||'','Passport Expiry Date':x.passportExpiry||'','Visa Number':x.visa||'','Unified Number':x.unified||'',
+      'Emirates ID Number':x.eid||'','Emirates ID Expiry Date':x.eidExpiry||'','Working Status':x.workingStatus||'','TWP Status':x.twpStatus||'',
+      'TWP Card Number':x.twpCard||'','TWP Card Expiry Date':x.twpExpiry||'','TWP Card File':x.twpFileName||''
+    };
+    for(let i=0;i<maxCertificates;i++) row[`Certificate ${i+1}`]=sceCertificateExportText((x.certificates||[])[i]||{});
+    row['Missing Information']=sceMissingFields(x).join(', ');
+    row['Last Updated']=x.updatedAt||'';
+    return row;
   });
-  return rows;
 }
 function exportScEmployeesExcel(){
   const rows=scEmployeeExportRows();

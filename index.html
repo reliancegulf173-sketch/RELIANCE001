@@ -1886,8 +1886,18 @@ document.getElementById('subcontractorForm').addEventListener('submit',function(
   scPersist();closeSubcontractorForm();renderSubcontractors();
 });
 
+function getFilteredSubcontractors(){
+  const q=(document.getElementById('scSearch')?.value||'').toLowerCase();
+  const sf=document.getElementById('scStatusFilter')?.value||'all';
+  const ef=document.getElementById('scExpiryFilter')?.value||'all';
+  return subcontractors.filter(x=>{
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
+    return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
+  });
+}
 function subcontractorExportRows(){
-  return subcontractors.map(x=>({
+  // Export only the subcontractor-company list shown in the Subcontractor section.
+  return getFilteredSubcontractors().map(x=>({
     'Subcontractor Name':x.name||'',
     'Subcontractor Code':x.code||'',
     'Type of Business':getSubcontractorBusinessType(x),
@@ -1962,6 +1972,7 @@ function getFilteredScEmployees(){
   });
 }
 function scEmployeeExportRows(){
+  // Export only the subcontractor-employee list shown in the Employee section.
   const rows=[];
   getFilteredScEmployees().forEach(x=>{
     const certs=(x.certificates||[]);

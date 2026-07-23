@@ -2225,5 +2225,147 @@ document.addEventListener('DOMContentLoaded',()=>{try{if(siteReportMonth)siteRep
 
 </script>
 
+
+<style>
+.date-validation-error{border:2px solid #d93025!important;background:#fff2f2!important;}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const todayISO = () => {
+    const d = new Date();
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 10);
+  };
+
+  const keyOf = (el) => String(el.name || el.id || el.getAttribute('data-field') || '').toLowerCase();
+  const isIssue = (el) => /(?:issue|issued)[_\-\s]*date|date[_\-\s]*(?:issue|issued)/i.test(keyOf(el));
+  const isExpiry = (el) => /(?:expiry|expiration|expire|exp)[_\-\s]*date|date[_\-\s]*(?:expiry|expiration|expire|exp)/i.test(keyOf(el));
+  const baseKey = (el) => keyOf(el)
+    .replace(/(?:issue|issued|expiry|expiration|expire|exp)[_\-\s]*date/g, '')
+    .replace(/date[_\-\s]*(?:issue|issued|expiry|expiration|expire|exp)/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+  function showError(el, message) {
+    el.setCustomValidity(message);
+    el.classList.add('date-validation-error');
+    el.reportValidity();
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+    el.focus();
+  }
+
+  function clearError(el) {
+    el.setCustomValidity('');
+    el.classList.remove('date-validation-error');
+  }
+
+  function findIssueFor(expiry, scope) {
+    const dates = Array.from(scope.querySelectorAll('input[type="date"]'));
+    const expiryBase = baseKey(expiry);
+    let candidates = dates.filter(isIssue);
+    if (expiryBase) {
+      const exact = candidates.find(i => baseKey(i) === expiryBase);
+      if (exact) return exact;
+    }
+    const row = expiry.closest('tr, .row, .form-row, .form-grid, .field-row, .certificate-row, .cicpa-row');
+    if (row) {
+      const nearby = Array.from(row.querySelectorAll('input[type="date"]')).find(isIssue);
+      if (nearby) return nearby;
+    }
+    return candidates.length === 1 ? candidates[0] : null;
+  }
+
+  function validateDates(scope) {
+    const root = scope && scope.querySelectorAll ? scope : document;
+    const dates = Array.from(root.querySelectorAll('input[type="date"]'));
+    const today = todayISO();
+
+    dates.forEach(clearError);
+
+    for (const issue of dates.filter(isIssue)) {
+      issue.max = today;
+      if (issue.value && issue.value > today) {
+        showError(issue, 'Issue Date cannot be a future date.');
+        return false;
+      }
+    }
+
+    for (const expiry of dates.filter(isExpiry)) {
+      const issue = findIssueFor(expiry, root);
+      if (issue && issue.value) {
+        expiry.min = issue.value;
+        if (expiry.value && expiry.value < issue.value) {
+          showError(expiry, 'Expiry Date cannot be earlier than Issue Date.');
+          return false;
+        }
+      } else {
+        expiry.removeAttribute('min');
+      }
+    }
+    return true;
+  }
+
+  function initialize(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    const today = todayISO();
+    scope.querySelectorAll('input[type="date"]').forEach(input => {
+      if (isIssue(input)) input.max = today;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initialize(document);
+    validateDates(document);
+  });
+
+  document.addEventListener('input', function (event) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'date') return;
+    clearError(input);
+    if (isIssue(input)) input.max = todayISO();
+  }, true);
+
+  document.addEventListener('change', function (event) {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'date') return;
+    const form = input.closest('form') || document;
+    validateDates(form);
+  }, true);
+
+  document.addEventListener('submit', function (event) {
+    const form = event.target;
+    if (!validateDates(form)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  document.addEventListener('click', function (event) {
+    const button = event.target.closest('button, input[type="button"], input[type="submit"], a.btn');
+    if (!button) return;
+    const label = String(button.textContent || button.value || button.getAttribute('title') || '').trim();
+    if (!/(save|update|submit|confirm|approve|add record|add employee|renew)/i.test(label)) return;
+    const scope = button.closest('form, .modal, .page, .section, .content') || document;
+    if (!validateDates(scope)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  const observer = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType === 1) initialize(node);
+      });
+    }
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  window.validateAllPortalDates = validateDates;
+})();
+
+</script>
 </body>
 </html>

@@ -454,6 +454,19 @@ th{background:#edf3f8;color:#294d6a}
 @media(max-width:900px){.client-form-grid,.client-detail-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.client-form-grid,.client-detail-grid,.client-doc-grid{grid-template-columns:1fr}}
 </style>
+
+<style>
+/* Multi-portal opening controls */
+.portal-card{cursor:default}
+.portal-card-main{cursor:pointer}
+.portal-open-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
+.portal-open-btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.portal-open-btn.here{background:#123c69;color:#fff}
+.portal-open-btn.new-tab{background:#eef5fb;color:#123c69;border:1px solid #c9dceb}
+.portal-open-btn:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(17,40,64,.14)}
+@media(max-width:560px){.portal-open-actions{flex-direction:column}.portal-open-btn{width:100%}}
+</style>
+
 </head>
 <body>
 
@@ -545,46 +558,73 @@ th{background:#edf3f8;color:#294d6a}
           <div><h2 id="welcomeTitle">Good day</h2><p>Select the portal you want to open.</p></div>
         </div>
         <div class="portal-selector">
-          <div class="portal-card" onclick="openEmployeePortal()">
-            <div class="portal-card-icon">👥</div>
-            <h3>Employee Management Portal</h3>
-            <p>Manage employee records, approvals, missing information, document expiry, notifications and reports.</p>
-            <span class="enter">Open Employee Portal →</span>
+          <div class="portal-card">
+            <div class="portal-card-main" onclick="openEmployeePortal()">
+              <div class="portal-card-icon">👥</div>
+              <h3>Employee Management Portal</h3>
+              <p>Manage employee records, approvals, missing information, document expiry, notifications and reports.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openEmployeePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('employee')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card site" onclick="openSitePortal()">
-            <div class="portal-card-icon">🏗</div>
-            <h3>Site Management Portal</h3>
-            <p>Manage employee mobilization, demobilization, live manpower, site history, notifications and professional reports.</p>
-            <div style="margin:10px 0"><span class="pill approved">ACTIVE</span></div>
-            <span class="enter">Open Site Portal →</span>
+          <div class="portal-card site">
+            <div class="portal-card-main" onclick="openSitePortal()">
+              <div class="portal-card-icon">🏗</div>
+              <h3>Site Management Portal</h3>
+              <p>Manage employee mobilization, demobilization, live manpower, site history, notifications and professional reports.</p>
+              <div style="margin:10px 0"><span class="pill approved">ACTIVE</span></div>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openSitePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('site')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card cicpa-card" onclick="openCicpaPortal()">
-            <div class="portal-card-icon">🪪</div>
-            <h3>CICPA Management Portal</h3>
-            <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
-            <span class="enter">Open CICPA Portal →</span>
+          <div class="portal-card cicpa-card">
+            <div class="portal-card-main" onclick="openCicpaPortal()">
+              <div class="portal-card-icon">🪪</div>
+              <h3>CICPA Management Portal</h3>
+              <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openCicpaPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('cicpa')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card subcontractor-card" onclick="openSubcontractorPortal()">
-            <div class="portal-card-icon">🤝</div>
-            <h3>Subcontractor Management Portal</h3>
-            <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
-            <span class="enter">Open Subcontractor Portal →</span>
+          <div class="portal-card subcontractor-card">
+            <div class="portal-card-main" onclick="openSubcontractorPortal()">
+              <div class="portal-card-icon">🤝</div>
+              <h3>Subcontractor Management Portal</h3>
+              <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openSubcontractorPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('subcontractor')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card leave-card" onclick="openLeavePortal()">
-            <div class="portal-card-icon">🏖️</div>
-            <h3>Leave Management Portal</h3>
-            <p>Manage worker leave, paid and unpaid days, return dates, notifications, history and reports.</p>
-            <span class="enter">Open Leave Portal →</span>
+          <div class="portal-card leave-card">
+            <div class="portal-card-main" onclick="openLeavePortal()">
+              <div class="portal-card-icon">🏖️</div>
+              <h3>Leave Management Portal</h3>
+              <p>Manage worker leave, paid and unpaid days, return dates, notifications, history and reports.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openLeavePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('leave')">Open in New Tab ↗</button>
+            </div>
           </div>
-
-          <div class="portal-card client-card" onclick="openClientPortal()">
-            <div class="portal-card-icon">🏢</div>
-            <h3>Client Management Portal</h3>
-            <p>Manage clients, trade-license documents, linked projects, expiry alerts, reports and activity history.</p>
-            <span class="enter">Open Client Portal →</span>
+          <div class="portal-card client-card">
+            <div class="portal-card-main" onclick="openClientPortal()">
+              <div class="portal-card-icon">🏢</div>
+              <h3>Client Management Portal</h3>
+              <p>Manage clients, trade-license documents, linked projects, expiry alerts, reports and activity history.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openClientPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('client')">Open in New Tab ↗</button>
+            </div>
           </div>
-
-
         </div>
       </section>
 
@@ -2502,6 +2542,46 @@ document.addEventListener('DOMContentLoaded',()=>{try{if(siteReportMonth)siteRep
 
 
 document.addEventListener('DOMContentLoaded',()=>{const cf=document.getElementById('cicpaForm'),lf=document.getElementById('loaForm');if(cf)cf.addEventListener('submit',saveCicpaForm);if(lf)lf.addEventListener('submit',saveLoaForm);document.getElementById('cicpaSearch')?.addEventListener('input',renderCicpa);document.getElementById('cicpaStatusFilter')?.addEventListener('change',renderCicpa);document.getElementById('loaSearch')?.addEventListener('input',renderLoas);document.getElementById('loaStatusFilter')?.addEventListener('change',renderLoas);document.getElementById('loaTotal')?.addEventListener('input',updateLoaBalance);document.getElementById('loaUsedInput')?.addEventListener('input',updateLoaBalance);document.getElementById('cicpaEmployeeSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findCicpaEmployee()}});renderCicpaHome();renderCicpaLocationManagement()});
+
+// Open any ERP portal in a separate browser tab while keeping the current portal open.
+function openPortalInNewTab(portalName){
+  const url = new URL(window.location.href);
+  url.searchParams.set('portal', portalName);
+  const newTab = window.open(url.toString(), '_blank', 'noopener');
+  if(!newTab){
+    alert('Your browser blocked the new tab. Please allow pop-ups for this ERP page.');
+  }
+}
+
+function openRequestedPortalFromUrl(){
+  const portal = new URLSearchParams(window.location.search).get('portal');
+  if(!portal) return;
+  const portalMap = {
+    employee: 'openEmployeePortal',
+    site: 'openSitePortal',
+    cicpa: 'openCicpaPortal',
+    subcontractor: 'openSubcontractorPortal',
+    leave: 'openLeavePortal',
+    client: 'openClientPortal'
+  };
+  const functionName = portalMap[String(portal).toLowerCase()];
+  if(!functionName) return;
+
+  // Wait until the ERP has completed its normal login/session initialization.
+  let attempts = 0;
+  const timer = setInterval(function(){
+    attempts++;
+    const appVisible = document.querySelector('.app') && getComputedStyle(document.querySelector('.app')).display !== 'none';
+    if(typeof window[functionName] === 'function' && (appVisible || attempts > 10)){
+      clearInterval(timer);
+      window[functionName]();
+    }else if(attempts >= 40){
+      clearInterval(timer);
+    }
+  }, 150);
+}
+document.addEventListener('DOMContentLoaded', openRequestedPortalFromUrl);
+
 </script>
 </body>
 </html>

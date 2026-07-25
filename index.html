@@ -505,7 +505,7 @@ th{background:#edf3f8;color:#294d6a}
       <div class="sub">Sign in to Employee ERP Portal</div>
       <div class="field">
         <label>Username</label>
-        <input id="loginUser" autocomplete="username" placeholder="Enter username">
+        <input id="loginUser" autocomplete="email" autocomplete="username" placeholder="Enter username">
       </div>
       <div class="field">
         <label>Password</label>
@@ -1113,77 +1113,197 @@ th{background:#edf3f8;color:#294d6a}
   </div>
 </div>
 
+<!-- Firebase live database and authentication -->
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
 <script>
-const users={
-  admin:{password:'admin123',name:'Admin',role:'Admin'},
-  adminmanager:{password:'Prince@123',name:'Prince',role:'Admin Manager'}
+const firebaseConfig = {
+  apiKey: "AIzaSyABML2qARFciXXylkeCvyAjWRuvAoUcrBs",
+  authDomain: "reliance-gulf-erp.firebaseapp.com",
+  databaseURL: "https://reliance-gulf-erp-default-rtdb.firebaseio.com",
+  projectId: "reliance-gulf-erp",
+  storageBucket: "reliance-gulf-erp.firebasestorage.app",
+  messagingSenderId: "671890858126",
+  appId: "1:671890858126:web:7c92334893b81cf8afa9df",
+  measurementId: "G-5Y6XLSSNVX"
 };
+firebase.initializeApp(firebaseConfig);
+const firebaseAuth = firebase.auth();
+const firebaseDb = firebase.firestore();
+
+const CLOUD_DATA_KEYS = [
+  'rg_employees_v3','rg_notifications_v3','rg_cicpa_records_v3','rg_cicpa_locations_v2','rg_cicpa_loa_v1',
+  'rg_subcontractors_v1','relianceGulfSubcontractorEmployeesV1','rg_leave_records_v1','rg_leave_types_v1',
+  'rg_clients_v1','rg_client_projects_v1','rg_client_activity_v1','rg_site_mobilizations_v1'
+];
+const nativeLocalSetItem = localStorage.setItem.bind(localStorage);
+const nativeLocalRemoveItem = localStorage.removeItem.bind(localStorage);
+let cloudApplying = false;
+let cloudReady = false;
+let cloudUnsubscribe = null;
+let cloudWriteTimer = null;
+const pendingCloudWrites = {};
+
+function cloudToast(message, isError=false){
+  console[isError?'error':'log']('[Firebase]', message);
+  const el=document.getElementById('loginMsg');
+  if(el && !document.getElementById('loginScreen').classList.contains('hidden')) el.textContent=message;
+}
+
+function refreshAppFromCloud(){
+  try{
+    if(typeof readStoredArray==='function'){
+      if(typeof EMPLOYEE_STORAGE_KEY!=='undefined') employees=readStoredArray(EMPLOYEE_STORAGE_KEY);
+      if(typeof NOTIFICATION_STORAGE_KEY!=='undefined') notifications=readStoredArray(NOTIFICATION_STORAGE_KEY);
+      if(typeof CICPA_STORAGE_KEY!=='undefined') cicpaRecords=readStoredArray(CICPA_STORAGE_KEY);
+      if(typeof CICPA_LOCATION_STORAGE_KEY!=='undefined') managedCicpaLocations=readStoredArray(CICPA_LOCATION_STORAGE_KEY);
+      if(typeof CICPA_LOA_STORAGE_KEY!=='undefined') cicpaLoas=readStoredArray(CICPA_LOA_STORAGE_KEY);
+      if(typeof SUBCONTRACTOR_STORAGE_KEY!=='undefined') subcontractors=readStoredArray(SUBCONTRACTOR_STORAGE_KEY);
+      if(typeof SC_EMP_STORAGE_KEY!=='undefined') scEmployees=readStoredArray(SC_EMP_STORAGE_KEY);
+      if(typeof LEAVE_STORAGE_KEY!=='undefined') leaveRecords=readStoredArray(LEAVE_STORAGE_KEY);
+      if(typeof LEAVE_TYPES_KEY!=='undefined') leaveTypes=readStoredArray(LEAVE_TYPES_KEY);
+      if(typeof CLIENT_STORAGE_KEY!=='undefined') clientRecords=readStoredArray(CLIENT_STORAGE_KEY);
+      if(typeof PROJECT_STORAGE_KEY!=='undefined') projectRecords=readStoredArray(PROJECT_STORAGE_KEY);
+      if(typeof CLIENT_HISTORY_KEY!=='undefined') clientActivities=readStoredArray(CLIENT_HISTORY_KEY);
+      if(typeof SITE_STORAGE_KEY!=='undefined') siteRecords=readStoredArray(SITE_STORAGE_KEY);
+    }
+    if(typeof renderDashboard==='function') renderDashboard();
+    if(typeof renderEmployeeList==='function') renderEmployeeList();
+    if(typeof renderCicpaDashboard==='function') renderCicpaDashboard();
+    if(typeof scRender==='function') scRender();
+    if(typeof sceRender==='function') sceRender();
+    if(typeof leaveRender==='function') leaveRender();
+    if(typeof renderClientDashboard==='function') renderClientDashboard();
+    if(typeof renderSiteDashboard==='function') renderSiteDashboard();
+  }catch(err){ console.warn('Cloud refresh warning:',err); }
+}
+
+async function flushCloudWrites(){
+  if(!cloudReady || !firebaseAuth.currentUser) return;
+  const payload={};
+  Object.assign(payload,pendingCloudWrites);
+  Object.keys(pendingCloudWrites).forEach(k=>delete pendingCloudWrites[k]);
+  if(!Object.keys(payload).length) return;
+  payload.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
+  payload.updatedBy=firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid;
+  try{ await firebaseDb.collection('erp').doc('sharedData').set(payload,{merge:true}); }
+  catch(err){ console.error('Cloud save failed:',err); cloudToast('Cloud save failed: '+err.message,true); }
+}
+function queueCloudWrite(key,value){
+  if(!CLOUD_DATA_KEYS.includes(key) || cloudApplying) return;
+  pendingCloudWrites[key]=value;
+  clearTimeout(cloudWriteTimer);
+  cloudWriteTimer=setTimeout(flushCloudWrites,250);
+}
+localStorage.setItem=function(key,value){
+  nativeLocalSetItem(key,String(value));
+  queueCloudWrite(key,String(value));
+};
+localStorage.removeItem=function(key){
+  nativeLocalRemoveItem(key);
+  if(CLOUD_DATA_KEYS.includes(key) && !cloudApplying){
+    pendingCloudWrites[key]=firebase.firestore.FieldValue.delete();
+    clearTimeout(cloudWriteTimer);
+    cloudWriteTimer=setTimeout(flushCloudWrites,250);
+  }
+};
+
+async function startCloudSync(){
+  if(!firebaseAuth.currentUser) return;
+  const ref=firebaseDb.collection('erp').doc('sharedData');
+  const snap=await ref.get();
+  cloudApplying=true;
+  try{
+    if(snap.exists){
+      const data=snap.data()||{};
+      CLOUD_DATA_KEYS.forEach(key=>{ if(typeof data[key]==='string') nativeLocalSetItem(key,data[key]); });
+    }else{
+      const seed={createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:firebaseAuth.currentUser.email||firebaseAuth.currentUser.uid};
+      CLOUD_DATA_KEYS.forEach(key=>{ const v=localStorage.getItem(key); if(v!==null) seed[key]=v; });
+      await ref.set(seed,{merge:true});
+    }
+  }finally{ cloudApplying=false; }
+  cloudReady=true;
+  refreshAppFromCloud();
+  if(cloudUnsubscribe) cloudUnsubscribe();
+  cloudUnsubscribe=ref.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const data=doc.data()||{};
+    let changed=false;
+    cloudApplying=true;
+    try{
+      CLOUD_DATA_KEYS.forEach(key=>{
+        if(typeof data[key]==='string' && localStorage.getItem(key)!==data[key]){
+          nativeLocalSetItem(key,data[key]); changed=true;
+        }
+      });
+    }finally{ cloudApplying=false; }
+    if(changed) refreshAppFromCloud();
+  },err=>cloudToast('Live sync error: '+err.message,true));
+}
+window.firebaseBridge={auth:firebaseAuth,db:firebaseDb,startCloudSync};
+</script>
+
+<script>
 let currentUser=null;
-function login(){
-  const u=document.getElementById('loginUser').value.trim().toLowerCase();
-  const p=document.getElementById('loginPass').value;
-  const user=users[u];
-  if(!user||user.password!==p){
-    document.getElementById('loginMsg').textContent='Invalid username or password.';
-    return;
+async function login(){
+  const email=document.getElementById('loginUser').value.trim().toLowerCase();
+  const password=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');
+  if(!email || !password){ msg.textContent='Please enter email and password.'; return; }
+  msg.textContent='Signing in...';
+  try{
+    const persistence=document.getElementById('keepSignedIn').checked
+      ? firebase.auth.Auth.Persistence.LOCAL
+      : firebase.auth.Auth.Persistence.SESSION;
+    await firebaseAuth.setPersistence(persistence);
+    const credential=await firebaseAuth.signInWithEmailAndPassword(email,password);
+    currentUser={username:email,email,name:(email.split('@')[0]||'User').replace(/[._-]+/g,' '),role:'Admin',uid:credential.user.uid};
+    if(document.getElementById('rememberMe').checked){
+      localStorage.setItem('rg_saved_username',email);
+      localStorage.setItem('rg_remember_me','true');
+    }else{
+      localStorage.removeItem('rg_saved_username');
+      localStorage.removeItem('rg_remember_me');
+    }
+    document.getElementById('loginPass').value='';
+    msg.textContent='Loading live ERP data...';
+    await startCloudSync();
+    msg.textContent='';
+    applyUser();
+  }catch(error){
+    console.error(error);
+    const friendly={
+      'auth/invalid-credential':'Invalid email or password.',
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/too-many-requests':'Too many attempts. Please try again later.',
+      'auth/network-request-failed':'Network error. Please check your internet connection.'
+    };
+    msg.textContent=friendly[error.code]||('Login failed: '+error.message);
   }
-
-  currentUser={username:u,...user};
-  document.getElementById('loginMsg').textContent='';
-
-  const rememberMe=document.getElementById('rememberMe').checked;
-  const keepSignedIn=document.getElementById('keepSignedIn').checked;
-
-  if(rememberMe){
-    localStorage.setItem('rg_saved_username',u);
-    localStorage.setItem('rg_saved_password',p);
-    localStorage.setItem('rg_remember_me','true');
-  }else{
-    localStorage.removeItem('rg_saved_username');
-    localStorage.removeItem('rg_saved_password');
-    localStorage.removeItem('rg_remember_me');
-  }
-
-  if(keepSignedIn){
-    localStorage.setItem('rg_current_user',JSON.stringify(currentUser));
-    localStorage.setItem('rg_keep_signed_in','true');
-    sessionStorage.removeItem('rg_current_user');
-  }else{
-    sessionStorage.setItem('rg_current_user',JSON.stringify(currentUser));
-    localStorage.removeItem('rg_current_user');
-    localStorage.removeItem('rg_keep_signed_in');
-  }
-
-  applyUser();
 }
 function applyUser(){
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('portalApp').classList.remove('hidden');
-  document.getElementById('currentUserName').textContent=currentUser.name;
+  const displayName=currentUser.name.replace(/\b\w/g,c=>c.toUpperCase());
+  document.getElementById('currentUserName').textContent=displayName;
   document.getElementById('currentUserRole').textContent=currentUser.role;
-  document.getElementById('avatarText').textContent=currentUser.name.charAt(0).toUpperCase();
-  document.getElementById('welcomeTitle').textContent='Good day, '+currentUser.name;
+  document.getElementById('avatarText').textContent=displayName.charAt(0).toUpperCase();
+  document.getElementById('welcomeTitle').textContent='Good day, '+displayName;
   document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
-  document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',currentUser.role!=='Admin Manager'));
+  document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',false));
   showPage('dashboard');
   renderDashboard();
 }
-function logout(){
-  sessionStorage.removeItem('rg_current_user');
-  localStorage.removeItem('rg_current_user');
-  localStorage.removeItem('rg_keep_signed_in');
+async function logout(){
+  if(cloudUnsubscribe){cloudUnsubscribe();cloudUnsubscribe=null;}
+  cloudReady=false;
+  await firebaseAuth.signOut();
   currentUser=null;
   document.getElementById('portalApp').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
-
-  if(localStorage.getItem('rg_remember_me')==='true'){
-    document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
-    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
-    document.getElementById('rememberMe').checked=true;
-  }else{
-    document.getElementById('loginPass').value='';
-  }
-
+  document.getElementById('loginPass').value='';
   document.getElementById('keepSignedIn').checked=false;
 }
 function togglePassword(){
@@ -1191,44 +1311,19 @@ function togglePassword(){
   const btn=document.getElementById('passwordToggleBtn');
   const showing=p.type==='text';
   p.type=showing?'password':'text';
-  if(btn){
-    btn.textContent=showing?'👁️':'🙈';
-    btn.setAttribute('aria-label',showing?'Show password':'Hide password');
-  }
+  if(btn){btn.textContent=showing?'👁️':'🙈';btn.setAttribute('aria-label',showing?'Show password':'Hide password');}
 }
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-
 (function restoreLoginState(){
-  const remembered=localStorage.getItem('rg_remember_me')==='true';
-  if(remembered){
+  if(localStorage.getItem('rg_remember_me')==='true'){
     document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
-    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
     document.getElementById('rememberMe').checked=true;
   }
-
-  const persistentUser=localStorage.getItem('rg_current_user');
-  const sessionUser=sessionStorage.getItem('rg_current_user');
-
-  if(localStorage.getItem('rg_keep_signed_in')==='true' && persistentUser){
-    try{
-      currentUser=JSON.parse(persistentUser);
-      document.getElementById('keepSignedIn').checked=true;
-      applyUser();
-      return;
-    }catch(error){
-      localStorage.removeItem('rg_current_user');
-      localStorage.removeItem('rg_keep_signed_in');
-    }
-  }
-
-  if(sessionUser){
-    try{
-      currentUser=JSON.parse(sessionUser);
-      applyUser();
-    }catch(error){
-      sessionStorage.removeItem('rg_current_user');
-    }
-  }
+  firebaseAuth.onAuthStateChanged(async user=>{
+    if(!user || currentUser) return;
+    currentUser={username:user.email,email:user.email,name:(user.email||'User').split('@')[0].replace(/[._-]+/g,' '),role:'Admin',uid:user.uid};
+    try{await startCloudSync();applyUser();}catch(err){document.getElementById('loginMsg').textContent='Unable to load cloud data: '+err.message;}
+  });
 })();
 
 const fields=[

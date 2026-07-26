@@ -546,18 +546,24 @@ th{background:#edf3f8;color:#294d6a}
 </style>
 
 
-<style id="unc-visible-fixed-style">
-.uncv-card{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:13px;min-height:101px;padding:14px 16px;border:1px solid #d9e7f3;border-radius:16px;background:#fff;text-align:left;color:#102a43;cursor:pointer;box-shadow:0 7px 17px rgba(25,61,94,.07);transition:.2s}
-.uncv-card:hover{transform:translateY(-3px);border-color:#80b9e9;box-shadow:0 14px 27px rgba(25,61,94,.14)}
-.uncv-card>span{display:grid;place-items:center;width:50px;height:50px;border-radius:15px;background:#eaf4ff;font-size:25px}
-.uncv-card b{display:block;font-size:15px;margin-bottom:6px;color:#102a43}.uncv-card small{display:block;color:#61788f;font-size:12px}.uncv-card strong{font-size:25px;color:#e11d48}.uncv-card em{position:absolute;right:15px;bottom:9px;color:#0874d1;font-size:12px;font-weight:800;font-style:normal}
-#uncVisibleModal{display:none;position:fixed;inset:0;z-index:999999;background:rgba(2,18,34,.7);padding:24px;overflow:auto;backdrop-filter:blur(5px)}
-#uncVisibleModal.show{display:flex;align-items:flex-start;justify-content:center}
-.uncv-dialog{width:min(1100px,96vw);margin:auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
-.uncv-dialog-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:linear-gradient(135deg,#062c4e,#0a65a5);color:#fff}.uncv-dialog-head h2{margin:0;color:#fff}.uncv-dialog-head button{width:40px;height:40px;border:0;border-radius:11px;background:rgba(255,255,255,.15);color:#fff;font-size:27px;cursor:pointer}
-.uncv-dialog-body{padding:18px}.uncv-summary{margin-bottom:12px;padding:11px 14px;border-radius:11px;background:#eef7ff;color:#16466e;font-weight:800}
-@media(max-width:1080px){#uncVisibleGrid{grid-template-columns:repeat(2,minmax(240px,1fr))!important}}
-@media(max-width:650px){#uncVisibleGrid{grid-template-columns:1fr!important;padding:12px!important}.uncv-card{min-height:94px}}
+<style id="unc-final-css">
+#universalNotificationCenterFinal.unc-final{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ position:relative!important;width:100%!important;height:auto!important;
+ margin:22px 0 28px!important;background:#f7fbff!important;
+ border:1px solid #b9d8ef!important;border-radius:22px!important;
+ overflow:hidden!important;box-shadow:0 16px 40px rgba(10,55,91,.14)!important;
+ z-index:1!important;
+}
+.unc-final-header{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:16px!important;padding:21px 23px!important;background:linear-gradient(135deg,#062c4e,#0874b9)!important;color:#fff!important}
+.unc-final-header h2{margin:4px 0!important;color:#fff!important;font-size:25px!important}.unc-final-header p{margin:0!important;color:#d9efff!important}.unc-final-kicker{font-size:11px!important;font-weight:900!important;letter-spacing:1.7px!important;color:#80dcff!important}
+.unc-final-badge{display:grid!important;place-items:center!important;min-width:48px!important;height:48px!important;padding:0 10px!important;border-radius:15px!important;background:#ef4444!important;color:#fff!important;font-size:20px!important;font-weight:900!important}
+.unc-final-grid{display:grid!important;grid-template-columns:repeat(3,minmax(240px,1fr))!important;gap:14px!important;padding:18px!important}
+.unc-final-card{display:grid!important;grid-template-columns:52px minmax(0,1fr) auto!important;align-items:center!important;gap:13px!important;min-height:98px!important;padding:14px 16px!important;background:#fff!important;border:1px solid #d7e6f2!important;border-radius:16px!important;box-shadow:0 7px 17px rgba(25,61,94,.07)!important;cursor:pointer!important;transition:.2s!important;color:#102a43!important}
+.unc-final-card:hover{transform:translateY(-3px)!important;border-color:#72afe0!important;box-shadow:0 14px 28px rgba(25,61,94,.15)!important}
+.unc-final-card>span{display:grid!important;place-items:center!important;width:50px!important;height:50px!important;border-radius:15px!important;background:#eaf4ff!important;font-size:25px!important}.unc-final-card b{display:block!important;color:#102a43!important;font-size:15px!important;margin-bottom:6px!important}.unc-final-card small{display:block!important;color:#657d95!important;font-size:12px!important}.unc-final-card strong{color:#e11d48!important;font-size:25px!important}
+@media(max-width:1080px){.unc-final-grid{grid-template-columns:repeat(2,minmax(230px,1fr))!important}}
+@media(max-width:650px){.unc-final-grid{grid-template-columns:1fr!important;padding:12px!important}.unc-final-header{align-items:flex-start!important}.unc-final-card{min-height:92px!important}}
 </style>
 
 </head>
@@ -651,36 +657,33 @@ th{background:#edf3f8;color:#294d6a}
           <div><h2 id="welcomeTitle">Good day</h2><p>Select the portal you want to open.</p></div>
         </div>
 
-<div id="uncVisiblePanel" style="display:block!important;visibility:visible!important;opacity:1!important;margin:22px 0 28px;border:1px solid #bcd8ef;border-radius:22px;background:#f7fbff;box-shadow:0 16px 38px rgba(12,55,91,.14);overflow:hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 22px;background:linear-gradient(135deg,#062c4e,#0a65a5);color:white">
+<!-- UNIVERSAL NOTIFICATION CENTER: ALWAYS VISIBLE -->
+<section id="universalNotificationCenterFinal" class="unc-final">
+  <div class="unc-final-header">
     <div>
-      <div style="font-size:11px;font-weight:900;letter-spacing:1.7px;color:#7cdbff">LIVE ERP MONITORING</div>
-      <h2 style="margin:5px 0 4px;color:white;font-size:25px">🔔 Universal Notification Center <span id="uncVisibleTotal" style="display:inline-grid;place-items:center;min-width:29px;height:29px;padding:0 8px;background:#ef4444;border-radius:999px;font-size:13px">0</span></h2>
-      <div style="color:#d8efff;font-weight:600">Expiry alerts, leave movements and manpower status</div>
+      <div class="unc-final-kicker">LIVE ERP MONITORING</div>
+      <h2>🔔 Universal Notification Center</h2>
+      <p>Expiry alerts, leave movements and current manpower status</p>
     </div>
-    <button type="button" onclick="renderUNCVisible()" style="border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:white;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer">↻ Refresh</button>
+    <div class="unc-final-badge" id="uncFinalTotal">0</div>
   </div>
 
-  <div id="uncVisibleGrid" style="display:grid;grid-template-columns:repeat(3,minmax(250px,1fr));gap:14px;padding:18px">
-    <button class="uncv-card" onclick="openUNCVisible('cicpa')"><span>🪪</span><div><b>CICPA Expiring</b><small>Within 30 Days</small></div><strong id="uncvCicpa">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('passport')"><span>🛂</span><div><b>Passport Expiring</b><small>Within 30 Days</small></div><strong id="uncvPassport">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('visa')"><span>📗</span><div><b>Visa Expiring</b><small>Within 30 Days</small></div><strong id="uncvVisa">0</strong><em>View →</em></button>
-
-    <button class="uncv-card" onclick="openUNCVisible('emirates')"><span>🪪</span><div><b>Emirates ID Expiring</b><small>Within 30 Days</small></div><strong id="uncvEmirates">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('medical')"><span>🩺</span><div><b>Medical Expiring</b><small>Within 30 Days</small></div><strong id="uncvMedical">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('ata')"><span>🎓</span><div><b>ATA Training Expiring</b><small>Within 30 Days</small></div><strong id="uncvAta">0</strong><em>View →</em></button>
-
-    <button class="uncv-card" onclick="openUNCVisible('twp')"><span>🛡️</span><div><b>TWP Expiring</b><small>Within 30 Days</small></div><strong id="uncvTwp">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('labour')"><span>💳</span><div><b>Labour Card Expiring</b><small>Within 30 Days</small></div><strong id="uncvLabour">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('return7')"><span>🛬</span><div><b>Leave Return</b><small>Within 7 Days</small></div><strong id="uncvReturn7">0</strong><em>View →</em></button>
-
-    <button class="uncv-card" onclick="openUNCVisible('going7')"><span>🛫</span><div><b>Going on Leave</b><small>Within 7 Days</small></div><strong id="uncvGoing7">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('onsite')"><span>🏗️</span><div><b>Manpower On Site</b><small>Currently Mobilized</small></div><strong id="uncvOnsite">0</strong><em>View →</em></button>
-    <button class="uncv-card" onclick="openUNCVisible('onleave')"><span>🧳</span><div><b>Employees On Leave</b><small>Current Status</small></div><strong id="uncvOnleave">0</strong><em>View →</em></button>
-
-    <button class="uncv-card" onclick="openUNCVisible('idle')"><span>👷</span><div><b>Employees Idle</b><small>Available Manpower</small></div><strong id="uncvIdle">0</strong><em>View →</em></button>
+  <div class="unc-final-grid">
+    <div class="unc-final-card" onclick="uncFinalOpen('CICPA Expiring Within 30 Days','cicpa')"><span>🪪</span><div><b>CICPA Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalCicpa">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Passport Expiring Within 30 Days','passport')"><span>🛂</span><div><b>Passport Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalPassport">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Visa Expiring Within 30 Days','visa')"><span>📗</span><div><b>Visa Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalVisa">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Emirates ID Expiring Within 30 Days','emirates')"><span>🪪</span><div><b>Emirates ID Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalEmirates">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Medical Expiring Within 30 Days','medical')"><span>🩺</span><div><b>Medical Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalMedical">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('ATA Training Expiring Within 30 Days','ata')"><span>🎓</span><div><b>ATA Training Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalAta">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('TWP Expiring Within 30 Days','twp')"><span>🛡️</span><div><b>TWP Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalTwp">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Labour Card Expiring Within 30 Days','labour')"><span>💳</span><div><b>Labour Card Expiring</b><small>Within 30 Days</small></div><strong id="uncFinalLabour">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Leave Return Within 7 Days','return7')"><span>🛬</span><div><b>Leave Return</b><small>Within 7 Days</small></div><strong id="uncFinalReturn7">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Going on Leave Within 7 Days','going7')"><span>🛫</span><div><b>Going on Leave</b><small>Within 7 Days</small></div><strong id="uncFinalGoing7">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Manpower On Site','onsite')"><span>🏗️</span><div><b>Manpower On Site</b><small>Currently Mobilized</small></div><strong id="uncFinalOnsite">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Employees On Leave','onleave')"><span>🧳</span><div><b>Employees On Leave</b><small>Current Status</small></div><strong id="uncFinalOnleave">0</strong></div>
+    <div class="unc-final-card" onclick="uncFinalOpen('Employees Idle','idle')"><span>👷</span><div><b>Employees Idle</b><small>Available Manpower</small></div><strong id="uncFinalIdle">0</strong></div>
   </div>
-</div>
+</section>
 
         <div class="portal-selector">
           <div class="portal-card">
@@ -2045,78 +2048,46 @@ function exportExcel(){
 
   const table='<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c[1])}</th>`).join('')+'</tr></thead><tbody>'+data.map(employee=>'<tr>'+cols.map(c=>`<td>${esc(cellValue(employee,c[0]))}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
   const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Reliance Gulf Employee List</h2>${table}
-<div id="uncVisibleModal" onclick="if(event.target===this)closeUNCVisible()">
-  <div class="uncv-dialog">
-    <div class="uncv-dialog-head"><h2 id="uncvModalTitle">Notification Details</h2><button type="button" onclick="closeUNCVisible()">×</button></div>
-    <div class="uncv-dialog-body">
-      <div class="uncv-summary" id="uncvSummary"></div>
-      <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Company</th><th>Designation / Type</th><th>Date / Status</th><th>Details</th></tr></thead><tbody id="uncvBody"></tbody></table></div>
-    </div>
-  </div>
-</div>
-
-
-<script id="unc-visible-fixed-script">
-(function(){
- const D=86400000;
- const dt=v=>{if(!v)return null;const d=new Date(String(v).slice(0,10)+'T00:00:00');return isNaN(d)?null:d};
- const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
- const days=v=>{const d=dt(v);return d?Math.round((d-today())/D):999999};
- const within=(v,n)=>{const x=days(v);return x>=0&&x<=n};
- const safe=v=>typeof esc==='function'?esc(v??'-'):String(v??'-');
- function data(){
-   const es=typeof employees!=='undefined'&&Array.isArray(employees)?employees:[];
-   const ls=typeof leaveRecords!=='undefined'&&Array.isArray(leaveRecords)?leaveRecords:[];
-   const cs=typeof cicpaRecords!=='undefined'&&Array.isArray(cicpaRecords)?cicpaRecords:[];
-   const emp=code=>es.find(e=>String(e.employeeId||'').trim()===String(code||'').trim())||{};
-   const cert=(e,field,words)=>e?.[field]||((Array.isArray(e?.additionalCertificates)?e.additionalCertificates:[]).find(c=>words.some(w=>String(c.name||'').toLowerCase().includes(w)))?.expiryDate||'');
-   const row=(e,date,detail,type)=>({name:e.nameEnglish||e.employeeName||'',code:e.employeeId||'',company:e.company||'',type:type||e.designation||'',date,detail});
-   return {
-    cicpa:cs.filter(r=>within(r.expiryDate||r.expiry||r.cicpaExpiry,30)).map(r=>{const e=emp(r.employeeId||r.employeeCode);return {name:r.employeeName||e.nameEnglish||'',code:r.employeeId||r.employeeCode||'',company:r.company||e.company||'',type:'CICPA',date:r.expiryDate||r.expiry||r.cicpaExpiry||'',detail:r.cicpaNumber||r.number||'CICPA pass'}}),
-    passport:es.filter(e=>within(e.passportExpiry,30)).map(e=>row(e,e.passportExpiry,'Passport expiring')),
-    visa:es.filter(e=>within(e.visaExpiry||e.residenceExpiry||e.ioleExpiry,30)).map(e=>row(e,e.visaExpiry||e.residenceExpiry||e.ioleExpiry,'Visa / residence expiring')),
-    emirates:es.filter(e=>within(e.idExpiry,30)).map(e=>row(e,e.idExpiry,'Emirates ID expiring')),
-    medical:es.filter(e=>within(e.adnocMedicalExpiry||e.medicalExpiry,30)).map(e=>row(e,e.adnocMedicalExpiry||e.medicalExpiry,'Medical expiring')),
-    ata:es.filter(e=>within(cert(e,'ataExpiry',['ata']),30)).map(e=>row(e,cert(e,'ataExpiry',['ata']),'ATA Training expiring')),
-    twp:es.filter(e=>within(cert(e,'twpExpiry',['twp','third party']),30)).map(e=>row(e,cert(e,'twpExpiry',['twp','third party']),'TWP expiring')),
-    labour:es.filter(e=>within(e.labourExpiry,30)).map(e=>row(e,e.labourExpiry,'Labour Card expiring')),
-    return7:ls.filter(r=>r.status!=='Rejected'&&within(r.rejoiningDate,7)).map(r=>({name:r.employeeName,code:r.employeeId,company:r.company,type:r.leaveType,date:r.rejoiningDate,detail:'Returning from leave'})),
-    going7:ls.filter(r=>r.status!=='Rejected'&&within(r.startDate,7)).map(r=>({name:r.employeeName,code:r.employeeId,company:r.company,type:r.leaveType,date:r.startDate,detail:'Going on leave'})),
-    onsite:es.filter(e=>e.siteStatus==='On Site').map(e=>row(e,'On Site',e.currentSiteName||'Active site assignment')),
-    onleave:es.filter(e=>e.siteStatus==='On Leave').map(e=>row(e,e.leaveRejoiningDate||'Not Rejoined Yet','Currently on leave')),
-    idle:es.filter(e=>e.siteStatus==='Idle').map(e=>row(e,'Idle','Available manpower'))
-   };
- }
- const meta={
-  cicpa:['CICPA Expiring Within 30 Days','uncvCicpa'],passport:['Passport Expiring Within 30 Days','uncvPassport'],visa:['Visa Expiring Within 30 Days','uncvVisa'],
-  emirates:['Emirates ID Expiring Within 30 Days','uncvEmirates'],medical:['Medical Expiring Within 30 Days','uncvMedical'],ata:['ATA Training Expiring Within 30 Days','uncvAta'],
-  twp:['TWP Expiring Within 30 Days','uncvTwp'],labour:['Labour Card Expiring Within 30 Days','uncvLabour'],return7:['Leave Return Within 7 Days','uncvReturn7'],
-  going7:['Going on Leave Within 7 Days','uncvGoing7'],onsite:['Manpower On Site','uncvOnsite'],onleave:['Employees On Leave','uncvOnleave'],idle:['Employees Idle','uncvIdle']
+<script id="unc-final-js">
+function uncFinalDate(v){if(!v)return null;const d=new Date(String(v).slice(0,10)+'T00:00:00');return isNaN(d.getTime())?null:d}
+function uncFinalDays(v){const d=uncFinalDate(v),t=new Date();t.setHours(0,0,0,0);return d?Math.round((d-t)/86400000):999999}
+function uncFinalWithin(v,n){const x=uncFinalDays(v);return x>=0&&x<=n}
+function uncFinalEmployees(){try{return Array.isArray(employees)?employees:[]}catch(e){return []}}
+function uncFinalLeaves(){try{return Array.isArray(leaveRecords)?leaveRecords:[]}catch(e){return []}}
+function uncFinalCicpas(){try{return Array.isArray(cicpaRecords)?cicpaRecords:[]}catch(e){return []}}
+function uncFinalRows(){
+ const es=uncFinalEmployees(),ls=uncFinalLeaves(),cs=uncFinalCicpas();
+ const cert=(e,f,words)=>e[f]||((Array.isArray(e.additionalCertificates)?e.additionalCertificates:[]).find(c=>words.some(w=>String(c.name||'').toLowerCase().includes(w)))?.expiryDate||'');
+ return {
+  cicpa:cs.filter(r=>uncFinalWithin(r.expiryDate||r.expiry||r.cicpaExpiry,30)),
+  passport:es.filter(e=>uncFinalWithin(e.passportExpiry,30)),
+  visa:es.filter(e=>uncFinalWithin(e.visaExpiry||e.residenceExpiry||e.ioleExpiry,30)),
+  emirates:es.filter(e=>uncFinalWithin(e.idExpiry,30)),
+  medical:es.filter(e=>uncFinalWithin(e.adnocMedicalExpiry||e.medicalExpiry,30)),
+  ata:es.filter(e=>uncFinalWithin(cert(e,'ataExpiry',['ata']),30)),
+  twp:es.filter(e=>uncFinalWithin(cert(e,'twpExpiry',['twp','third party']),30)),
+  labour:es.filter(e=>uncFinalWithin(e.labourExpiry,30)),
+  return7:ls.filter(r=>r.status!=='Rejected'&&uncFinalWithin(r.rejoiningDate,7)),
+  going7:ls.filter(r=>r.status!=='Rejected'&&uncFinalWithin(r.startDate,7)),
+  onsite:es.filter(e=>e.siteStatus==='On Site'),
+  onleave:es.filter(e=>e.siteStatus==='On Leave'),
+  idle:es.filter(e=>e.siteStatus==='Idle')
  };
- window.renderUNCVisible=function(){
-   const panel=document.getElementById('uncVisiblePanel');if(!panel)return;
-   panel.style.display='block';panel.style.visibility='visible';panel.style.opacity='1';
-   const rows=data();let total=0;
-   Object.entries(meta).forEach(([k,m])=>{const n=rows[k].length;const el=document.getElementById(m[1]);if(el)el.textContent=n;total+=n});
-   document.getElementById('uncVisibleTotal').textContent=total;window.__uncVisibleRows=rows;
- };
- window.openUNCVisible=function(k){
-   const rows=(window.__uncVisibleRows||data())[k]||[],title=meta[k]?.[0]||'Notification Details';
-   document.getElementById('uncvModalTitle').textContent=title;
-   document.getElementById('uncvSummary').textContent=rows.length+' record(s) found.';
-   document.getElementById('uncvBody').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${safe(r.name)}</b><br><small>${safe(r.code)}</small></td><td>${safe(r.company)}</td><td>${safe(r.type)}</td><td><b>${safe(r.date)}</b></td><td>${safe(r.detail)}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:30px">No matching records found.</td></tr>';
-   document.getElementById('uncVisibleModal').classList.add('show');
- };
- window.closeUNCVisible=()=>document.getElementById('uncVisibleModal')?.classList.remove('show');
- document.addEventListener('DOMContentLoaded',()=>setTimeout(renderUNCVisible,250));
- setTimeout(renderUNCVisible,500);
- setInterval(renderUNCVisible,60000);
-})();
-</script>
-
-
-<script>
-new MutationObserver(()=>{const d=document.getElementById('dashboard');if(d&&d.classList.contains('active')&&typeof renderUNCVisible==='function')setTimeout(renderUNCVisible,30)}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+}
+function uncFinalRender(){
+ const ids={cicpa:'uncFinalCicpa',passport:'uncFinalPassport',visa:'uncFinalVisa',emirates:'uncFinalEmirates',medical:'uncFinalMedical',ata:'uncFinalAta',twp:'uncFinalTwp',labour:'uncFinalLabour',return7:'uncFinalReturn7',going7:'uncFinalGoing7',onsite:'uncFinalOnsite',onleave:'uncFinalOnleave',idle:'uncFinalIdle'};
+ const rows=uncFinalRows();let total=0;
+ Object.keys(ids).forEach(k=>{const n=rows[k].length;const el=document.getElementById(ids[k]);if(el)el.textContent=n;total+=n});
+ const t=document.getElementById('uncFinalTotal');if(t)t.textContent=total;
+ window.uncFinalData=rows;
+}
+function uncFinalOpen(title,key){
+ const rows=(window.uncFinalData||uncFinalRows())[key]||[];
+ alert(title+'\n\n'+rows.length+' record(s) found.');
+}
+document.addEventListener('DOMContentLoaded',()=>setTimeout(uncFinalRender,300));
+setTimeout(uncFinalRender,700);
+setInterval(uncFinalRender,60000);
 </script>
 
 </body></html>`;

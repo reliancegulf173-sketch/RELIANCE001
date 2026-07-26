@@ -290,6 +290,33 @@ td.expiry-date-soon,
 }
 
 
+
+
+/* Improved CICPA LOA form design */
+#loaModal{align-items:flex-start;overflow-y:auto;padding:20px;background:rgba(8,23,36,.68)}
+#loaModal .modal-box{position:relative;width:min(980px,96vw);max-height:calc(100vh - 40px);overflow-y:auto;overflow-x:hidden;margin:auto;background:#f6f9fc;border-radius:22px;padding:0;box-shadow:0 28px 90px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.35)}
+#loaModal .modal-close{position:absolute;top:18px;right:18px;z-index:6;border:1px solid rgba(255,255,255,.5);width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;font-size:24px;line-height:1;backdrop-filter:blur(5px)}
+#loaModal .modal-close:hover{background:#fff;color:var(--navy2)}
+.loa-form-header{padding:26px 74px 24px 28px;background:linear-gradient(135deg,var(--navy2),var(--blue));color:#fff;border-radius:22px 22px 0 0}
+.loa-form-header .eyebrow{display:inline-block;margin-bottom:7px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.15);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.loa-form-header h2{margin:0;font-size:27px;line-height:1.2;color:#fff}
+.loa-form-header p{margin:8px 0 0;color:rgba(255,255,255,.82);font-size:13px}
+.loa-form-body{padding:24px 28px 8px}
+.loa-section{background:#fff;border:1px solid #dfe7ef;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(17,40,64,.06)}
+.loa-section-title{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #e8eef4;color:var(--navy2);font-size:16px}
+.loa-section-title span{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#eaf3fb;color:var(--blue);font-size:15px}
+#loaModal .loa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+#loaModal .form-group.full{grid-column:1/-1}
+#loaModal .form-group label{font-size:12px;font-weight:800;color:#334b5f;margin-bottom:7px}
+#loaModal .input{width:100%;min-height:44px;border:1px solid #cfdae5;border-radius:11px;padding:11px 12px;background:#fbfdff;transition:.18s ease}
+#loaModal textarea.input{min-height:96px;resize:vertical}
+#loaModal .input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(31,111,168,.12)}
+#loaModal #loaBalanceInput{background:#eef8f2;color:#176b43;font-weight:900;border-color:#bfe2ce}
+#loaModal .loa-help{display:block;margin-top:5px;font-size:11px;color:var(--muted)}
+#loaModal .loa-form-actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;padding:16px 28px 20px;background:linear-gradient(to top,#f6f9fc 75%,rgba(246,249,252,.25));z-index:4}
+#loaModal .loa-form-actions .btn{min-width:120px}
+@media(max-width:700px){#loaModal{padding:8px}#loaModal .modal-box{width:100%;max-height:calc(100vh - 16px);border-radius:16px}.loa-form-header{padding:22px 62px 20px 18px;border-radius:16px 16px 0 0}.loa-form-header h2{font-size:22px}.loa-form-body{padding:16px 14px 4px}#loaModal .loa-grid{grid-template-columns:1fr}.loa-section{padding:14px}#loaModal .loa-form-actions{padding:14px;flex-direction:column-reverse}#loaModal .loa-form-actions .btn{width:100%}}
+
 /* Subcontractor Management Portal */
 .subcontractor-card:before{background:rgba(22,163,74,.12)!important}
 .subcontractor-card .portal-card-icon{background:linear-gradient(135deg,#166534,#22c55e)!important}
@@ -406,6 +433,22 @@ th{background:#edf3f8;color:#294d6a}
 /* CICPA Management Portal v3 */
 .cicpa-home-grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:18px;margin:18px 0}.cicpa-module-card{cursor:pointer;padding:24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#fff,#f5f9ff);box-shadow:var(--shadow);transition:.2s}.cicpa-module-card:hover{transform:translateY(-3px)}.cicpa-module-card .big-icon{font-size:38px}.cicpa-module-card h3{margin:10px 0 6px}.cicpa-module{display:none}.cicpa-module.active{display:block}.cicpa-dashboard-grid{display:grid;grid-template-columns:repeat(6,minmax(145px,1fr));gap:12px;margin:16px 0}.cicpa-dashboard-grid .kpi{cursor:pointer}.cicpa-pass-box{border:1px solid var(--line);border-radius:15px;padding:16px;margin:12px 0;background:#fbfdff}.cicpa-pass-grid{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:12px}.cicpa-location-row{display:flex;gap:8px;align-items:end;margin:8px 0}.cicpa-location-row .form-group{flex:1}.status-dot{display:inline-block;padding:5px 9px;border-radius:999px;font-weight:700;font-size:12px}.status-active{background:#dcfce7;color:#166534}.status-16-30-days,.status-nearly-expiring{background:#fef9c3;color:#854d0e}.status-8-15-days{background:#ffedd5;color:#9a3412}.status-0-7-days{background:#fee2e2;color:#b91c1c}.status-expired{background:#7f1d1d;color:#fff}.status-cancelled{background:#e5e7eb;color:#374151}.status-fully-utilized{background:#ede9fe;color:#5b21b6}.cicpa-location-table input,.cicpa-location-table select{min-width:120px}.cicpa-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.cicpa-tabs .btn.active{background:var(--primary);color:#fff}.cicpa-alert-list{max-height:280px;overflow:auto}.cicpa-alert{padding:10px;border-bottom:1px solid var(--line)}
 @media(max-width:1100px){.cicpa-dashboard-grid{grid-template-columns:repeat(3,1fr)}.cicpa-pass-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.cicpa-home-grid,.cicpa-dashboard-grid,.cicpa-pass-grid{grid-template-columns:1fr}.cicpa-location-row{align-items:stretch;flex-direction:column}}
+
+/* Portal opening option popup - fixed visibility */
+.portal-open-actions{display:none!important}
+.portal-card-main{cursor:pointer}
+.portal-card-main::after{content:"Click to Open Options";display:inline-flex;margin-top:14px;padding:9px 13px;border-radius:9px;background:#123c69;color:#fff;font-weight:800;font-size:13px;position:relative;z-index:3}
+.portal-choice-overlay{position:fixed;inset:0;background:rgba(5,20,35,.58);display:none;align-items:center;justify-content:center;padding:20px;z-index:99999}
+.portal-choice-overlay.show{display:flex}
+.portal-choice-box{width:min(430px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.3);text-align:center}
+.portal-choice-box h3{margin:0 0 8px;font-size:23px}
+.portal-choice-box p{margin:0 0 20px;color:#64748b}
+.portal-choice-buttons{display:grid;gap:11px}
+.portal-choice-buttons button{border:0;border-radius:11px;padding:13px 16px;font-weight:800;font-size:15px;cursor:pointer}
+.portal-choice-buttons .choice-here{background:#123c69;color:#fff}
+.portal-choice-buttons .choice-tab{background:#eef5fb;color:#123c69;border:1px solid #c9dceb}
+.portal-choice-buttons .choice-cancel{background:#f1f5f9;color:#475569}
+
 </style>
 
 <style id="clientPortalStyles">
@@ -427,6 +470,19 @@ th{background:#edf3f8;color:#294d6a}
 @media(max-width:900px){.client-form-grid,.client-detail-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.client-form-grid,.client-detail-grid,.client-doc-grid{grid-template-columns:1fr}}
 </style>
+
+<style>
+/* Multi-portal opening controls */
+.portal-card{cursor:default}
+.portal-card-main{cursor:pointer}
+.portal-open-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
+.portal-open-btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.portal-open-btn.here{background:#123c69;color:#fff}
+.portal-open-btn.new-tab{background:#eef5fb;color:#123c69;border:1px solid #c9dceb}
+.portal-open-btn:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(17,40,64,.14)}
+@media(max-width:560px){.portal-open-actions{flex-direction:column}.portal-open-btn{width:100%}}
+</style>
+
 </head>
 <body>
 
@@ -449,7 +505,7 @@ th{background:#edf3f8;color:#294d6a}
       <div class="sub">Sign in to Employee ERP Portal</div>
       <div class="field">
         <label>Username</label>
-        <input id="loginUser" autocomplete="username" placeholder="Enter username">
+        <input id="loginUser" autocomplete="email" autocomplete="username" placeholder="Enter username">
       </div>
       <div class="field">
         <label>Password</label>
@@ -518,46 +574,73 @@ th{background:#edf3f8;color:#294d6a}
           <div><h2 id="welcomeTitle">Good day</h2><p>Select the portal you want to open.</p></div>
         </div>
         <div class="portal-selector">
-          <div class="portal-card" onclick="openEmployeePortal()">
-            <div class="portal-card-icon">👥</div>
-            <h3>Employee Management Portal</h3>
-            <p>Manage employee records, approvals, missing information, document expiry, notifications and reports.</p>
-            <span class="enter">Open Employee Portal →</span>
+          <div class="portal-card">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('employee', 'Employee Management Portal')">
+              <div class="portal-card-icon">👥</div>
+              <h3>Employee Management Portal</h3>
+              <p>Manage employee records, approvals, missing information, document expiry, notifications and reports.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openEmployeePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('employee')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card site" onclick="openSitePortal()">
-            <div class="portal-card-icon">🏗</div>
-            <h3>Site Management Portal</h3>
-            <p>Manage employee mobilization, demobilization, live manpower, site history, notifications and professional reports.</p>
-            <div style="margin:10px 0"><span class="pill approved">ACTIVE</span></div>
-            <span class="enter">Open Site Portal →</span>
+          <div class="portal-card site">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('site', 'Site Management Portal')">
+              <div class="portal-card-icon">🏗</div>
+              <h3>Site Management Portal</h3>
+              <p>Manage employee mobilization, demobilization, live manpower, site history, notifications and professional reports.</p>
+              <div style="margin:10px 0"><span class="pill approved">ACTIVE</span></div>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openSitePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('site')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card cicpa-card" onclick="openCicpaPortal()">
-            <div class="portal-card-icon">🪪</div>
-            <h3>CICPA Management Portal</h3>
-            <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
-            <span class="enter">Open CICPA Portal →</span>
+          <div class="portal-card cicpa-card">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('cicpa', 'CICPA Management Portal')">
+              <div class="portal-card-icon">🪪</div>
+              <h3>CICPA Management Portal</h3>
+              <p>Manage employee CICPA passes, up to five locations, three CICPA numbers, cancellation and expiry alerts.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openCicpaPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('cicpa')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card subcontractor-card" onclick="openSubcontractorPortal()">
-            <div class="portal-card-icon">🤝</div>
-            <h3>Subcontractor Management Portal</h3>
-            <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
-            <span class="enter">Open Subcontractor Portal →</span>
+          <div class="portal-card subcontractor-card">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('subcontractor', 'Subcontractor Management Portal')">
+              <div class="portal-card-icon">🤝</div>
+              <h3>Subcontractor Management Portal</h3>
+              <p>Manage subcontractor companies, trade-license expiry, validation, status and saved records.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openSubcontractorPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('subcontractor')">Open in New Tab ↗</button>
+            </div>
           </div>
-          <div class="portal-card leave-card" onclick="openLeavePortal()">
-            <div class="portal-card-icon">🏖️</div>
-            <h3>Leave Management Portal</h3>
-            <p>Manage worker leave, paid and unpaid days, return dates, notifications, history and reports.</p>
-            <span class="enter">Open Leave Portal →</span>
+          <div class="portal-card leave-card">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('leave', 'Leave Management Portal')">
+              <div class="portal-card-icon">🏖️</div>
+              <h3>Leave Management Portal</h3>
+              <p>Manage worker leave, paid and unpaid days, return dates, notifications, history and reports.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openLeavePortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('leave')">Open in New Tab ↗</button>
+            </div>
           </div>
-
-          <div class="portal-card client-card" onclick="openClientPortal()">
-            <div class="portal-card-icon">🏢</div>
-            <h3>Client Management Portal</h3>
-            <p>Manage clients, trade-license documents, linked projects, expiry alerts, reports and activity history.</p>
-            <span class="enter">Open Client Portal →</span>
+          <div class="portal-card client-card">
+            <div class="portal-card-main" onclick="showPortalOpenOptions('client', 'Client Management Portal')">
+              <div class="portal-card-icon">🏢</div>
+              <h3>Client Management Portal</h3>
+              <p>Manage clients, trade-license documents, linked projects, expiry alerts, reports and activity history.</p>
+            </div>
+            <div class="portal-open-actions">
+              <button class="portal-open-btn here" type="button" onclick="openClientPortal()">Open Here</button>
+              <button class="portal-open-btn new-tab" type="button" onclick="openPortalInNewTab('client')">Open in New Tab ↗</button>
+            </div>
           </div>
-
-
         </div>
       </section>
 
@@ -717,11 +800,13 @@ th{background:#edf3f8;color:#294d6a}
             <div id="leaveEmployeeInfo" class="leave-employee-info"><div class="leave-info-grid"><div><small>Employee Name</small><b id="leaveEmpName">-</b></div><div><small>Employee Code</small><b id="leaveEmpCode">-</b></div><div><small>Designation</small><b id="leaveEmpDesignation">-</b></div><div><small>Company</small><b id="leaveEmpCompany">-</b></div><div><small>Joining Date</small><b id="leaveEmpJoining">-</b></div></div></div>
             <input type="hidden" id="leaveSelectedEmployeeId"><input type="hidden" id="leaveEditingId">
             <div class="leave-form-grid">
-              <label>Leave Type<select id="leaveType" class="input"></select></label><label>Leave Start Date<input id="leaveStart" type="date" class="input" onchange="calculateLeaveDays()"></label><label>Leave End Date<input id="leaveEnd" type="date" class="input" onchange="calculateLeaveDays()"></label>
-              <label>Ticket Date<input id="leaveTicketDate" type="date" class="input"></label><label>Rejoining Date<input id="leaveRejoining" type="date" class="input" onchange="calculateLeaveDays()"></label><label>Total Leave Days<input id="leaveTotalDays" class="input" readonly></label>
+              <label>Leave Type *<select id="leaveType" class="input" required></select></label><label>Leave Start Date<input id="leaveStart" type="date" class="input" onchange="calculateLeaveDays()"></label><label>Leave End Date<input id="leaveEnd" type="date" class="input" onchange="calculateLeaveDays()"></label>
+              <label>Ticket Date<input id="leaveTicketDate" type="date" class="input"></label><label>Rejoining Date<input id="leaveRejoining" type="date" class="input" onchange="calculateLeaveDays()"><span style="display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:700"><input id="leaveNotRejoined" type="checkbox" onchange="toggleLeaveNotRejoined()" style="width:18px;height:18px"> Employee Not Rejoined Yet</span><small class="muted">Keep checked until the employee actually rejoins.</small></label><label>Total Leave Days<input id="leaveTotalDays" class="input" readonly></label>
               <label class="leave-paid-field">Paid Leave Days<input id="leavePaidDays" type="number" min="0" class="input" value="0" oninput="calculateLeaveDays()"></label><label>Unpaid Leave Days<input id="leaveUnpaidDays" class="input" readonly></label><label>Ticket Provided<select id="leaveTicketProvided" class="input"><option>Company</option><option>Self</option><option>One Way Company</option><option>One Way Self</option><option>Not Applicable</option></select></label>
-              <label class="leave-settlement-field">Settlement Amount Paid<input id="leaveSettlementAmount" type="number" min="0" step="0.01" class="input" placeholder="0.00"></label><label class="leave-settlement-field">Paid Date<input id="leaveSettlementPaidDate" type="date" class="input"></label><label class="leave-settlement-field">Mode of Payment<select id="leaveSettlementMode" class="input"><option value="">Select Mode</option><option>Bank Transfer</option><option>Cash</option><option>Cheque</option><option>Exchange House</option><option>Other</option></select></label>
-              <label>Emergency Contact Number<input id="leaveEmergencyContact" class="input"></label><label class="span-2">Leave Address<input id="leaveAddress" class="input"></label><label class="span-2">Remarks<textarea id="leaveRemarks" class="input" rows="3"></textarea></label><label>Attachment<input id="leaveAttachment" type="file" class="input"><small>File name is saved in browser storage.</small></label>
+              <div class="span-2" style="border-top:1px solid var(--border);margin-top:6px;padding-top:12px"><h3 style="margin:0 0 4px">Accounts Section</h3><small class="muted">Payment details are saved with this employee leave record.</small></div>
+              <label class="leave-settlement-field">Paid Amount<input id="leaveSettlementAmount" type="number" min="0" step="0.01" class="input" placeholder="0.00"></label><label class="leave-settlement-field">Paid Date<input id="leaveSettlementPaidDate" type="date" class="input"></label><label class="leave-settlement-field">Payment Mode<select id="leaveSettlementMode" class="input"><option value="">Select Mode</option><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>Exchange House</option><option>Other</option></select></label>
+              <label class="span-2 leave-settlement-field">Accounts Remarks<textarea id="leaveAccountsRemarks" class="input" rows="2" placeholder="Enter payment or accounts remarks"></textarea></label>
+              <label>Emergency Contact Number<input id="leaveEmergencyContact" class="input"></label><label class="span-2">Leave Address<input id="leaveAddress" class="input"></label><label class="span-2">General Remarks<textarea id="leaveRemarks" class="input" rows="3"></textarea></label><label>Attachment<input id="leaveAttachment" type="file" class="input"><small>File name is saved in browser storage.</small></label>
               <label>Status<select id="leaveRecordStatus" class="input"><option>Pending</option><option>Approved</option><option>Rejected</option></select></label><label class="span-2">Approval / Audit Comment<input id="leaveAuditComment" class="input" placeholder="Add comment for approval, rejection or correction"></label>
             </div>
             <div class="toolbar"><button class="btn primary" onclick="saveLeaveRecord()">Save Leave Record</button><button class="btn light" onclick="resetLeaveForm()">Clear</button></div>
@@ -960,9 +1045,9 @@ th{background:#edf3f8;color:#294d6a}
         </div>
       </section>
 
-      <div id="cicpaModal" class="modal"><div class="modal-box" style="max-width:1150px"><button class="modal-close" onclick="closeModal('cicpaModal')">×</button><h2 id="cicpaFormTitle">Add Employee CICPA</h2><form id="cicpaForm"><div class="toolbar"><input class="input grow" id="cicpaEmployeeSearch" placeholder="Enter exact Employee Code"><button type="button" class="btn primary" onclick="findCicpaEmployee()">Search Employee</button></div><input type="hidden" id="cicpaEmployeeId"><input type="hidden" id="cicpaEmployeeName"><input type="hidden" id="cicpaEditId"><div id="cicpaEmpInfo" class="cicpa-emp-info"><div class="cicpa-info-grid"><div><small>Employee Name</small><b id="cicpaEmpNameView">-</b></div><div><small>Employee Code</small><b id="cicpaEmpCodeView">-</b></div><div><small>Company</small><b id="cicpaEmpCompanyView">-</b></div><div><small>Craft / Designation</small><b id="cicpaEmpDesignationView">-</b></div><div><small>Employee Category</small><b id="cicpaEmpCategoryView">-</b></div></div><div class="form-actions"><button type="button" class="btn success" onclick="addCicpaPass()">+ Add More CICPA</button></div></div><div class="form-section"><h3>CICPA Records (Maximum 3)</h3><div id="cicpaPasses"></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('cicpaModal')">Cancel</button><button class="btn primary" type="submit">Save CICPA Record</button></div></form></div></div>
+      <div id="cicpaModal" class="modal"><div class="modal-box" style="max-width:1150px"><button class="modal-close" onclick="closeModal('cicpaModal')">×</button><h2 id="cicpaFormTitle">Add Employee CICPA</h2><form id="cicpaForm"><div class="toolbar"><input class="input grow" id="cicpaEmployeeSearch" placeholder="Enter Employee Code from Employee or Subcontractor Portal"><button type="button" class="btn primary" onclick="findCicpaEmployee()">Search Employee</button></div><input type="hidden" id="cicpaEmployeeId"><input type="hidden" id="cicpaEmployeeName"><input type="hidden" id="cicpaEditId"><div id="cicpaEmpInfo" class="cicpa-emp-info"><div class="cicpa-info-grid"><div><small>Employee Name</small><b id="cicpaEmpNameView">-</b></div><div><small>Employee Code</small><b id="cicpaEmpCodeView">-</b></div><div><small>Company</small><b id="cicpaEmpCompanyView">-</b></div><div><small>Craft / Designation</small><b id="cicpaEmpDesignationView">-</b></div><div><small>Employee Category</small><b id="cicpaEmpCategoryView">-</b></div></div><div class="form-actions"><button type="button" class="btn success" onclick="addCicpaPass()">+ Add More CICPA</button></div></div><div class="form-section"><h3>CICPA Records (Maximum 3)</h3><div id="cicpaPasses"></div></div><div class="form-actions"><button type="button" class="btn light" onclick="clearCicpaForm()">Clear</button><button type="button" class="btn light" onclick="closeModal('cicpaModal')">Cancel</button><button class="btn primary" type="submit">Save CICPA</button></div></form></div></div>
 
-      <div id="loaModal" class="modal"><div class="modal-box" style="max-width:900px"><button class="modal-close" onclick="closeModal('loaModal')">×</button><h2 id="loaFormTitle">Add CICPA LOA</h2><form id="loaForm"><input type="hidden" id="loaEditId"><div class="form-grid"><div class="form-group"><label>LOA Name in English *</label><input id="loaNameEn" class="input" required></div><div class="form-group"><label>LOA Name in Arabic *</label><input id="loaNameAr" class="input" dir="rtl" required></div><div class="form-group"><label>LOA Number *</label><input id="loaNumber" class="input" required></div><div class="form-group"><label>Location Number *</label><input id="loaLocationNumber" class="input" required></div><div class="form-group"><label>Start Date *</label><input id="loaStart" type="date" class="input" required></div><div class="form-group"><label>Expiry Date *</label><input id="loaExpiry" type="date" class="input" required></div><div class="form-group"><label>Issued by Client *</label><select id="loaClient" class="input" required></select></div><div class="form-group"><label>Total Number of Persons *</label><input id="loaTotal" type="number" min="0" class="input" required></div><div class="form-group"><label>Number of Persons Used</label><input id="loaUsedInput" type="number" min="0" class="input" value="0"></div><div class="form-group"><label>Available Balance</label><input id="loaBalanceInput" class="input" readonly></div><div class="form-group"><label>Status</label><select id="loaCancelled" class="input"><option value="no">Active</option><option value="yes">Cancelled</option></select></div><div class="form-group full"><label>Remarks</label><textarea id="loaRemarks" class="input" rows="3"></textarea></div><div class="form-group full"><label>LOA Attachment</label><input id="loaAttachment" type="file" class="input"></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('loaModal')">Cancel</button><button class="btn primary" type="submit">Save LOA</button></div></form></div></div>
+      <div id="loaModal" class="modal"><div class="modal-box"><button class="modal-close" onclick="closeModal('loaModal')" aria-label="Close">×</button><div class="loa-form-header"><span class="eyebrow">CICPA Management Portal</span><h2 id="loaFormTitle">Add New CICPA LOA</h2><p>Enter the LOA details, validity period, client information and approved manpower allocation.</p></div><form id="loaForm"><input type="hidden" id="loaEditId"><div class="loa-form-body"><div class="loa-section"><h3 class="loa-section-title"><span>01</span>LOA Basic Information</h3><div class="loa-grid"><div class="form-group"><label>LOA Number *</label><input id="loaNumber" class="input" placeholder="Enter official LOA number" required></div><div class="form-group"><label>Location Number *</label><input id="loaLocationNumber" class="input" placeholder="Enter location number" required></div><div class="form-group"><label>LOA Name in English *</label><input id="loaNameEn" class="input" placeholder="Enter LOA name in English" required></div><div class="form-group"><label>LOA Name in Arabic *</label><input id="loaNameAr" class="input" dir="rtl" placeholder="أدخل اسم خطاب الموافقة" required></div><div class="form-group full"><label>Issued by Client *</label><select id="loaClient" class="input" required></select><small class="loa-help">Client list is linked with the Client Management Portal.</small></div></div></div><div class="loa-section"><h3 class="loa-section-title"><span>02</span>Validity and Status</h3><div class="loa-grid"><div class="form-group"><label>Start Date *</label><input id="loaStart" type="date" class="input" required></div><div class="form-group"><label>Expiry Date *</label><input id="loaExpiry" type="date" class="input" required></div><div class="form-group full"><label>LOA Status</label><select id="loaCancelled" class="input"><option value="no">Active</option><option value="yes">Cancelled</option></select></div></div></div><div class="loa-section"><h3 class="loa-section-title"><span>03</span>Manpower Allocation</h3><div class="loa-grid"><div class="form-group"><label>Total Approved Persons *</label><input id="loaTotal" type="number" min="0" class="input" placeholder="0" required></div><div class="form-group"><label>Persons Used</label><input id="loaUsedInput" type="number" min="0" class="input" value="0"></div><div class="form-group full"><label>Available Balance</label><input id="loaBalanceInput" class="input" readonly><small class="loa-help">Calculated automatically from total approved persons minus persons used.</small></div></div></div><div class="loa-section"><h3 class="loa-section-title"><span>04</span>Supporting Details</h3><div class="loa-grid"><div class="form-group full"><label>Remarks</label><textarea id="loaRemarks" class="input" rows="3" placeholder="Enter any additional notes or conditions"></textarea></div><div class="form-group full"><label>LOA Attachment</label><input id="loaAttachment" type="file" class="input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"><small class="loa-help">Upload the approved LOA document or supporting attachment.</small></div></div></div></div><div class="loa-form-actions"><button type="button" class="btn light" onclick="closeModal('loaModal')">Cancel</button><button class="btn primary" type="submit">Save CICPA LOA</button></div></form></div></div>
 
       <section id="employees" class="page">
         <div id="employeeNotices"></div>
@@ -1018,77 +1103,209 @@ th{background:#edf3f8;color:#294d6a}
 <div class="modal" id="warningModal"><div class="modal-card"><button class="close" onclick="closeModal('warningModal')">×</button><h2>This information is missing.</h2><p>Please review these fields. Click Save again to save with missing information.</p><ul id="missingList"></ul><button class="btn primary" onclick="closeModal('warningModal')">Review Form</button></div></div>
 <div class="modal" id="reviewModal"><div class="modal-card"><button class="close" onclick="closeModal('reviewModal')">×</button><div id="reviewContent"></div></div></div>
 
+<div id="portalChoiceOverlay" class="portal-choice-overlay" onclick="closePortalOpenOptions(event)">
+  <div class="portal-choice-box" role="dialog" aria-modal="true" aria-labelledby="portalChoiceTitle" onclick="event.stopPropagation()">
+    <h3 id="portalChoiceTitle">Open Portal</h3>
+    <p>Choose how you want to open this portal.</p>
+    <div class="portal-choice-buttons">
+      <button id="portalChoiceHere" class="choice-here" type="button">Open Here</button>
+      <button id="portalChoiceTab" class="choice-tab" type="button">Open in New Browser Tab ↗</button>
+      <button class="choice-cancel" type="button" onclick="hidePortalOpenOptions()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase live database and authentication -->
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
 <script>
-const users={
-  admin:{password:'admin123',name:'Admin',role:'Admin'},
-  adminmanager:{password:'Prince@123',name:'Prince',role:'Admin Manager'}
+const firebaseConfig = {
+  apiKey: "AIzaSyABML2qARFciXXylkeCvyAjWRuvAoUcrBs",
+  authDomain: "reliance-gulf-erp.firebaseapp.com",
+  databaseURL: "https://reliance-gulf-erp-default-rtdb.firebaseio.com",
+  projectId: "reliance-gulf-erp",
+  storageBucket: "reliance-gulf-erp.firebasestorage.app",
+  messagingSenderId: "671890858126",
+  appId: "1:671890858126:web:7c92334893b81cf8afa9df",
+  measurementId: "G-5Y6XLSSNVX"
 };
+firebase.initializeApp(firebaseConfig);
+const firebaseAuth = firebase.auth();
+const firebaseDb = firebase.firestore();
+
+const CLOUD_DATA_KEYS = [
+  'rg_employees_v3','rg_notifications_v3','rg_cicpa_records_v3','rg_cicpa_locations_v2','rg_cicpa_loa_v1',
+  'rg_subcontractors_v1','relianceGulfSubcontractorEmployeesV1','rg_leave_records_v1','rg_leave_types_v1',
+  'rg_clients_v1','rg_client_projects_v1','rg_client_activity_v1','rg_site_mobilizations_v1'
+];
+const nativeLocalSetItem = localStorage.setItem.bind(localStorage);
+const nativeLocalRemoveItem = localStorage.removeItem.bind(localStorage);
+let cloudApplying = false;
+let cloudReady = false;
+let cloudUnsubscribe = null;
+let cloudWriteTimer = null;
+const pendingCloudWrites = {};
+
+function cloudToast(message, isError=false){
+  console[isError?'error':'log']('[Firebase]', message);
+  const el=document.getElementById('loginMsg');
+  if(el && !document.getElementById('loginScreen').classList.contains('hidden')) el.textContent=message;
+}
+
+function refreshAppFromCloud(){
+  try{
+    if(typeof readStoredArray==='function'){
+      if(typeof EMPLOYEE_STORAGE_KEY!=='undefined') employees=readStoredArray(EMPLOYEE_STORAGE_KEY);
+      if(typeof NOTIFICATION_STORAGE_KEY!=='undefined') notifications=readStoredArray(NOTIFICATION_STORAGE_KEY);
+      if(typeof CICPA_STORAGE_KEY!=='undefined') cicpaRecords=readStoredArray(CICPA_STORAGE_KEY);
+      if(typeof CICPA_LOCATION_STORAGE_KEY!=='undefined') managedCicpaLocations=readStoredArray(CICPA_LOCATION_STORAGE_KEY);
+      if(typeof CICPA_LOA_STORAGE_KEY!=='undefined') cicpaLoas=readStoredArray(CICPA_LOA_STORAGE_KEY);
+      if(typeof SUBCONTRACTOR_STORAGE_KEY!=='undefined') subcontractors=readStoredArray(SUBCONTRACTOR_STORAGE_KEY);
+      if(typeof SC_EMP_STORAGE_KEY!=='undefined') scEmployees=readStoredArray(SC_EMP_STORAGE_KEY);
+      if(typeof LEAVE_STORAGE_KEY!=='undefined') leaveRecords=readStoredArray(LEAVE_STORAGE_KEY);
+      if(typeof LEAVE_TYPES_KEY!=='undefined') leaveTypes=readStoredArray(LEAVE_TYPES_KEY);
+      if(typeof CLIENT_STORAGE_KEY!=='undefined') clientRecords=readStoredArray(CLIENT_STORAGE_KEY);
+      if(typeof PROJECT_STORAGE_KEY!=='undefined') projectRecords=readStoredArray(PROJECT_STORAGE_KEY);
+      if(typeof CLIENT_HISTORY_KEY!=='undefined') clientActivities=readStoredArray(CLIENT_HISTORY_KEY);
+      if(typeof SITE_STORAGE_KEY!=='undefined') siteRecords=readStoredArray(SITE_STORAGE_KEY);
+    }
+    if(typeof renderDashboard==='function') renderDashboard();
+    if(typeof renderEmployeeList==='function') renderEmployeeList();
+    if(typeof renderCicpaDashboard==='function') renderCicpaDashboard();
+    if(typeof scRender==='function') scRender();
+    if(typeof sceRender==='function') sceRender();
+    if(typeof leaveRender==='function') leaveRender();
+    if(typeof renderClientDashboard==='function') renderClientDashboard();
+    if(typeof renderSiteDashboard==='function') renderSiteDashboard();
+  }catch(err){ console.warn('Cloud refresh warning:',err); }
+}
+
+async function flushCloudWrites(){
+  if(!cloudReady || !firebaseAuth.currentUser) return;
+  const payload={};
+  Object.assign(payload,pendingCloudWrites);
+  Object.keys(pendingCloudWrites).forEach(k=>delete pendingCloudWrites[k]);
+  if(!Object.keys(payload).length) return;
+  payload.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
+  payload.updatedBy=firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid;
+  try{ await firebaseDb.collection('erp').doc('sharedData').set(payload,{merge:true}); }
+  catch(err){ console.error('Cloud save failed:',err); cloudToast('Cloud save failed: '+err.message,true); }
+}
+function queueCloudWrite(key,value){
+  if(!CLOUD_DATA_KEYS.includes(key) || cloudApplying) return;
+  pendingCloudWrites[key]=value;
+  clearTimeout(cloudWriteTimer);
+  cloudWriteTimer=setTimeout(flushCloudWrites,250);
+}
+localStorage.setItem=function(key,value){
+  nativeLocalSetItem(key,String(value));
+  queueCloudWrite(key,String(value));
+};
+localStorage.removeItem=function(key){
+  nativeLocalRemoveItem(key);
+  if(CLOUD_DATA_KEYS.includes(key) && !cloudApplying){
+    pendingCloudWrites[key]=firebase.firestore.FieldValue.delete();
+    clearTimeout(cloudWriteTimer);
+    cloudWriteTimer=setTimeout(flushCloudWrites,250);
+  }
+};
+
+async function startCloudSync(){
+  if(!firebaseAuth.currentUser) return;
+  const ref=firebaseDb.collection('erp').doc('sharedData');
+  const snap=await ref.get();
+  cloudApplying=true;
+  try{
+    if(snap.exists){
+      const data=snap.data()||{};
+      CLOUD_DATA_KEYS.forEach(key=>{ if(typeof data[key]==='string') nativeLocalSetItem(key,data[key]); });
+    }else{
+      const seed={createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:firebaseAuth.currentUser.email||firebaseAuth.currentUser.uid};
+      CLOUD_DATA_KEYS.forEach(key=>{ const v=localStorage.getItem(key); if(v!==null) seed[key]=v; });
+      await ref.set(seed,{merge:true});
+    }
+  }finally{ cloudApplying=false; }
+  cloudReady=true;
+  refreshAppFromCloud();
+  if(cloudUnsubscribe) cloudUnsubscribe();
+  cloudUnsubscribe=ref.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const data=doc.data()||{};
+    let changed=false;
+    cloudApplying=true;
+    try{
+      CLOUD_DATA_KEYS.forEach(key=>{
+        if(typeof data[key]==='string' && localStorage.getItem(key)!==data[key]){
+          nativeLocalSetItem(key,data[key]); changed=true;
+        }
+      });
+    }finally{ cloudApplying=false; }
+    if(changed) refreshAppFromCloud();
+  },err=>cloudToast('Live sync error: '+err.message,true));
+}
+window.firebaseBridge={auth:firebaseAuth,db:firebaseDb,startCloudSync};
+</script>
+
+<script>
 let currentUser=null;
-function login(){
-  const u=document.getElementById('loginUser').value.trim().toLowerCase();
-  const p=document.getElementById('loginPass').value;
-  const user=users[u];
-  if(!user||user.password!==p){
-    document.getElementById('loginMsg').textContent='Invalid username or password.';
-    return;
+async function login(){
+  const email=document.getElementById('loginUser').value.trim().toLowerCase();
+  const password=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');
+  if(!email || !password){ msg.textContent='Please enter email and password.'; return; }
+  msg.textContent='Signing in...';
+  try{
+    const persistence=document.getElementById('keepSignedIn').checked
+      ? firebase.auth.Auth.Persistence.LOCAL
+      : firebase.auth.Auth.Persistence.SESSION;
+    await firebaseAuth.setPersistence(persistence);
+    const credential=await firebaseAuth.signInWithEmailAndPassword(email,password);
+    currentUser={username:email,email,name:(email.split('@')[0]||'User').replace(/[._-]+/g,' '),role:'Admin',uid:credential.user.uid};
+    if(document.getElementById('rememberMe').checked){
+      localStorage.setItem('rg_saved_username',email);
+      localStorage.setItem('rg_remember_me','true');
+    }else{
+      localStorage.removeItem('rg_saved_username');
+      localStorage.removeItem('rg_remember_me');
+    }
+    document.getElementById('loginPass').value='';
+    msg.textContent='Loading live ERP data...';
+    await startCloudSync();
+    msg.textContent='';
+    applyUser();
+  }catch(error){
+    console.error(error);
+    const friendly={
+      'auth/invalid-credential':'Invalid email or password.',
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/too-many-requests':'Too many attempts. Please try again later.',
+      'auth/network-request-failed':'Network error. Please check your internet connection.'
+    };
+    msg.textContent=friendly[error.code]||('Login failed: '+error.message);
   }
-
-  currentUser={username:u,...user};
-  document.getElementById('loginMsg').textContent='';
-
-  const rememberMe=document.getElementById('rememberMe').checked;
-  const keepSignedIn=document.getElementById('keepSignedIn').checked;
-
-  if(rememberMe){
-    localStorage.setItem('rg_saved_username',u);
-    localStorage.setItem('rg_saved_password',p);
-    localStorage.setItem('rg_remember_me','true');
-  }else{
-    localStorage.removeItem('rg_saved_username');
-    localStorage.removeItem('rg_saved_password');
-    localStorage.removeItem('rg_remember_me');
-  }
-
-  if(keepSignedIn){
-    localStorage.setItem('rg_current_user',JSON.stringify(currentUser));
-    localStorage.setItem('rg_keep_signed_in','true');
-    sessionStorage.removeItem('rg_current_user');
-  }else{
-    sessionStorage.setItem('rg_current_user',JSON.stringify(currentUser));
-    localStorage.removeItem('rg_current_user');
-    localStorage.removeItem('rg_keep_signed_in');
-  }
-
-  applyUser();
 }
 function applyUser(){
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('portalApp').classList.remove('hidden');
-  document.getElementById('currentUserName').textContent=currentUser.name;
+  const displayName=currentUser.name.replace(/\b\w/g,c=>c.toUpperCase());
+  document.getElementById('currentUserName').textContent=displayName;
   document.getElementById('currentUserRole').textContent=currentUser.role;
-  document.getElementById('avatarText').textContent=currentUser.name.charAt(0).toUpperCase();
-  document.getElementById('welcomeTitle').textContent='Good day, '+currentUser.name;
+  document.getElementById('avatarText').textContent=displayName.charAt(0).toUpperCase();
+  document.getElementById('welcomeTitle').textContent='Good day, '+displayName;
   document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
-  document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',currentUser.role!=='Admin Manager'));
+  document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',false));
   showPage('dashboard');
   renderDashboard();
 }
-function logout(){
-  sessionStorage.removeItem('rg_current_user');
-  localStorage.removeItem('rg_current_user');
-  localStorage.removeItem('rg_keep_signed_in');
+async function logout(){
+  if(cloudUnsubscribe){cloudUnsubscribe();cloudUnsubscribe=null;}
+  cloudReady=false;
+  await firebaseAuth.signOut();
   currentUser=null;
   document.getElementById('portalApp').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
-
-  if(localStorage.getItem('rg_remember_me')==='true'){
-    document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
-    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
-    document.getElementById('rememberMe').checked=true;
-  }else{
-    document.getElementById('loginPass').value='';
-  }
-
+  document.getElementById('loginPass').value='';
   document.getElementById('keepSignedIn').checked=false;
 }
 function togglePassword(){
@@ -1096,44 +1313,19 @@ function togglePassword(){
   const btn=document.getElementById('passwordToggleBtn');
   const showing=p.type==='text';
   p.type=showing?'password':'text';
-  if(btn){
-    btn.textContent=showing?'👁️':'🙈';
-    btn.setAttribute('aria-label',showing?'Show password':'Hide password');
-  }
+  if(btn){btn.textContent=showing?'👁️':'🙈';btn.setAttribute('aria-label',showing?'Show password':'Hide password');}
 }
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-
 (function restoreLoginState(){
-  const remembered=localStorage.getItem('rg_remember_me')==='true';
-  if(remembered){
+  if(localStorage.getItem('rg_remember_me')==='true'){
     document.getElementById('loginUser').value=localStorage.getItem('rg_saved_username')||'';
-    document.getElementById('loginPass').value=localStorage.getItem('rg_saved_password')||'';
     document.getElementById('rememberMe').checked=true;
   }
-
-  const persistentUser=localStorage.getItem('rg_current_user');
-  const sessionUser=sessionStorage.getItem('rg_current_user');
-
-  if(localStorage.getItem('rg_keep_signed_in')==='true' && persistentUser){
-    try{
-      currentUser=JSON.parse(persistentUser);
-      document.getElementById('keepSignedIn').checked=true;
-      applyUser();
-      return;
-    }catch(error){
-      localStorage.removeItem('rg_current_user');
-      localStorage.removeItem('rg_keep_signed_in');
-    }
-  }
-
-  if(sessionUser){
-    try{
-      currentUser=JSON.parse(sessionUser);
-      applyUser();
-    }catch(error){
-      sessionStorage.removeItem('rg_current_user');
-    }
-  }
+  firebaseAuth.onAuthStateChanged(async user=>{
+    if(!user || currentUser) return;
+    currentUser={username:user.email,email:user.email,name:(user.email||'User').split('@')[0].replace(/[._-]+/g,' '),role:'Admin',uid:user.uid};
+    try{await startCloudSync();applyUser();}catch(err){document.getElementById('loginMsg').textContent='Unable to load cloud data: '+err.message;}
+  });
 })();
 
 const fields=[
@@ -1145,6 +1337,10 @@ const fields=[
 ];
 const listColumns=[
   ...fields.map(f=>[f[0],f[1]]),
+  ['currentSiteName','Current Site Name'],
+  ['leaveRejoiningDate','Leave Rejoining Date'],
+  ['statusUpdatedAt','Last Status Updated Date'],
+  ['statusSource','Status Source'],
   ['approvalStatus','Approval Status'],
   ['updatedBy','Updated By'],
   ['updatedAt','Updated At'],
@@ -1249,15 +1445,117 @@ function openCicpaModule(type,filter=''){document.getElementById('cicpaHome').st
 function renderCicpaHome(){const a=allCicpaPasses(),ls=cicpaLoas.map(l=>({...l,status:loaStatus(l)}));cicpaHomeActive.textContent=a.filter(x=>x.status==='Active').length;cicpaHomeSoon.textContent=a.filter(x=>statusMatches(x.status,'Within 30 Days')).length;cicpaHomeExpired.textContent=a.filter(x=>x.status==='Expired').length;cicpaHomeLoaActive.textContent=ls.filter(x=>x.status==='Active').length;cicpaHomeLoaSoon.textContent=ls.filter(x=>x.status==='Within 30 Days').length;cicpaHomeLoaBalance.textContent=ls.reduce((n,x)=>n+Math.max(0,Number(x.total||0)-Number(x.used||0)),0);const alerts=[...a.filter(x=>x.days!==null&&x.days>=0&&x.days<=30).map(x=>`<div class="cicpa-alert"><b>CICPA ${esc(x.pass.number)}</b> — ${esc(x.record.employeeName)} expires in ${x.days} day(s).</div>`),...ls.filter(x=>{let d=daysTo(x.expiryDate);return d!==null&&d>=0&&d<=30}).map(x=>`<div class="cicpa-alert"><b>LOA ${esc(x.number)}</b> expires in ${daysTo(x.expiryDate)} day(s).</div>`)];cicpaAlertList.innerHTML=alerts.join('')||'<div class="muted">No expiry notifications.</div>'}
 function renderCicpa(){const all=allCicpaPasses(),q=(cicpaSearch?.value||'').toLowerCase(),f=cicpaStatusFilter?.value||'';cicpaActive.textContent=all.filter(x=>x.status==='Active').length;cicpaSoon.textContent=all.filter(x=>statusMatches(x.status,'Within 30 Days')).length;cicpa15.textContent=all.filter(x=>statusMatches(x.status,'Within 15 Days')).length;cicpa7.textContent=all.filter(x=>statusMatches(x.status,'Within 7 Days')).length;cicpaExpired.textContent=all.filter(x=>x.status==='Expired').length;cicpaCancelled.textContent=all.filter(x=>x.status==='Cancelled').length;const rows=all.filter(x=>!q||[x.record.employeeId,x.record.employeeName,x.record.company,x.record.designation,x.pass.number,(x.pass.locations||[]).join(' ')].join(' ').toLowerCase().includes(q)).filter(x=>statusMatches(x.status,f));cicpaBody.innerHTML=rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.record.employeeId)}</td><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.company||'-')}</td><td>${esc(x.record.category||'-')}</td><td>${esc(x.record.designation||'-')}</td><td><b>${esc(x.pass.number)}</b></td><td>${esc(x.pass.issueDate||'-')}</td><td>${esc(x.pass.expiryDate||'-')}</td><td>${x.days===null?'-':x.days}</td><td>${esc((x.pass.locations||[]).join(', ')||'-')}</td><td><span class="status-dot status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${esc(x.pass.remarks||x.pass.cancellationRemarks||'-')}</td><td><button class="mini" onclick="viewCicpaRecord('${x.record.id}',${x.index})">View</button> <button class="mini" onclick="editCicpa('${x.record.id}')">Edit</button> ${x.status!=='Cancelled'?`<button class="mini" onclick="cancelCicpaPass('${x.record.id}',${x.index})">Cancel</button>`:''} <button class="mini danger" onclick="deleteCicpaPass('${x.record.id}',${x.index})">Delete</button> <button class="mini" onclick="downloadCicpaRecord('${x.record.id}',${x.index})">Download</button></td></tr>`).join('')||'<tr><td colspan="14" class="muted">No CICPA records found.</td></tr>';renderCicpaLocationManagement();renderCicpaHome()}
 function setCicpaStatusFilter(v){cicpaStatusFilter.value=v;renderCicpa()}function clearCicpaFilters(){cicpaSearch.value='';cicpaStatusFilter.value='';renderCicpa()}
-function employeeSources(){const arr=[];(Array.isArray(employees)?employees:[]).forEach(e=>arr.push({code:e.employeeId||e.employeeCode,name:e.nameEnglish||e.nameArabic,company:e.company||'RELIANCE GULF',designation:e.designation||e.actualDesignation||'',category:'Company Employee'}));(Array.isArray(subcontractors)?subcontractors:[]).forEach(s=>(s.employees||s.manpower||[]).forEach(e=>arr.push({code:e.employeeId||e.employeeCode||e.code,name:e.nameEnglish||e.name||e.employeeName,company:s.name||s.companyName||e.company||'Subcontractor',designation:e.designation||e.trade||'',category:'Subcontractor Employee'})));return arr}
-function openCicpaForm(){cicpaForm.reset();cicpaEditId.value='';cicpaEmployeeId.value='';cicpaEmployeeName.value='';cicpaPasses.innerHTML='';cicpaEmpInfo.classList.remove('show');cicpaFormTitle.textContent='Add Employee CICPA';cicpaModal.classList.add('show')}
-function findCicpaEmployee(){const code=cicpaEmployeeSearch.value.trim().toLowerCase(),e=employeeSources().find(x=>String(x.code||'').trim().toLowerCase()===code);if(!e){cicpaEmpInfo.classList.remove('show');alert('Employee Code not found in Employee or Subcontractor Employee Portal.');return}cicpaEmployeeId.value=e.code;cicpaEmployeeName.value=e.name;cicpaEmpNameView.textContent=e.name||'-';cicpaEmpCodeView.textContent=e.code||'-';cicpaEmpCompanyView.textContent=e.company||'-';cicpaEmpDesignationView.textContent=e.designation||'-';cicpaEmpCategoryView.textContent=e.category;cicpaEmpInfo.classList.add('show');const old=cicpaRecords.find(r=>String(r.employeeId).toLowerCase()===String(e.code).toLowerCase());cicpaPasses.innerHTML='';if(old){cicpaEditId.value=old.id;(old.passes||[]).forEach(addCicpaPass)}else addCicpaPass()}
-function activeLocationOptions(selected=''){return '<option value="">Select CICPA Location</option>'+managedCicpaLocations.filter(x=>x.active||x.name===selected).map(x=>`<option value="${esc(x.name)}" ${x.name===selected?'selected':''}>${esc(x.number+' - '+x.name)}</option>`).join('')}
-function addPassLocation(host,value=''){if(host.querySelectorAll('.cicpa-location').length>=5){alert('Maximum 5 locations are allowed.');return}const row=document.createElement('div');row.className='cicpa-location-row';row.innerHTML=`<div class="form-group"><label>Location ${host.querySelectorAll('.cicpa-location').length+1}</label><select class="cicpa-location input" required>${activeLocationOptions(value)}</select></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Remove</button>`;host.appendChild(row)}
-function addCicpaPass(p={}){if(!cicpaEmployeeId.value){alert('Please search employee first.');return}if(cicpaPasses.children.length>=3){alert('Maximum 3 CICPA records are allowed per employee.');return}const d=document.createElement('div');d.className='cicpa-pass-box';d.innerHTML=`<div class="cicpa-pass-grid"><div class="form-group"><label>CICPA Number *</label><input class="cp-number input" required value="${esc(p.number||'')}"></div><div class="form-group"><label>Issue Date *</label><input class="cp-issue input" type="date" required value="${esc(p.issueDate||'')}"></div><div class="form-group"><label>Expiry Date *</label><input class="cp-expiry input" type="date" required value="${esc(p.expiryDate||'')}"></div><div class="form-group"><label>Cancellation Date</label><input class="cp-cancel-date input" type="date" value="${esc(p.cancellationDate||'')}"></div><div class="form-group"><label>Cancellation Remarks</label><input class="cp-cancel-remarks input" value="${esc(p.cancellationRemarks||'')}"></div><div class="form-group"><label>Attachment</label><input class="cp-attachment input" type="file"></div><div class="form-group full"><label>Remarks</label><textarea class="cp-remarks input">${esc(p.remarks||'')}</textarea></div></div><div class="pass-locations"><div class="toolbar"><h4 class="grow">CICPA Locations (Maximum 5)</h4><button type="button" class="btn light add-location">+ Add More Location</button></div><div class="cp-locations"></div></div><button type="button" class="btn danger" onclick="this.parentElement.remove()">Delete This CICPA</button>`;cicpaPasses.appendChild(d);const h=d.querySelector('.cp-locations');(p.locations?.length?p.locations:['']).forEach(v=>addPassLocation(h,v));d.querySelector('.add-location').onclick=()=>addPassLocation(h)}
-function collectCicpaPasses(){return [...document.querySelectorAll('#cicpaPasses .cicpa-pass-box')].map(b=>({number:b.querySelector('.cp-number').value.trim(),issueDate:b.querySelector('.cp-issue').value,expiryDate:b.querySelector('.cp-expiry').value,cancellationDate:b.querySelector('.cp-cancel-date').value,cancellationRemarks:b.querySelector('.cp-cancel-remarks').value.trim(),cancelled:!!b.querySelector('.cp-cancel-date').value,remarks:b.querySelector('.cp-remarks').value.trim(),attachment:b.querySelector('.cp-attachment').files[0]?.name||'',locations:[...b.querySelectorAll('.cicpa-location')].map(x=>x.value).filter(Boolean)}))}
-function saveCicpaForm(e){e.preventDefault();const emp=employeeSources().find(x=>String(x.code)===String(cicpaEmployeeId.value));if(!emp)return alert('Search and select a valid employee.');const passes=collectCicpaPasses();if(!passes.length||passes.some(p=>!p.number||!p.issueDate||!p.expiryDate||!p.locations.length))return alert('Complete all CICPA fields and select at least one location.');if(new Set(passes.map(p=>p.number.toLowerCase())).size!==passes.length)return alert('Duplicate CICPA numbers are not allowed.');const rec={id:cicpaEditId.value||String(Date.now()),employeeId:emp.code,employeeName:emp.name,company:emp.company,designation:emp.designation,category:emp.category,passes,updatedAt:new Date().toISOString()};const i=cicpaRecords.findIndex(x=>x.id===rec.id||String(x.employeeId).toLowerCase()===String(rec.employeeId).toLowerCase());if(i>=0)cicpaRecords[i]=rec;else cicpaRecords.push(rec);persistCicpa();closeModal('cicpaModal');renderCicpa()}
-function editCicpa(id){const r=cicpaRecords.find(x=>x.id===id);if(!r)return;openCicpaForm();cicpaEmployeeSearch.value=r.employeeId;findCicpaEmployee();cicpaEditId.value=r.id;cicpaFormTitle.textContent='Edit Employee CICPA'}
+function employeeSources(){
+  const arr=[];
+  const seen=new Set();
+  const addEmployee=(e={})=>{
+    const code=String(e.code||'').trim();
+    if(!code||seen.has(code.toLowerCase()))return;
+    seen.add(code.toLowerCase());
+    arr.push(e);
+  };
+  (Array.isArray(employees)?employees:[]).forEach(e=>addEmployee({
+    code:e.employeeId||e.employeeCode,
+    name:e.nameEnglish||e.nameArabic||e.name||'',
+    company:e.company||'RELIANCE GULF',
+    designation:e.actualDesignation||e.designation||e.trade||'',
+    category:'Company Employee'
+  }));
+  (Array.isArray(scEmployees)?scEmployees:[]).forEach(e=>{
+    const sc=(Array.isArray(subcontractors)?subcontractors:[]).find(s=>String(s.id)===String(e.companyId));
+    addEmployee({
+      code:e.code||e.employeeCode||e.employeeId,
+      name:e.name||e.nameEnglish||e.nameArabic||'',
+      company:sc?.name||sc?.companyName||e.company||'Subcontractor',
+      designation:e.tradeEnglish||e.trade||e.designation||'',
+      category:'Subcontractor Employee'
+    });
+  });
+  (Array.isArray(subcontractors)?subcontractors:[]).forEach(s=>(s.employees||s.manpower||[]).forEach(e=>addEmployee({
+    code:e.employeeId||e.employeeCode||e.code,
+    name:e.nameEnglish||e.name||e.employeeName||'',
+    company:s.name||s.companyName||e.company||'Subcontractor',
+    designation:e.designation||e.tradeEnglish||e.trade||'',
+    category:'Subcontractor Employee'
+  })));
+  return arr;
+}
+function cicpaEl(id){return document.getElementById(id)}
+function openCicpaForm(){
+  const form=cicpaEl('cicpaForm'), modal=cicpaEl('cicpaModal'), passes=cicpaEl('cicpaPasses'), info=cicpaEl('cicpaEmpInfo');
+  if(!form||!modal||!passes){alert('CICPA form could not be loaded. Please refresh the page.');return;}
+  form.reset();
+  cicpaEl('cicpaEditId').value='';
+  cicpaEl('cicpaEmployeeId').value='';
+  cicpaEl('cicpaEmployeeName').value='';
+  passes.innerHTML='';
+  info?.classList.remove('show');
+  cicpaEl('cicpaFormTitle').textContent='Add Employee CICPA';
+  addCicpaPass();
+  modal.classList.add('show');
+  setTimeout(()=>cicpaEl('cicpaEmployeeSearch')?.focus(),50);
+}
+function clearCicpaForm(){
+  const form=cicpaEl('cicpaForm'); if(!form)return;
+  form.reset();
+  cicpaEl('cicpaEditId').value='';cicpaEl('cicpaEmployeeId').value='';cicpaEl('cicpaEmployeeName').value='';
+  cicpaEl('cicpaEmpInfo')?.classList.remove('show');
+  cicpaEl('cicpaPasses').innerHTML='';addCicpaPass();
+  cicpaEl('cicpaEmployeeSearch')?.focus();
+}
+function findCicpaEmployee(){
+  const search=cicpaEl('cicpaEmployeeSearch');
+  const code=(search?.value||'').trim().toLowerCase();
+  if(!code){alert('Please enter Employee Code.');search?.focus();return;}
+  const e=employeeSources().find(x=>String(x.code||'').trim().toLowerCase()===code);
+  if(!e){cicpaEl('cicpaEmpInfo')?.classList.remove('show');alert('Employee Code not found in Employee or Subcontractor Employee Portal.');return;}
+  cicpaEl('cicpaEmployeeId').value=e.code||'';cicpaEl('cicpaEmployeeName').value=e.name||'';
+  cicpaEl('cicpaEmpNameView').textContent=e.name||'-';cicpaEl('cicpaEmpCodeView').textContent=e.code||'-';
+  cicpaEl('cicpaEmpCompanyView').textContent=e.company||'-';cicpaEl('cicpaEmpDesignationView').textContent=e.designation||'-';
+  cicpaEl('cicpaEmpCategoryView').textContent=e.category||'-';cicpaEl('cicpaEmpInfo')?.classList.add('show');
+  const old=cicpaRecords.find(r=>String(r.employeeId||'').toLowerCase()===String(e.code||'').toLowerCase());
+  if(old){cicpaEl('cicpaEditId').value=old.id;cicpaEl('cicpaPasses').innerHTML='';(old.passes||[]).forEach(p=>addCicpaPass(p));}
+}
+function activeLocationOptions(selected=''){return '<option value="">Select CICPA Location</option>'+managedCicpaLocations.filter(x=>x.active||x.name===selected).map(x=>`<option value="${esc(x.name)}" ${x.name===selected?'selected':''}>${esc((x.number?x.number+' - ':'')+x.name)}</option>`).join('')}
+function renumberPassLocations(host){[...host.querySelectorAll('.cicpa-location-row')].forEach((row,i)=>{const lab=row.querySelector('label');if(lab)lab.textContent='Location '+(i+1)})}
+function addPassLocation(host,value=''){
+  if(!host)return;
+  if(host.querySelectorAll('.cicpa-location').length>=5){alert('Maximum 5 locations are allowed.');return}
+  const row=document.createElement('div');row.className='cicpa-location-row';
+  row.innerHTML=`<div class="form-group"><label>Location ${host.querySelectorAll('.cicpa-location').length+1}</label><select class="cicpa-location input" required>${activeLocationOptions(value)}</select></div><button type="button" class="btn danger remove-location">Remove</button>`;
+  row.querySelector('.remove-location').onclick=()=>{if(host.querySelectorAll('.cicpa-location-row').length<=1){alert('At least one location is required.');return}row.remove();renumberPassLocations(host)};
+  host.appendChild(row)
+}
+function renumberCicpaPasses(){[...cicpaEl('cicpaPasses').querySelectorAll('.cicpa-pass-box')].forEach((box,i)=>{const h=box.querySelector('.cicpa-pass-title');if(h)h.textContent='CICPA Details #'+(i+1)})}
+function addCicpaPass(p={}){
+  const passes=cicpaEl('cicpaPasses');if(!passes)return;
+  if(passes.children.length>=3){alert('Maximum 3 CICPA records are allowed per employee.');return}
+  const d=document.createElement('div');d.className='cicpa-pass-box';
+  d.innerHTML=`<div class="toolbar"><h3 class="grow cicpa-pass-title">CICPA Details #${passes.children.length+1}</h3><button type="button" class="btn danger delete-pass">Delete CICPA</button></div><div class="cicpa-pass-grid"><div class="form-group"><label>CICPA Number *</label><input class="cp-number input" required value="${esc(p.number||'')}"></div><div class="form-group"><label>Issue Date *</label><input class="cp-issue input" type="date" required value="${esc(p.issueDate||'')}"></div><div class="form-group"><label>Expiry Date *</label><input class="cp-expiry input" type="date" required value="${esc(p.expiryDate||'')}"></div><div class="form-group full"><label>Remarks</label><textarea class="cp-remarks input">${esc(p.remarks||'')}</textarea></div></div><div class="pass-locations"><div class="toolbar"><h4 class="grow">CICPA Locations for This Number (Maximum 5)</h4><button type="button" class="btn light add-location">+ Add More Location</button></div><div class="cp-locations"></div></div>`;
+  passes.appendChild(d);
+  const h=d.querySelector('.cp-locations');(p.locations?.length?p.locations:['']).forEach(v=>addPassLocation(h,v));
+  d.querySelector('.add-location').onclick=()=>addPassLocation(h);
+  d.querySelector('.delete-pass').onclick=()=>{if(passes.children.length<=1){alert('At least one CICPA detail is required.');return}d.remove();renumberCicpaPasses()};
+  const issue=d.querySelector('.cp-issue'), expiry=d.querySelector('.cp-expiry');issue.addEventListener('change',()=>{expiry.min=issue.value;if(expiry.value&&expiry.value<issue.value)expiry.value=''});if(issue.value)expiry.min=issue.value;
+}
+function collectCicpaPasses(){return [...document.querySelectorAll('#cicpaPasses .cicpa-pass-box')].map(b=>({number:b.querySelector('.cp-number').value.trim(),issueDate:b.querySelector('.cp-issue').value,expiryDate:b.querySelector('.cp-expiry').value,remarks:b.querySelector('.cp-remarks').value.trim(),locations:[...b.querySelectorAll('.cicpa-location')].map(x=>x.value).filter(Boolean)}))}
+function saveCicpaForm(e){
+  e.preventDefault();
+  const employeeId=cicpaEl('cicpaEmployeeId').value;
+  const emp=employeeSources().find(x=>String(x.code||'').trim().toLowerCase()===String(employeeId||'').trim().toLowerCase());
+  if(!emp)return alert('Please search and select a valid employee first.');
+  const passes=collectCicpaPasses();
+  if(!passes.length||passes.some(p=>!p.number||!p.issueDate||!p.expiryDate||!p.locations.length))return alert('Complete CICPA Number, Issue Date, Expiry Date and select at least one Location.');
+  if(passes.some(p=>p.expiryDate<p.issueDate))return alert('Expiry Date cannot be earlier than Issue Date.');
+  if(new Set(passes.map(p=>p.number.toLowerCase())).size!==passes.length)return alert('Duplicate CICPA numbers are not allowed.');
+  for(const p of passes){if(new Set(p.locations.map(v=>v.toLowerCase())).size!==p.locations.length)return alert('Duplicate locations are not allowed within the same CICPA record.');}
+  const editId=cicpaEl('cicpaEditId').value;
+  const rec={id:editId||String(Date.now()),employeeId:emp.code,employeeName:emp.name,company:emp.company,designation:emp.designation,category:emp.category,passes,updatedAt:new Date().toISOString()};
+  const i=cicpaRecords.findIndex(x=>x.id===rec.id||String(x.employeeId||'').toLowerCase()===String(rec.employeeId||'').toLowerCase());
+  if(i>=0)cicpaRecords[i]=rec;else cicpaRecords.push(rec);
+  persistCicpa();closeModal('cicpaModal');renderCicpa();
+}
+function editCicpa(id){const r=cicpaRecords.find(x=>x.id===id);if(!r)return;openCicpaForm();cicpaEl('cicpaEmployeeSearch').value=r.employeeId;findCicpaEmployee();cicpaEl('cicpaEditId').value=r.id;cicpaEl('cicpaFormTitle').textContent='Edit Employee CICPA'}
 function cancelCicpaPass(id,i){const r=cicpaRecords.find(x=>x.id===id),p=r?.passes?.[i];if(!p)return;const date=prompt('Cancellation Date (YYYY-MM-DD):',new Date().toISOString().slice(0,10));if(!date)return;const remarks=prompt('Cancellation Remarks:','')||'';p.cancelled=true;p.cancellationDate=date;p.cancellationRemarks=remarks;persistCicpa();renderCicpa()}
 function deleteCicpaPass(id,i){if(!confirm('Delete this CICPA record?'))return;const r=cicpaRecords.find(x=>x.id===id);r.passes.splice(i,1);if(!r.passes.length)cicpaRecords=cicpaRecords.filter(x=>x.id!==id);persistCicpa();renderCicpa()}
 function viewCicpaRecord(id,i){downloadCicpaRecord(id,i,true)}function downloadCicpaRecord(id,i,preview=false){const r=cicpaRecords.find(x=>x.id===id),p=r?.passes?.[i];if(!p)return;const html=`<h2>CICPA Record</h2><p><b>Employee:</b> ${esc(r.employeeName)} (${esc(r.employeeId)})</p><p><b>Company:</b> ${esc(r.company)} | <b>Category:</b> ${esc(r.category)} | <b>Craft:</b> ${esc(r.designation)}</p><p><b>CICPA Number:</b> ${esc(p.number)}<br><b>Issue:</b> ${esc(p.issueDate)}<br><b>Expiry:</b> ${esc(p.expiryDate)}<br><b>Locations:</b> ${esc((p.locations||[]).join(', '))}<br><b>Status:</b> ${esc(cicpaPassStatus(p))}</p>`;if(preview){const w=open();w.document.write(html);w.document.close()}else downloadBlob(new Blob([html],{type:'text/html'}),`CICPA_${p.number}.html`)}
@@ -1501,6 +1799,10 @@ function renderEmployees(){
           : `<td class="empty-cell">Not Filled</td>`;
       }
 
+      if(key==='currentSiteName'||key==='leaveRejoiningDate'||key==='statusUpdatedAt'||key==='statusSource'){
+        return `<td class="${v?'':'empty-cell'}">${esc(v||'-')}</td>`;
+      }
+
       if(key==='approvalStatus'){
         return v
           ? `<td><span class="pill ${v==='Approved'?'approved':v==='Correction Required'?'correction':'review'}">${esc(v)}</span></td>`
@@ -1523,6 +1825,7 @@ function viewEmployee(id){
   const missingNames=missing(e);
   detailContent.innerHTML=`<div class="employee-name-with-photo" style="margin-bottom:12px">${employeePhotoHtml(e.photo,e.nameEnglish,true)}<h2>${esc(e.nameEnglish||'Not Filled')} <small>(${esc(e.employeeId||'Not Filled')})</small></h2></div>
   <p><span class="pill ${e.approvalStatus==='Approved'?'approved':e.approvalStatus==='Correction Required'?'correction':'review'}">${esc(e.approvalStatus||'Not Filled')}</span></p>
+  <div class="notice blue" style="margin-bottom:14px"><b>Automatic Site Status:</b> ${esc(e.siteStatus||'Idle')}<br><b>Current Site:</b> ${esc(e.currentSiteName||'-')}<br><b>Leave Rejoining Date:</b> ${esc(e.leaveRejoiningDate||'-')}<br><b>Last Status Updated:</b> ${esc(e.statusUpdatedAt||'-')}<br><b>Status Source:</b> ${esc(e.statusSource||'Automatic')}</div>
   <div class="form-grid">${fields.map(f=>{
     const value=String(e[f[0]]??'').trim();
     const conditionalNotRequired=f[0]==='cancellationDate'&&e.workingStatus!=='Inactive';
@@ -1550,6 +1853,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show')}
 employeeForm.onsubmit=async e=>{
   e.preventDefault();let rec={},missingNow=[];
   fields.forEach(f=>{let el=document.getElementById(f[0]);rec[f[0]]=el.value.trim();let wrap=document.querySelector(`.form-group[data-key="${f[0]}"]`);wrap.classList.remove('missing');if(f[4]&&!rec[f[0]]){missingNow.push(f[1]);wrap.classList.add('missing')}});
+  if(editingId){const existingStatus=employees.find(x=>x.id===editingId);rec.siteStatus=existingStatus?.siteStatus||'Idle';}else rec.siteStatus='Idle';
   rec.additionalCertificates=readEmployeeCertificates();
   const existingPhoto=editingId?(employees.find(x=>x.id===editingId)?.photo||''):'';
   rec.photo=document.getElementById('employeePhoto').files[0]?await fileToDataUrl(document.getElementById('employeePhoto').files[0]):existingPhoto;
@@ -1566,7 +1870,7 @@ employeeForm.onsubmit=async e=>{
     addNotification('Approval',saved,`${old?'Employee information modified':'New employee added'} by ${currentUser.name}. This record is waiting for your review.`, 'Admin Manager','Under Review',actionId);
     if(missingNow.length)addNotification('Missing Information',saved,`Missing fields: ${missingNow.join(', ')}`, 'Admin Manager','Under Review',actionId);
   }
-  persist();editingId=null;saveAttempt=0;showPage('employees');
+  persist();syncAllEmployeeSiteStatuses('Employee Record Saved');editingId=null;saveAttempt=0;showPage('employees');
 };
 
 function renderReview(){
@@ -1599,7 +1903,11 @@ function exportExcel(){
   // Export every employee form field, followed by system/approval information.
   const cols=[
     ...fields.map(f=>[f[0],f[1]]),
-    ['approvalStatus','Approval Status'],
+    ['currentSiteName','Current Site Name'],
+  ['leaveRejoiningDate','Leave Rejoining Date'],
+  ['statusUpdatedAt','Last Status Updated Date'],
+  ['statusSource','Status Source'],
+  ['approvalStatus','Approval Status'],
     ['missingFields','Missing Information'],
     ['updatedBy','Updated By'],
     ['updatedAt','Updated At'],
@@ -2053,40 +2361,47 @@ const LEAVE_STORAGE_KEY='rg_leave_records_v1';
 const LEAVE_TYPES_KEY='rg_leave_types_v1';
 let leaveRecords=[];let leaveTypes=[];let leaveQuickFilter='all';
 try{leaveRecords=JSON.parse(localStorage.getItem(LEAVE_STORAGE_KEY)||'[]');if(!Array.isArray(leaveRecords))leaveRecords=[];}catch(e){leaveRecords=[];}
-try{leaveTypes=JSON.parse(localStorage.getItem(LEAVE_TYPES_KEY)||'[]');if(!Array.isArray(leaveTypes)||!leaveTypes.length)leaveTypes=['Annual Leave','Emergency Leave','Leave Encashment','Official Duty'];}catch(e){leaveTypes=['Annual Leave','Emergency Leave','Leave Encashment','Official Duty'];}
+const DEFAULT_LEAVE_TYPES=['Annual Leave','Emergency Leave','Company Assignment','Unpaid Administrative Leave'];
+try{
+  const storedLeaveTypes=JSON.parse(localStorage.getItem(LEAVE_TYPES_KEY)||'[]');
+  const legacyTypes=['Leave Encashment','Official Duty'];
+  const customTypes=Array.isArray(storedLeaveTypes)?storedLeaveTypes.filter(x=>x&&!legacyTypes.includes(x)&&!DEFAULT_LEAVE_TYPES.some(d=>d.toLowerCase()===String(x).toLowerCase())):[];
+  leaveTypes=[...DEFAULT_LEAVE_TYPES,...customTypes];
+}catch(e){leaveTypes=[...DEFAULT_LEAVE_TYPES];}
 function leavePersist(){localStorage.setItem(LEAVE_STORAGE_KEY,JSON.stringify(leaveRecords));localStorage.setItem(LEAVE_TYPES_KEY,JSON.stringify(leaveTypes));}
 function leaveDate(v){return v?new Date(v+'T00:00:00'):null}function leaveTodayDate(){const d=new Date();d.setHours(0,0,0,0);return d}function leaveDaysFromToday(v){const d=leaveDate(v);return d?Math.round((d-leaveTodayDate())/86400000):99999}
 function leaveEmployeeByCode(code){return (employees||[]).find(e=>String(e.employeeId||'').trim().toLowerCase()===String(code||'').trim().toLowerCase())}
 function leaveEmployeeById(id){return (employees||[]).find(e=>String(e.employeeId||'')===String(id||''))}
-function leaveCurrentStatus(r){const today=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate||r.endDate);if(r.status==='Rejected')return'Rejected';if(r.status==='Pending')return'Pending';if(s&&re&&today>s&&today>re)return r.returnConfirmed?'Returned':'Overdue';return r.status||'Approved'}
-function syncEmployeeLeaveStatuses(){let changed=false;(employees||[]).forEach(e=>{const active=leaveRecords.filter(r=>r.employeeId===e.employeeId&&r.status==='Approved').sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate))).find(r=>{const t=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate);return s&&re&&t>=s&&t<re});const should=active?'On Leave':'Idle';if(active&&e.siteStatus!==should){e.siteStatus=should;changed=true}else if(!active&&e.siteStatus==='On Leave'){e.siteStatus='Idle';changed=true}});if(changed&&typeof persist==='function')persist()}
+function leaveCurrentStatus(r){const today=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate||r.endDate);if(r.status==='Rejected')return'Rejected';if(r.status==='Pending')return'Pending';if(r.notRejoined||!r.rejoiningDate)return r.status||'Approved';if(s&&re&&today>s&&today>re)return r.returnConfirmed?'Returned':'Overdue';return r.status||'Approved'}
+function syncEmployeeLeaveStatuses(){return syncAllEmployeeSiteStatuses('Leave Management')}
 function openLeavePortal(){document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));syncEmployeeLeaveStatuses();showPage('leavePortal');showLeaveModule('dashboard')}
 function showLeaveModule(module){['dashboard','add','history','reports'].forEach(x=>{document.getElementById('leave'+x.charAt(0).toUpperCase()+x.slice(1)+'Module')?.classList.toggle('hidden',x!==module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('active',x===module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('light',x!==module)});refreshLeaveTypeOptions();if(module==='dashboard')renderLeaveDashboard();if(module==='history')renderLeaveHistory();if(module==='reports')renderLeaveReportPreview()}
-function refreshLeaveTypeOptions(){['leaveType','leaveTypeFilter'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const selected=el.value;el.innerHTML=(id==='leaveTypeFilter'?'<option value="all">All Leave Types</option>':'')+leaveTypes.map(x=>'<option>'+esc(x)+'</option>').join('');if([...el.options].some(o=>o.value===selected))el.value=selected})}
+function refreshLeaveTypeOptions(){['leaveType','leaveTypeFilter'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const selected=el.value;el.innerHTML=(id==='leaveTypeFilter'?'<option value="all">All Leave Types</option>':'<option value="">Select Leave Type</option>')+leaveTypes.map(x=>'<option>'+esc(x)+'</option>').join('');if([...el.options].some(o=>o.value===selected))el.value=selected})}
 function findLeaveEmployee(){const e=leaveEmployeeByCode(document.getElementById('leaveEmployeeCode').value);if(!e){alert('Employee Code not found in Employee Management Portal.');document.getElementById('leaveEmployeeInfo').classList.remove('show');return}document.getElementById('leaveSelectedEmployeeId').value=e.employeeId;document.getElementById('leaveEmpName').textContent=e.nameEnglish||'-';document.getElementById('leaveEmpCode').textContent=e.employeeId||'-';document.getElementById('leaveEmpDesignation').textContent=e.designation||'-';document.getElementById('leaveEmpCompany').textContent=e.company||'-';document.getElementById('leaveEmpJoining').textContent=e.joiningDate||'-';document.getElementById('leaveEmployeeInfo').classList.add('show')}
+function toggleLeaveNotRejoined(){const checked=!!document.getElementById('leaveNotRejoined')?.checked,rejoin=document.getElementById('leaveRejoining');if(rejoin){rejoin.disabled=checked;if(checked)rejoin.value='';rejoin.required=!checked}calculateLeaveDays()}
 function calculateLeaveDays(){const s=leaveDate(document.getElementById('leaveStart').value),re=leaveDate(document.getElementById('leaveRejoining').value),end=leaveDate(document.getElementById('leaveEnd').value);let total=0;if(s&&(re||end)){const last=re||end;total=Math.max(0,Math.round((last-s)/86400000));if(!re&&end)total+=1}document.getElementById('leaveTotalDays').value=total;const paid=Math.max(0,Number(document.getElementById('leavePaidDays').value||0));document.getElementById('leaveUnpaidDays').value=Math.max(0,total-paid)}
-function saveLeaveRecord(){const employeeId=document.getElementById('leaveSelectedEmployeeId').value,e=leaveEmployeeById(employeeId);if(!e){alert('Please search and select an employee first.');return}const start=document.getElementById('leaveStart').value,end=document.getElementById('leaveEnd').value,rejoin=document.getElementById('leaveRejoining').value;if(!start||!end||!rejoin){alert('Leave Start Date, Leave End Date and Rejoining Date are required.');return}calculateLeaveDays();const id=document.getElementById('leaveEditingId').value;const old=id?leaveRecords.find(r=>String(r.id)===String(id)):null;const actor=currentUser?.name||'System',now=new Date().toLocaleString(),status=document.getElementById('leaveRecordStatus').value,comment=document.getElementById('leaveAuditComment').value.trim();const audit=old?.audit?[...old.audit]:[];audit.push({action:old?'Edited':'Created',by:actor,role:currentUser?.role||'',date:now,comment});if(status!==old?.status)audit.push({action:status,by:actor,role:currentUser?.role||'',date:now,comment});const file=document.getElementById('leaveAttachment').files[0];const accountRole=['Admin Manager','Accounts','Account Manager'].includes(currentUser?.role);const settlementAmount=accountRole?Number(document.getElementById('leaveSettlementAmount').value||0):Number(old?.settlementAmount||0);const settlementPaidDate=accountRole?document.getElementById('leaveSettlementPaidDate').value:(old?.settlementPaidDate||'');const settlementMode=accountRole?document.getElementById('leaveSettlementMode').value:(old?.settlementMode||'');const rec={id:old?.id||Date.now(),employeeId:e.employeeId,employeeName:e.nameEnglish||'',designation:e.designation||'',company:e.company||'',project:e.project||e.site||'',joiningDate:e.joiningDate||'',leaveType:document.getElementById('leaveType').value,startDate:start,endDate:end,ticketDate:document.getElementById('leaveTicketDate').value,rejoiningDate:rejoin,totalDays:Number(document.getElementById('leaveTotalDays').value||0),paidDays:Number(document.getElementById('leavePaidDays').value||0),unpaidDays:Number(document.getElementById('leaveUnpaidDays').value||0),ticketProvided:document.getElementById('leaveTicketProvided').value,settlementAmount,settlementPaidDate,settlementMode,remarks:document.getElementById('leaveRemarks').value,attachmentName:file?.name||old?.attachmentName||'',emergencyContact:document.getElementById('leaveEmergencyContact').value,leaveAddress:document.getElementById('leaveAddress').value,status,audit,createdBy:old?.createdBy||actor,createdAt:old?.createdAt||now,updatedBy:actor,updatedAt:now};if(old)Object.assign(old,rec);else leaveRecords.unshift(rec);const settlementComplete=rec.settlementAmount>0&&rec.settlementPaidDate&&rec.settlementMode;addNotification('Leave Settlement',e,settlementComplete?`Leave settlement of AED ${rec.settlementAmount.toFixed(2)} was recorded. Paid on ${rec.settlementPaidDate} by ${rec.settlementMode}.`:`Leave record created/updated for ${rec.employeeName}. Please review and update settlement amount, paid date and mode of payment.`,'Admin Manager',settlementComplete?'Completed':'Open',String(rec.id));leavePersist();persist();syncEmployeeLeaveStatuses();resetLeaveForm();showLeaveModule('dashboard')}
-function resetLeaveForm(){['leaveEmployeeCode','leaveSelectedEmployeeId','leaveEditingId','leaveStart','leaveEnd','leaveTicketDate','leaveRejoining','leaveTotalDays','leaveUnpaidDays','leaveRemarks','leaveEmergencyContact','leaveAddress','leaveAuditComment','leaveSettlementAmount','leaveSettlementPaidDate','leaveSettlementMode'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('leavePaidDays').value=0;document.getElementById('leaveEmployeeInfo').classList.remove('show');document.getElementById('leaveRecordStatus').value='Pending';document.getElementById('leaveFormTitle').textContent='Add Leave Record'}
-function editLeaveRecord(id){const r=leaveRecords.find(x=>x.id===id);if(!r)return;showLeaveModule('add');document.getElementById('leaveEditingId').value=r.id;document.getElementById('leaveEmployeeCode').value=r.employeeId;findLeaveEmployee();const map={leaveType:r.leaveType,leaveStart:r.startDate,leaveEnd:r.endDate,leaveTicketDate:r.ticketDate,leaveRejoining:r.rejoiningDate,leavePaidDays:r.paidDays,leaveTicketProvided:r.ticketProvided,leaveSettlementAmount:r.settlementAmount||'',leaveSettlementPaidDate:r.settlementPaidDate||'',leaveSettlementMode:r.settlementMode||'',leaveRemarks:r.remarks,leaveEmergencyContact:r.emergencyContact,leaveAddress:r.leaveAddress,leaveRecordStatus:r.status};Object.entries(map).forEach(([id,v])=>document.getElementById(id).value=v??'');calculateLeaveDays();document.getElementById('leaveFormTitle').textContent='Edit Leave Record'}
+function saveLeaveRecord(){const employeeId=document.getElementById('leaveSelectedEmployeeId').value,e=leaveEmployeeById(employeeId);if(!e){alert('Please search and select an employee first.');return}const leaveType=document.getElementById('leaveType').value,start=document.getElementById('leaveStart').value,end=document.getElementById('leaveEnd').value,ticketDate=document.getElementById('leaveTicketDate').value,notRejoined=!!document.getElementById('leaveNotRejoined')?.checked,rejoin=notRejoined?'':document.getElementById('leaveRejoining').value;if(!leaveType){alert('Please select Leave Type.');document.getElementById('leaveType').focus();return}if(!start||!end||!ticketDate||(!notRejoined&&!rejoin)){alert('Leave Start Date, Leave End Date and Ticket Date are required. Enter Rejoining Date or check Employee Not Rejoined Yet.');return}calculateLeaveDays();const id=document.getElementById('leaveEditingId').value;const old=id?leaveRecords.find(r=>String(r.id)===String(id)):null;const actor=currentUser?.name||'System',now=new Date().toLocaleString(),status=document.getElementById('leaveRecordStatus').value,comment=document.getElementById('leaveAuditComment').value.trim();const audit=old?.audit?[...old.audit]:[];audit.push({action:old?'Edited':'Created',by:actor,role:currentUser?.role||'',date:now,comment});if(status!==old?.status)audit.push({action:status,by:actor,role:currentUser?.role||'',date:now,comment});const file=document.getElementById('leaveAttachment').files[0];const accountRole=['Admin Manager','Accounts','Account Manager'].includes(currentUser?.role);const settlementAmount=accountRole?Number(document.getElementById('leaveSettlementAmount').value||0):Number(old?.settlementAmount||0);const settlementPaidDate=accountRole?document.getElementById('leaveSettlementPaidDate').value:(old?.settlementPaidDate||'');const settlementMode=accountRole?document.getElementById('leaveSettlementMode').value:(old?.settlementMode||'');const accountsRemarks=accountRole?document.getElementById('leaveAccountsRemarks').value:(old?.accountsRemarks||'');const rec={id:old?.id||Date.now(),employeeId:e.employeeId,employeeName:e.nameEnglish||'',designation:e.designation||'',company:e.company||'',project:e.project||e.site||'',joiningDate:e.joiningDate||'',leaveType,startDate:start,endDate:end,ticketDate,rejoiningDate:rejoin,notRejoined,totalDays:Number(document.getElementById('leaveTotalDays').value||0),paidDays:Number(document.getElementById('leavePaidDays').value||0),unpaidDays:Number(document.getElementById('leaveUnpaidDays').value||0),ticketProvided:document.getElementById('leaveTicketProvided').value,settlementAmount,settlementPaidDate,settlementMode,accountsRemarks,remarks:document.getElementById('leaveRemarks').value,attachmentName:file?.name||old?.attachmentName||'',emergencyContact:document.getElementById('leaveEmergencyContact').value,leaveAddress:document.getElementById('leaveAddress').value,status,audit,createdBy:old?.createdBy||actor,createdAt:old?.createdAt||now,updatedBy:actor,updatedAt:now};if(old)Object.assign(old,rec);else leaveRecords.unshift(rec);const settlementComplete=rec.settlementAmount>0&&rec.settlementPaidDate&&rec.settlementMode;addNotification('Leave Settlement',e,settlementComplete?`Leave settlement of AED ${rec.settlementAmount.toFixed(2)} was recorded. Paid on ${rec.settlementPaidDate} by ${rec.settlementMode}.`:`Leave record created/updated for ${rec.employeeName}. Please review and update settlement amount, paid date and mode of payment.`,'Admin Manager',settlementComplete?'Completed':'Open',String(rec.id));leavePersist();persist();syncEmployeeLeaveStatuses();resetLeaveForm();showLeaveModule('dashboard')}
+function resetLeaveForm(){['leaveEmployeeCode','leaveSelectedEmployeeId','leaveEditingId','leaveStart','leaveEnd','leaveTicketDate','leaveRejoining','leaveTotalDays','leaveUnpaidDays','leaveRemarks','leaveEmergencyContact','leaveAddress','leaveAuditComment','leaveSettlementAmount','leaveSettlementPaidDate','leaveSettlementMode','leaveAccountsRemarks'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('leavePaidDays').value=0;const nr=document.getElementById('leaveNotRejoined');if(nr)nr.checked=false;toggleLeaveNotRejoined();document.getElementById('leaveEmployeeInfo').classList.remove('show');document.getElementById('leaveRecordStatus').value='Pending';refreshLeaveTypeOptions();document.getElementById('leaveType').value='';document.getElementById('leaveFormTitle').textContent='Add Leave Record'}
+function editLeaveRecord(id){const r=leaveRecords.find(x=>x.id===id);if(!r)return;showLeaveModule('add');document.getElementById('leaveEditingId').value=r.id;document.getElementById('leaveEmployeeCode').value=r.employeeId;findLeaveEmployee();const map={leaveType:r.leaveType,leaveStart:r.startDate,leaveEnd:r.endDate,leaveTicketDate:r.ticketDate,leaveRejoining:r.rejoiningDate,leavePaidDays:r.paidDays,leaveTicketProvided:r.ticketProvided,leaveSettlementAmount:r.settlementAmount||'',leaveSettlementPaidDate:r.settlementPaidDate||'',leaveSettlementMode:r.settlementMode||'',leaveAccountsRemarks:r.accountsRemarks||'',leaveRemarks:r.remarks,leaveEmergencyContact:r.emergencyContact,leaveAddress:r.leaveAddress,leaveRecordStatus:r.status};Object.entries(map).forEach(([id,v])=>document.getElementById(id).value=v??'');const nr=document.getElementById('leaveNotRejoined');if(nr)nr.checked=!!r.notRejoined||!r.rejoiningDate;toggleLeaveNotRejoined();calculateLeaveDays();document.getElementById('leaveFormTitle').textContent='Edit Leave Record'}
 function deleteLeaveRecord(id){if(!confirm('Delete this leave record?'))return;leaveRecords=leaveRecords.filter(x=>x.id!==id);leavePersist();syncEmployeeLeaveStatuses();renderLeaveDashboard()}
 function setLeaveQuickFilter(f){leaveQuickFilter=f;renderLeaveTable()}
 function leaveFilteredRecords(){const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=ds<=0&&dr>0;let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){syncEmployeeLeaveStatuses();document.getElementById('leaveTotalEmployees').textContent=(employees||[]).length;document.getElementById('leaveToday').textContent=leaveRecords.filter(r=>leaveDaysFromToday(r.startDate)<=0&&leaveDaysFromToday(r.rejoiningDate)>0&&r.status==='Approved').length;document.getElementById('leaveReturn15').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.rejoiningDate);return d>=0&&d<=15&&r.status==='Approved'}).length;document.getElementById('leaveGoing7').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.startDate);return d>=0&&d<=7&&r.status==='Approved'}).length;const alerts=[];leaveRecords.forEach(r=>{const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(r.status==='Approved'&&ret>=0&&ret<=15)alerts.push(`${r.employeeName} (${r.company}) is returning in ${ret} day(s).`);if(r.status==='Approved'&&go>=0&&go<=7)alerts.push(`${r.employeeName} (${r.company}) is going on leave in ${go} day(s).`);if(r.status==='Approved'&&ret<0&&!r.returnConfirmed)alerts.push(`${r.employeeName} has not returned after the leave expiry date.`)});document.getElementById('leaveNotifications').innerHTML=alerts.length?alerts.map(x=>'<div class="leave-alert">'+esc(x)+'</div>').join(''):'<p class="muted">No leave alerts.</p>';const companies={};const companyField=(typeof fields!=='undefined'?fields.find(f=>f[0]==='company'):null);const employeePortalCompanies=(companyField&&Array.isArray(companyField[5])?companyField[5]:['RELIANCE GULF','RELIANCE INTERNATIONAL']);employeePortalCompanies.forEach(company=>{const name=String(company||'').trim();if(name)companies[name]={totalEmployees:0,today:0,return15:0,going7:0}});(employees||[]).forEach(e=>{const company=String(e.company||e.companyName||'').trim();if(company&&!companies[company])companies[company]={totalEmployees:0,today:0,return15:0,going7:0};if(company)companies[company].totalEmployees++});leaveRecords.forEach(r=>{if(r.status!=='Approved')return;const company=String(r.company||'Unassigned').trim()||'Unassigned';companies[company]=companies[company]||{totalEmployees:0,today:0,return15:0,going7:0};const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(go<=0&&ret>0)companies[company].today++;if(ret>=0&&ret<=15)companies[company].return15++;if(go>=0&&go<=7)companies[company].going7++});document.getElementById('leaveCompanySummary').innerHTML=Object.keys(companies).length?'<div class="table-wrap"><table><thead><tr><th>Company Name</th><th>Total Employees</th><th>On Leave Today</th><th>Returning ≤15 Days</th><th>Going ≤7 Days</th></tr></thead><tbody>'+Object.entries(companies).sort((a,b)=>a[0].localeCompare(b[0])).map(([c,v])=>`<tr><td><b>${esc(c)}</b></td><td>${v.totalEmployees}</td><td>${v.today}</td><td>${v.return15}</td><td>${v.going7}</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">No company names are available in the Employee Portal.</p>';renderLeaveTable()}
-function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="12" style="text-align:center">No leave records found.</td></tr>'}
-function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySearch')?.value||'').toLowerCase();const groups={};leaveRecords.filter(r=>!q||[r.employeeId,r.employeeName].join(' ').toLowerCase().includes(q)).forEach(r=>(groups[r.employeeId]??=[]).push(r));document.getElementById('leaveHistoryContent').innerHTML=Object.entries(groups).map(([id,rs])=>{const e=leaveEmployeeById(id)||rs[0];rs.sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));return `<div class="panel" style="margin:14px 0"><h3>${esc(e.employeeName||e.nameEnglish)} <small>(${esc(id)})</small></h3><p>${esc(e.company||'')} · ${esc(e.designation||'')} · Joining: ${esc(e.joiningDate||'-')}</p><div class="table-wrap"><table><thead><tr><th>Step</th><th>Leave Type</th><th>Went on Leave</th><th>Returned / Rejoining</th><th>Total Days</th><th>Paid</th><th>Unpaid</th><th>Status</th><th>Audit Trail</th></tr></thead><tbody>${rs.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)}</td><td>${esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${r.paidDays}</td><td>${r.unpaidDays}</td><td>${esc(leaveCurrentStatus(r))}</td><td class="leave-audit">${(r.audit||[]).map(a=>`${esc(a.action)} by ${esc(a.by)} — ${esc(a.date)}${a.comment?'<br>'+esc(a.comment):''}`).join('<hr>')}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')||'<p class="muted">No employee leave history found.</p>'}
+function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="12" style="text-align:center">No leave records found.</td></tr>'}
+function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySearch')?.value||'').toLowerCase();const groups={};leaveRecords.filter(r=>!q||[r.employeeId,r.employeeName].join(' ').toLowerCase().includes(q)).forEach(r=>(groups[r.employeeId]??=[]).push(r));document.getElementById('leaveHistoryContent').innerHTML=Object.entries(groups).map(([id,rs])=>{const e=leaveEmployeeById(id)||rs[0];rs.sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));return `<div class="panel" style="margin:14px 0"><h3>${esc(e.employeeName||e.nameEnglish)} <small>(${esc(id)})</small></h3><p>${esc(e.company||'')} · ${esc(e.designation||'')} · Joining: ${esc(e.joiningDate||'-')}</p><div class="table-wrap"><table><thead><tr><th>Step</th><th>Leave Type</th><th>Went on Leave</th><th>Returned / Rejoining</th><th>Total Days</th><th>Paid</th><th>Unpaid</th><th>Status</th><th>Audit Trail</th></tr></thead><tbody>${rs.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${r.paidDays}</td><td>${r.unpaidDays}</td><td>${esc(leaveCurrentStatus(r))}</td><td class="leave-audit">${(r.audit||[]).map(a=>`${esc(a.action)} by ${esc(a.by)} — ${esc(a.date)}${a.comment?'<br>'+esc(a.comment):''}`).join('<hr>')}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')||'<p class="muted">No employee leave history found.</p>'}
 function addLeaveType(){const v=document.getElementById('newLeaveType').value.trim();if(!v)return;if(leaveTypes.some(x=>x.toLowerCase()===v.toLowerCase())){alert('This leave type already exists.');return}leaveTypes.push(v);leavePersist();document.getElementById('newLeaveType').value='';renderLeaveTypes();refreshLeaveTypeOptions()}
 function removeLeaveType(i){if(confirm('Remove this leave type?')){leaveTypes.splice(i,1);leavePersist();renderLeaveTypes();refreshLeaveTypeOptions()}}
 function renderLeaveTypes(){document.getElementById('leaveTypeList').innerHTML=leaveTypes.map((x,i)=>`<span class="location-chip">${esc(x)} <button onclick="removeLeaveType(${i})">×</button></span>`).join('')}
-function getLeaveReportRecords(){const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords];if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&leaveDaysFromToday(r.rejoiningDate)>0&&r.status==='Approved');return rows}
+function getLeaveReportRecords(){const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords];if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&(r.notRejoined||!r.rejoiningDate||leaveDaysFromToday(r.rejoiningDate)>0)&&r.status==='Approved');return rows}
 function renderLeaveReportPreview(){const el=document.getElementById('leaveReportPreview');if(el)el.innerHTML='<p class="muted">Select a report and use Export Excel or Export PDF.</p>'}
-function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,r.rejoiningDate,r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
+function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,(r.notRejoined||!r.rejoiningDate?'Not Rejoined Yet':r.rejoiningDate),r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
 function exportLeaveExcel(){const rows=[['Employee Code','Employee Name','Company','Designation','Leave Type','Start Date','End Date','Rejoining Date','Total Days','Paid Days','Unpaid Days','Ticket Provided','Status'],...leaveCsvRows()];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='leave-report.csv';a.click();URL.revokeObjectURL(a.href)}
 function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w.document.write(`<html><head><title>Leave Report</title><style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #999;padding:5px;text-align:left}h2{text-align:center}</style></head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 // Extend existing page controller without changing existing portal logic.
 if(typeof pageMeta!=='undefined')pageMeta.leavePortal=['Leave Management Portal','Worker leave, return dates, history and reports'];
 function applyLeaveRoleVisibility(){const role=currentUser?.role;document.querySelectorAll('.leave-paid-field').forEach(x=>x.style.display=['Admin','Admin Manager','Accounts','HR/Admin'].includes(role)?'block':'none');document.querySelectorAll('.leave-settlement-field').forEach(x=>x.style.display=['Admin Manager','Accounts','Account Manager'].includes(role)?'block':'none')}
 const originalShowPage=showPage;showPage=function(id){originalShowPage(id);if(id==='leavePortal'){applyLeaveRoleVisibility();syncEmployeeLeaveStatuses();renderLeaveDashboard()}};
-document.addEventListener('DOMContentLoaded',()=>{refreshLeaveTypeOptions();syncEmployeeLeaveStatuses();applyLeaveRoleVisibility()});
+document.addEventListener('DOMContentLoaded',()=>{refreshLeaveTypeOptions();syncEmployeeLeaveStatuses();applyLeaveRoleVisibility();setInterval(syncEmployeeLeaveStatuses,60000)});
 </script>
 
 
@@ -2198,6 +2513,35 @@ function siteClientName(id){return (typeof clientRecords!=='undefined'&&clientRe
 function siteProject(id){return (typeof projectRecords!=='undefined'&&projectRecords.find(x=>String(x.id)===String(id)))||null}
 function siteDays(a,b){if(!a)return 0;const x=new Date(a+'T00:00:00'),y=new Date((b||siteToday())+'T00:00:00');return Math.max(0,Math.floor((y-x)/86400000)+1)}
 function siteSetEmployeeStatus(key,working,site){const e=siteEmployeeByKey(key);if(!e)return;if(e.source==='company'){e.ref.workingStatus=working;e.ref.siteStatus=site;persist()}else{e.ref.workingStatus=working;e.ref.siteStatus=site;scePersist()}}
+
+// Central automatic Employee Site Status engine.
+// Priority: On Leave > On Site > Idle. Dates are evaluated against the current day.
+function statusDateValue(v){if(!v)return null;const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?null:d}
+function statusToday(){const d=new Date();d.setHours(0,0,0,0);return d}
+function employeeAutomaticStatus(employee){
+  const today=statusToday(),code=String(employee.employeeId||'').trim();
+  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim()===code&&r.status==='Approved').sort((a,b)=>String(b.ticketDate||b.startDate||'').localeCompare(String(a.ticketDate||a.startDate||''))).find(r=>{const ticket=statusDateValue(r.ticketDate),rejoin=statusDateValue(r.rejoiningDate),stillAway=!!r.notRejoined||!rejoin;return ticket&&today>=ticket&&(stillAway||today<rejoin)});
+  if(activeLeave)return{siteStatus:'On Leave',currentSiteName:'',leaveRejoiningDate:activeLeave.notRejoined||!activeLeave.rejoiningDate?'Not Rejoined Yet':activeLeave.rejoiningDate,statusSource:'Leave Management'};
+  const activeSite=(siteRecords||[]).filter(r=>String(r.employeeCode||'').trim()===code).filter(r=>{const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);return mob&&today>=mob&&(!demob||today<demob)}).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
+  if(activeSite)return{siteStatus:'On Site',currentSiteName:[activeSite.clientName,activeSite.projectName,activeSite.siteLocation].filter(Boolean).join(' / '),leaveRejoiningDate:'',statusSource:'Site Management'};
+  return{siteStatus:'Idle',currentSiteName:'',leaveRejoiningDate:'',statusSource:'Automatic'};
+}
+function syncAllEmployeeSiteStatuses(triggerSource='Automatic Scheduler'){
+  let changed=false;
+  (employees||[]).forEach(e=>{
+    const next=employeeAutomaticStatus(e);
+    const different=['siteStatus','currentSiteName','leaveRejoiningDate','statusSource'].some(k=>String(e[k]||'')!==String(next[k]||''));
+    if(different){Object.assign(e,next);e.statusUpdatedAt=new Date().toLocaleString();e.statusTrigger=triggerSource;changed=true}
+  });
+  if(changed&&typeof persist==='function')persist();
+  return changed;
+}
+function startAutomaticEmployeeStatusScheduler(){
+  syncAllEmployeeSiteStatuses('Automatic Date Check');
+  clearInterval(window.__employeeStatusTimer);
+  window.__employeeStatusTimer=setInterval(()=>{const changed=syncAllEmployeeSiteStatuses('Automatic Date Check');if(changed){try{renderEmployees();renderDashboard()}catch(e){}}},60000);
+}
+
 function showSiteModule(name){document.querySelectorAll('.site-module').forEach(x=>x.classList.add('hidden'));document.getElementById('site'+name[0].toUpperCase()+name.slice(1)+'Module')?.classList.remove('hidden');document.querySelectorAll('.site-tab').forEach(x=>{const a=x.dataset.siteModule===name;x.classList.toggle('active',a);x.classList.toggle('light',!a)});if(name==='dashboard')renderSiteDashboard();if(name==='mobilized')renderSiteActive();if(name==='history')renderSiteHistory();if(name==='monthly')renderSiteMonthly();if(name==='daily')renderSiteDaily();if(name==='notifications')renderSiteNotifications()}
 function siteRefreshDropdowns(){const cf=document.getElementById('siteClientFilter'),mc=document.getElementById('siteMobClient');const clients=Array.isArray(clientRecords)?clientRecords:[],opts=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cf){const v=cf.value;cf.innerHTML='<option value="all">All Clients</option>'+opts;cf.value=[...cf.options].some(o=>o.value===v)?v:'all'}if(mc){const v=mc.value;mc.innerHTML='<option value="">Select Client</option>'+opts;mc.value=[...mc.options].some(o=>o.value===v)?v:''}siteClientChanged();if(mc&&!mc.value){if(siteMobProject)siteMobProject.innerHTML='<option value="">Select Project</option>';if(siteMobLocation)siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}}
 function siteClientChanged(){const c=document.getElementById('siteClientFilter')?.value||'all',p=document.getElementById('siteProjectFilter');if(!p)return;const v=p.value;p.innerHTML='<option value="all">All Projects</option>'+projectRecords.filter(x=>c==='all'||String(x.clientId)===String(c)).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');p.value=[...p.options].some(o=>o.value===v)?v:'all'}
@@ -2205,10 +2549,10 @@ function openSiteMobilization(){siteSelectedEmployee=null;document.getElementByI
 function siteFindEmployee(){const code=siteEmployeeCodeSearch.value.trim().toLowerCase(),e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}const active=siteActiveRecords().find(r=>r.employeeKey===e.key);if(active){alert(`Employee is already mobilized.\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nDemobilize the employee before assigning another site.`);return}siteSelectedEmployee=e;siteSelectedEmployeeKey.value=e.key;siteMobCraft.value=e.trade;siteEmployeeInfo.innerHTML=`<div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.name)}<b>${esc(e.name)} (${esc(e.code)})</b></div>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;siteEmployeeInfo.classList.remove('hidden')}
 function siteMobClientChanged(){const cid=siteMobClient.value;siteMobProject.innerHTML='<option value="">Select Project</option>'+projectRecords.filter(p=>String(p.clientId)===String(cid)).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}
 function siteMobProjectChanged(){const p=siteProject(siteMobProject.value);siteMobLocation.innerHTML='<option value="">Select Site Location</option>'+(p?.location?`<option value="${esc(p.location)}">${esc(p.location)}</option>`:'');if(p?.location)siteMobLocation.value=p.location}
-function saveSiteMobilization(e){e.preventDefault();const emp=siteEmployeeByKey(siteSelectedEmployeeKey.value);if(!emp){alert('Search and select an employee first.');return}if(siteActiveRecords().some(r=>r.employeeKey===emp.key)){alert('This employee is already active at another site. Demobilize first.');return}const p=siteProject(siteMobProject.value),c=clientRecords.find(x=>String(x.id)===String(siteMobClient.value));if(!c||!p||!siteMobLocation.value||!siteMobDate.value){alert('Client, Project, Site Location and Mobilization Date are mandatory.');return}if(String(p.clientId)!==String(c.id)){alert('Selected project does not belong to selected client.');return}const duplicate=siteRecords.some(r=>r.employeeKey===emp.key&&r.clientId===c.id&&r.projectId===p.id&&r.siteLocation===siteMobLocation.value&&r.mobilizationDate===siteMobDate.value);if(duplicate){alert('Duplicate mobilization record cannot be saved.');return}siteRecords.unshift({id:String(Date.now()),employeeKey:emp.key,employeeCode:emp.code,employeeName:emp.name,employeeType:emp.type,subcontractorCompany:emp.subcontractor,trade:siteMobCraft.value.trim(),nationality:emp.nationality,clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:siteMobLocation.value,mobilizationDate:siteMobDate.value,demobilizationDate:'',lastWorkingDate:'',demobilizationReason:'',rate:Number(siteMobRate.value||0),hoursPerDay:Number(siteMobHours.value||0),accommodation:siteMobAccommodation.value,food:siteMobFood.value,remarks:siteMobRemarks.value.trim(),workingStatus:'Active',siteStatus:'On Site',createdAt:new Date().toISOString()});siteSetEmployeeStatus(emp.key,'Active','On Site');sitePersist();closeModal('siteMobilizeModal');renderSiteDashboard();showSiteModule('mobilized')}
+function saveSiteMobilization(e){e.preventDefault();const emp=siteEmployeeByKey(siteSelectedEmployeeKey.value);if(!emp){alert('Search and select an employee first.');return}if(siteActiveRecords().some(r=>r.employeeKey===emp.key)){alert('This employee is already active at another site. Demobilize first.');return}const p=siteProject(siteMobProject.value),c=clientRecords.find(x=>String(x.id)===String(siteMobClient.value));if(!c||!p||!siteMobLocation.value||!siteMobDate.value){alert('Client, Project, Site Location and Mobilization Date are mandatory.');return}if(String(p.clientId)!==String(c.id)){alert('Selected project does not belong to selected client.');return}const duplicate=siteRecords.some(r=>r.employeeKey===emp.key&&r.clientId===c.id&&r.projectId===p.id&&r.siteLocation===siteMobLocation.value&&r.mobilizationDate===siteMobDate.value);if(duplicate){alert('Duplicate mobilization record cannot be saved.');return}siteRecords.unshift({id:String(Date.now()),employeeKey:emp.key,employeeCode:emp.code,employeeName:emp.name,employeeType:emp.type,subcontractorCompany:emp.subcontractor,trade:siteMobCraft.value.trim(),nationality:emp.nationality,clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:siteMobLocation.value,mobilizationDate:siteMobDate.value,demobilizationDate:'',lastWorkingDate:'',demobilizationReason:'',rate:Number(siteMobRate.value||0),hoursPerDay:Number(siteMobHours.value||0),accommodation:siteMobAccommodation.value,food:siteMobFood.value,remarks:siteMobRemarks.value.trim(),workingStatus:'Active',siteStatus:'On Site',createdAt:new Date().toISOString()});sitePersist();syncAllEmployeeSiteStatuses('Site Management');closeModal('siteMobilizeModal');renderSiteDashboard();showSiteModule('mobilized')}
 function openSiteDemobilization(id){const r=siteRecords.find(x=>x.id===id);if(!r)return;siteDemobId.value=id;siteDemobInfo.innerHTML=`<b>${esc(r.employeeName)} (${esc(r.employeeCode)})</b><br>Final Client: ${esc(r.clientName)} · Project: ${esc(r.projectName)} · Site: ${esc(r.siteLocation)}`;siteDemobDate.value=siteToday();siteLastWorkingDate.value=siteToday();siteDemobReason.value='';siteDemobRemarks.value='';siteOtherReason.value='';siteToggleOtherReason();document.getElementById('siteDemobModal').classList.add('show')}
 function siteToggleOtherReason(){const other=siteDemobReason.value==='Other';siteOtherReasonWrap.classList.toggle('hidden',!other);siteOtherReason.required=other}
-function saveSiteDemobilization(e){e.preventDefault();const r=siteRecords.find(x=>x.id===siteDemobId.value);if(!r)return;const dd=siteDemobDate.value,lw=siteLastWorkingDate.value;if(dd<r.mobilizationDate||lw<r.mobilizationDate||lw>dd){alert('Demobilization and Last Working dates must not be earlier than Mobilization Date. Last Working Date cannot be after Demobilization Date.');return}if(siteDemobReason.value==='Other'&&!siteOtherReason.value.trim()){alert('Remarks are mandatory when Other is selected.');return}r.demobilizationDate=dd;r.lastWorkingDate=lw;r.demobilizationReason=siteDemobReason.value==='Other'?'Other: '+siteOtherReason.value.trim():siteDemobReason.value;r.remarks=[r.remarks,siteDemobRemarks.value.trim()].filter(Boolean).join(' | ');r.workingStatus=['Resigned','Terminated','Misconduct'].includes(siteDemobReason.value)?'Inactive':'Active';r.siteStatus=siteDemobReason.value==='On Leave'?'On Leave':'Idle';r.updatedAt=new Date().toISOString();siteSetEmployeeStatus(r.employeeKey,r.workingStatus,r.siteStatus);sitePersist();closeModal('siteDemobModal');renderSiteDashboard();showSiteModule('history')}
+function saveSiteDemobilization(e){e.preventDefault();const r=siteRecords.find(x=>x.id===siteDemobId.value);if(!r)return;const dd=siteDemobDate.value,lw=siteLastWorkingDate.value;if(dd<r.mobilizationDate||lw<r.mobilizationDate||lw>dd){alert('Demobilization and Last Working dates must not be earlier than Mobilization Date. Last Working Date cannot be after Demobilization Date.');return}if(siteDemobReason.value==='Other'&&!siteOtherReason.value.trim()){alert('Remarks are mandatory when Other is selected.');return}r.demobilizationDate=dd;r.lastWorkingDate=lw;r.demobilizationReason=siteDemobReason.value==='Other'?'Other: '+siteOtherReason.value.trim():siteDemobReason.value;r.remarks=[r.remarks,siteDemobRemarks.value.trim()].filter(Boolean).join(' | ');r.workingStatus=['Resigned','Terminated','Misconduct'].includes(siteDemobReason.value)?'Inactive':'Active';r.siteStatus=siteDemobReason.value==='On Leave'?'On Leave':'Idle';r.updatedAt=new Date().toISOString();sitePersist();syncAllEmployeeSiteStatuses('Site Management');closeModal('siteDemobModal');renderSiteDashboard();showSiteModule('history')}
 function siteActiveFiltered(){const q=(siteSearch?.value||'').toLowerCase(),cid=siteClientFilter?.value||'all',pid=siteProjectFilter?.value||'all',type=siteTypeFilter?.value||'all',m=siteToday().slice(0,7);return siteActiveRecords().filter(r=>{const hay=[r.employeeCode,r.employeeName,r.clientName,r.projectName,r.siteLocation,r.subcontractorCompany,r.trade].join(' ').toLowerCase();const quick=siteQuickFilter==='all'||(siteQuickFilter==='company'&&r.employeeType==='Company Employee')||(siteQuickFilter==='subcontractor'&&r.employeeType==='Subcontractor Employee')||(siteQuickFilter==='onsite'&&r.siteStatus==='On Site')||(siteQuickFilter==='mobilizedMonth'&&siteMonth(r.mobilizationDate)===m);return quick&&(!q||hay.includes(q))&&(cid==='all'||String(r.clientId)===String(cid))&&(pid==='all'||String(r.projectId)===String(pid))&&(type==='all'||r.employeeType===type)})}
 function renderSiteActive(){siteRefreshDropdowns();const rows=siteActiveFiltered();siteActiveBody.innerHTML=rows.map(r=>`<tr><td><b>${esc(r.employeeName)}</b></td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeType)}</td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.trade)}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.mobilizationDate)}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${esc(r.hoursPerDay)}</td><td>${esc(r.accommodation)}</td><td>${esc(r.food)}</td><td><span class="pill approved">On Site</span></td><td><button class="btn danger" onclick="openSiteDemobilization('${r.id}')">Demobilize</button></td></tr>`).join('')||'<tr><td colspan="15" class="muted">No active mobilization records found.</td></tr>';siteQuickFilter='all'}
 function siteHistoryFiltered(){const q=(siteHistorySearch?.value||'').toLowerCase(),m=siteToday().slice(0,7);return siteRecords.filter(r=>{const hay=Object.values(r).join(' ').toLowerCase();return(!q||hay.includes(q))&&(siteQuickFilter!=='demobilizedMonth'||siteMonth(r.demobilizationDate)===m)})}
@@ -2373,6 +2717,78 @@ document.addEventListener('DOMContentLoaded',()=>{try{if(siteReportMonth)siteRep
 
 
 document.addEventListener('DOMContentLoaded',()=>{const cf=document.getElementById('cicpaForm'),lf=document.getElementById('loaForm');if(cf)cf.addEventListener('submit',saveCicpaForm);if(lf)lf.addEventListener('submit',saveLoaForm);document.getElementById('cicpaSearch')?.addEventListener('input',renderCicpa);document.getElementById('cicpaStatusFilter')?.addEventListener('change',renderCicpa);document.getElementById('loaSearch')?.addEventListener('input',renderLoas);document.getElementById('loaStatusFilter')?.addEventListener('change',renderLoas);document.getElementById('loaTotal')?.addEventListener('input',updateLoaBalance);document.getElementById('loaUsedInput')?.addEventListener('input',updateLoaBalance);document.getElementById('cicpaEmployeeSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findCicpaEmployee()}});renderCicpaHome();renderCicpaLocationManagement()});
+
+// Open any ERP portal in a separate browser tab while keeping the current portal open.
+
+const portalOpenFunctionMap = {
+  employee: 'openEmployeePortal',
+  site: 'openSitePortal',
+  cicpa: 'openCicpaPortal',
+  subcontractor: 'openSubcontractorPortal',
+  leave: 'openLeavePortal',
+  client: 'openClientPortal'
+};
+function showPortalOpenOptions(portalName, portalTitle){
+  const overlay=document.getElementById('portalChoiceOverlay');
+  document.getElementById('portalChoiceTitle').textContent=portalTitle || 'Open Portal';
+  document.getElementById('portalChoiceHere').onclick=function(){
+    hidePortalOpenOptions();
+    const fn=window[portalOpenFunctionMap[portalName]];
+    if(typeof fn==='function') fn();
+  };
+  document.getElementById('portalChoiceTab').onclick=function(){
+    hidePortalOpenOptions();
+    openPortalInNewTab(portalName);
+  };
+  overlay.classList.add('show');
+}
+function hidePortalOpenOptions(){
+  document.getElementById('portalChoiceOverlay').classList.remove('show');
+}
+function closePortalOpenOptions(event){
+  if(event.target && event.target.id==='portalChoiceOverlay') hidePortalOpenOptions();
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape') hidePortalOpenOptions();});
+
+function openPortalInNewTab(portalName){
+  const url = new URL(window.location.href);
+  url.searchParams.set('portal', portalName);
+  const newTab = window.open(url.toString(), '_blank', 'noopener');
+  if(!newTab){
+    alert('Your browser blocked the new tab. Please allow pop-ups for this ERP page.');
+  }
+}
+
+function openRequestedPortalFromUrl(){
+  const portal = new URLSearchParams(window.location.search).get('portal');
+  if(!portal) return;
+  const portalMap = {
+    employee: 'openEmployeePortal',
+    site: 'openSitePortal',
+    cicpa: 'openCicpaPortal',
+    subcontractor: 'openSubcontractorPortal',
+    leave: 'openLeavePortal',
+    client: 'openClientPortal'
+  };
+  const functionName = portalMap[String(portal).toLowerCase()];
+  if(!functionName) return;
+
+  // Wait until the ERP has completed its normal login/session initialization.
+  let attempts = 0;
+  const timer = setInterval(function(){
+    attempts++;
+    const appVisible = document.querySelector('.app') && getComputedStyle(document.querySelector('.app')).display !== 'none';
+    if(typeof window[functionName] === 'function' && (appVisible || attempts > 10)){
+      clearInterval(timer);
+      window[functionName]();
+    }else if(attempts >= 40){
+      clearInterval(timer);
+    }
+  }, 150);
+}
+document.addEventListener('DOMContentLoaded', openRequestedPortalFromUrl);
+document.addEventListener('DOMContentLoaded',()=>{const statusField=document.getElementById('siteStatus');if(statusField){statusField.disabled=true;statusField.title='Automatically controlled by Leave and Site Management portals';const label=statusField.closest('.form-group')?.querySelector('label');if(label&&!label.textContent.includes('Automatic'))label.textContent+=' (Automatic)';}startAutomaticEmployeeStatusScheduler();});
+
 </script>
 </body>
 </html>

@@ -1299,7 +1299,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
 </div>
 <div class="form-grid" id="certGrid"></div><div style="margin-top:16px"><h3 style="margin:0 0 10px">Additional Certificates</h3><div id="employeeAdditionalCertificates"></div><button type="button" class="btn light" onclick="addEmployeeCertificate()">+ Add More</button></div></div>
           <div class="form-actions"><button type="button" class="btn light" onclick="showPage('employees')">Cancel</button><button type="submit" class="btn primary">Save & Send for Review</button></div>
-        <div class="toolbar"><button class="btn light" type="button" onclick="manualDownloadJoiningForm()">Download Joining Form</button></div></form>
+        <div class="toolbar"><button class="btn light" type="button" onclick="manualDownloadJoiningForm(); return false;">Download Joining Form</button></div></form>
       </section>
 
       <section id="review" class="page">
@@ -2232,13 +2232,15 @@ employeeForm.onsubmit=async e=>{
   syncAllEmployeeSiteStatuses('Employee Record Saved');
   // Do not hold the form open while waiting for the internet/Firebase.
   flushCloudWrites().catch(err=>console.error('Background cloud sync failed:',err));
-  const joiningDateAddedOrChanged=!!saved.joiningDate&&(!old||String(old.joiningDate||'')!==String(saved.joiningDate||'')||String(old.company||'')!==String(saved.company||''));
-  editingId=null;saveAttempt=0;showPage('employees');
-  if(joiningDateAddedOrChanged&&joiningTemplateForCompany(saved.company)){
-    setTimeout(()=>offerJoiningFormDownload(saved),100);
+  // Ask immediately while the Save button action is still active.
+  // This runs on every successful save when Company and Date of Joining are available.
+  const canOfferJoiningForm=!!saved.joiningDate&&!!joiningTemplateForCompany(saved.company);
+  if(canOfferJoiningForm){
+    offerJoiningFormDownload(saved);
   }else{
     alert('Employee data saved successfully.');
   }
+  editingId=null;saveAttempt=0;showPage('employees');
   }catch(err){
     console.error('Employee save error:',err);
     alert('Employee data could not be saved: '+(err?.message||err));

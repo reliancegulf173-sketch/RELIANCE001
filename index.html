@@ -613,7 +613,7 @@ th{background:#edf3f8;color:#294d6a}
           <span>Keep Me Signed In</span>
         </label>
       </div>
-      <button class="login-btn" onclick="login()">Sign In</button>
+      <button type="button" class="login-btn" id="signInBtn" onclick="login()">Sign In</button>
       <div id="loginMsg" class="login-msg"></div>
     </div>
   </section>
@@ -1350,8 +1350,10 @@ async function login(){
   const email=document.getElementById('loginUser').value.trim().toLowerCase();
   const password=document.getElementById('loginPass').value;
   const msg=document.getElementById('loginMsg');
+  const signInBtn=document.getElementById('signInBtn');
   if(!email || !password){ msg.textContent='Please enter email and password.'; return; }
   msg.textContent='Signing in...';
+  if(signInBtn){ signInBtn.disabled=true; signInBtn.textContent='Signing In...'; }
   try{
     const persistence=document.getElementById('keepSignedIn').checked
       ? firebase.auth.Auth.Persistence.LOCAL
@@ -1380,20 +1382,41 @@ async function login(){
       'auth/network-request-failed':'Network error. Please check your internet connection.'
     };
     msg.textContent=friendly[error.code]||('Login failed: '+error.message);
+  }finally{
+    if(signInBtn){ signInBtn.disabled=false; signInBtn.textContent='Sign In'; }
   }
 }
 function applyUser(){
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('portalApp').classList.remove('hidden');
-  const displayName=currentUser.name.replace(/\b\w/g,c=>c.toUpperCase());
-  document.getElementById('currentUserName').textContent=displayName;
-  document.getElementById('currentUserRole').textContent=currentUser.role;
-  document.getElementById('avatarText').textContent=displayName.charAt(0).toUpperCase();
-  document.getElementById('welcomeTitle').textContent='Good day, '+displayName;
+  const loginScreen=document.getElementById('loginScreen');
+  const portalApp=document.getElementById('portalApp');
+  if(loginScreen) loginScreen.classList.add('hidden');
+  if(portalApp) portalApp.classList.remove('hidden');
+
+  const rawName=(currentUser && currentUser.name) ? currentUser.name : 'User';
+  const displayName=rawName.replace(/\b\w/g,c=>c.toUpperCase());
+
+  const nameEl=document.getElementById('currentUserName');
+  const roleEl=document.getElementById('currentUserRole');
+  const avatarEl=document.getElementById('avatarText');
+  const oldWelcomeEl=document.getElementById('welcomeTitle');
+  const newWelcomeEl=document.getElementById('rgDashboardWelcome');
+
+  if(nameEl) nameEl.textContent=displayName;
+  if(roleEl) roleEl.textContent=(currentUser && currentUser.role) ? currentUser.role : 'Admin';
+  if(avatarEl) avatarEl.textContent=displayName.charAt(0).toUpperCase();
+  if(oldWelcomeEl) oldWelcomeEl.textContent='Good day, '+displayName;
+  if(newWelcomeEl) newWelcomeEl.textContent='Welcome back, '+displayName+'. Here is today’s manpower and document overview.';
+
   document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.manager-only').forEach(el=>el.classList.toggle('hidden',false));
-  showPage('dashboard');
-  renderDashboard();
+
+  if(typeof showPage==='function') showPage('dashboard');
+  if(typeof renderDashboard==='function'){
+    try{ renderDashboard(); }catch(err){ console.warn('Old dashboard render skipped:',err); }
+  }
+  if(typeof window.rgRenderProfessionalDashboard==='function'){
+    setTimeout(()=>window.rgRenderProfessionalDashboard(),100);
+  }
 }
 async function logout(){
   if(cloudUnsubscribe){cloudUnsubscribe();cloudUnsubscribe=null;}

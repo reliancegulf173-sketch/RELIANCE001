@@ -678,6 +678,7 @@ th{background:#edf3f8;color:#294d6a}
 .client-contact-row{display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;padding:12px;margin-bottom:10px;border:1px solid #dbe5f0;border-radius:12px;background:#fff}
 .client-contact-row label{margin:0}
 .client-contact-row .remove-contact-btn{height:46px;white-space:nowrap}
+.client-add-contact-btn{margin-top:4px;font-weight:700}
 @media(max-width:1100px){.client-contact-row{grid-template-columns:1fr 1fr}.client-contact-row .remove-contact-btn{grid-column:1/-1}}
 @media(max-width:650px){.client-contacts-header{align-items:stretch;flex-direction:column}.client-contact-row{grid-template-columns:1fr}}
 </style>
@@ -910,10 +911,10 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
                 <label>Company Address *<input id="clientAddress" class="input" required></label>
                 <div class="full client-contacts-section">
                   <div class="client-contacts-header">
-                    <label>Client Contact Persons *</label>
-                    <button type="button" class="btn primary" onclick="addClientContactRow()">+ Add More Contact Person</button>
+                    <label>Contact Persons</label>
                   </div>
                   <div id="clientContactsContainer"></div>
+                  <button type="button" class="btn light client-add-contact-btn" onclick="addClientContactRow()">+ Add More Contact Person</button>
                 </div>
                 <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
                 <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>

@@ -1243,6 +1243,7 @@ let cloudReady = false;
 let cloudUnsubscribe = null;
 let cloudWriteTimer = null;
 const pendingCloudWrites = {};
+const cloudWritesInFlight = new Set();
 
 function cloudToast(message, isError=false){
   console[isError?'error':'log']('[Firebase]', message);
@@ -1285,6 +1286,7 @@ async function flushCloudWrites(){
   Object.keys(pendingCloudWrites).forEach(k=>delete pendingCloudWrites[k]);
   if(!Object.keys(payload).length) return true;
   const dataKeys=Object.keys(payload);
+  dataKeys.forEach(key=>cloudWritesInFlight.add(key));
   payload.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
   payload.updatedBy=firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid;
   try{
@@ -1296,6 +1298,8 @@ async function flushCloudWrites(){
     console.error('Cloud save failed:',err);
     cloudToast('Saved in this browser. Cloud sync failed: '+err.message,true);
     return false;
+  }finally{
+    dataKeys.forEach(key=>cloudWritesInFlight.delete(key));
   }
 }
 function queueCloudWrite(key,value){
@@ -1366,7 +1370,7 @@ async function startCloudSync(){
       CLOUD_DATA_KEYS.forEach(key=>{
         if(typeof data[key]==='string' && localStorage.getItem(key)!==data[key]){
           // A local change waiting to upload must not be overwritten by an older snapshot.
-          if(Object.prototype.hasOwnProperty.call(pendingCloudWrites,key)) return;
+          if(Object.prototype.hasOwnProperty.call(pendingCloudWrites,key)||cloudWritesInFlight.has(key)) return;
           nativeLocalSetItem(key,data[key]); changed=true;
         }
       });
@@ -1546,33 +1550,49 @@ function isNotApplicableRemark(value){
   const normalized=String(value??'').trim().toUpperCase().replace(/[.\s]/g,'');
   return normalized==='N/A'||normalized==='NA';
 }
+const technicalCertificateConfig={
+  h2s:{requiredKey:'h2sRequired',expiryKey:'h2sExpiry',detailKey:'h2sRemark',label:'H2S Certificate'},
+  ata:{requiredKey:'ataRequired',expiryKey:'ataExpiry',detailKey:'ataRemark',label:'ATA Training'},
+  rigger:{requiredKey:'riggerRequired',expiryKey:'riggerExpiry',detailKey:'riggerRemark',label:'Rigger Certificate'},
+  scaffolder:{requiredKey:'scaffolderRequired',expiryKey:'scaffolderExpiry',detailKey:'scaffolderRemark',label:'Scaffolder Certificate'},
+  adnocMedical:{requiredKey:'adnocMedicalRequired',expiryKey:'adnocMedicalExpiry',detailKey:'adnocMedicalType',label:'ADNOC Medical'}
+};
 const technicalCertificateRemarkMap={
   h2sExpiry:'h2sRemark',
   ataExpiry:'ataRemark',
   riggerExpiry:'riggerRemark',
   scaffolderExpiry:'scaffolderRemark'
 };
+function technicalCertificateConfigByField(key){
+  return Object.values(technicalCertificateConfig).find(c=>c.expiryKey===key||c.detailKey===key)||null;
+}
+function isTechnicalCertificateRequired(employee,config){
+  if(!config)return true;
+  if(employee&&Object.prototype.hasOwnProperty.call(employee,config.requiredKey))return !!employee[config.requiredKey];
+  return !!String(employee?.[config.expiryKey]||employee?.[config.detailKey]||'').trim();
+}
 function isTechnicalCertificateNotApplicable(employee,expiryKey){
   const remarkKey=technicalCertificateRemarkMap[expiryKey];
   return !!remarkKey&&isNotApplicableRemark(employee?.[remarkKey]);
 }
 function missing(e){
   const result=[];
-  const certificateRemarkMap=technicalCertificateRemarkMap;
   fields.forEach(f=>{
     const key=f[0],label=f[1];
     if(key==='cancellationDate'){
       if(e.workingStatus==='Inactive'&&!String(e[key]??'').trim())result.push(label);
       return;
     }
-    const remarkKey=certificateRemarkMap[key];
+    const certConfig=technicalCertificateConfigByField(key);
+    if(certConfig&&!isTechnicalCertificateRequired(e,certConfig))return;
+    const remarkKey=technicalCertificateRemarkMap[key];
     if(remarkKey&&isNotApplicableRemark(e[remarkKey]))return;
     if(!String(e[key]??'').trim())result.push(label);
   });
   return [...new Set(result)];
 }
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
-function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry,'passportExpiry'],['Emirates ID',e.idExpiry,'idExpiry'],['Labour Card',e.labourExpiry,'labourExpiry'],['IOLE',e.ioleExpiry,'ioleExpiry'],['H2S',e.h2sExpiry,'h2sExpiry'],['ATA Training',e.ataExpiry,'ataExpiry'],['Rigger Certificate',e.riggerExpiry,'riggerExpiry'],['Scaffolder Certificate',e.scaffolderExpiry,'scaffolderExpiry'],['ADNOC Medical',e.adnocMedicalExpiry,'adnocMedicalExpiry'],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate,''])].forEach(x=>{if(x[2]&&isTechnicalCertificateNotApplicable(e,x[2]))return;let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
+function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry,'passportExpiry'],['Emirates ID',e.idExpiry,'idExpiry'],['Labour Card',e.labourExpiry,'labourExpiry'],['IOLE',e.ioleExpiry,'ioleExpiry'],['H2S',e.h2sExpiry,'h2sExpiry'],['ATA Training',e.ataExpiry,'ataExpiry'],['Rigger Certificate',e.riggerExpiry,'riggerExpiry'],['Scaffolder Certificate',e.scaffolderExpiry,'scaffolderExpiry'],['ADNOC Medical',e.adnocMedicalExpiry,'adnocMedicalExpiry'],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate,''])].forEach(x=>{const certConfig=x[2]?technicalCertificateConfigByField(x[2]):null;if(certConfig&&!isTechnicalCertificateRequired(e,certConfig))return;if(x[2]&&isTechnicalCertificateNotApplicable(e,x[2]))return;let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
 
 function deleteEmployeesWithExpiredDocuments(){
   // Automatic deletion disabled. Expired documents are shown only as alerts.
@@ -1749,6 +1769,27 @@ function buildForm(){
       wrap.innerHTML=`<label>${label}${req?' *':''}</label>${ctl}`;host.appendChild(wrap);
     });
   });
+  const certHost=document.getElementById('certGrid');
+  if(certHost){
+    Object.values(technicalCertificateConfig).forEach(config=>{
+      const expiryWrap=certHost.querySelector(`.form-group[data-key="${config.expiryKey}"]`);
+      const detailWrap=certHost.querySelector(`.form-group[data-key="${config.detailKey}"]`);
+      if(!expiryWrap||!detailWrap)return;
+      const selector=document.createElement('div');
+      selector.className='form-group certificate-required-selector';
+      selector.style.gridColumn='1 / -1';
+      selector.innerHTML=`<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px"><input type="checkbox" id="${config.requiredKey}" style="width:19px;height:19px"> ${config.label} Required</label>`;
+      certHost.insertBefore(selector,expiryWrap);
+      const toggle=()=>{
+        const required=document.getElementById(config.requiredKey).checked;
+        expiryWrap.style.display=required?'block':'none';
+        detailWrap.style.display=required?'block':'none';
+        if(!required){document.getElementById(config.expiryKey).value='';document.getElementById(config.detailKey).value='';expiryWrap.classList.remove('missing');detailWrap.classList.remove('missing');}
+      };
+      document.getElementById(config.requiredKey).addEventListener('change',toggle);
+      toggle();
+    });
+  }
   const working=document.getElementById('workingStatus');
   if(working){working.addEventListener('change',toggleCancellationDate);toggleCancellationDate()}
 }
@@ -1982,8 +2023,8 @@ function renderEmployees(){
 ['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
 function clearFilters(){['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).value='');renderEmployees()}
 function specialFilter(v){showPage('employees');filterSpecial.value=v;renderEmployees()}
-function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();document.getElementById('employeePhotoPreview').innerHTML='';document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));loadEmployeeCertificates([]);showPage('form');toggleCancellationDate()}
-function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});document.getElementById('employeePhoto').value='';document.getElementById('employeePhotoPreview').innerHTML=e.photo?employeePhotoHtml(e.photo,e.nameEnglish,true):'';loadEmployeeCertificates(e.additionalCertificates||[]);showPage('form');toggleCancellationDate()}
+function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();Object.values(technicalCertificateConfig).forEach(c=>{const cb=document.getElementById(c.requiredKey);if(cb){cb.checked=false;cb.dispatchEvent(new Event('change'));}});document.getElementById('employeePhotoPreview').innerHTML='';document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));loadEmployeeCertificates([]);showPage('form');toggleCancellationDate()}
+function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});Object.values(technicalCertificateConfig).forEach(c=>{const cb=document.getElementById(c.requiredKey);if(cb){cb.checked=isTechnicalCertificateRequired(e,c);cb.dispatchEvent(new Event('change'));if(cb.checked){document.getElementById(c.expiryKey).value=e[c.expiryKey]||'';document.getElementById(c.detailKey).value=e[c.detailKey]||'';}}});document.getElementById('employeePhoto').value='';document.getElementById('employeePhotoPreview').innerHTML=e.photo?employeePhotoHtml(e.photo,e.nameEnglish,true):'';loadEmployeeCertificates(e.additionalCertificates||[]);showPage('form');toggleCancellationDate()}
 function viewEmployee(id){
   let e=employees.find(x=>x.id===id);
   const missingNames=missing(e);
@@ -1992,7 +2033,8 @@ function viewEmployee(id){
   <div class="notice blue" style="margin-bottom:14px"><b>Automatic Site Status:</b> ${esc(e.siteStatus||'Idle')}<br><b>Current Site:</b> ${esc(e.currentSiteName||'-')}<br><b>Leave Rejoining Date:</b> ${esc(e.leaveRejoiningDate||'-')}<br><b>Last Status Updated:</b> ${esc(e.statusUpdatedAt||'-')}<br><b>Status Source:</b> ${esc(e.statusSource||'Automatic')}</div>
   <div class="form-grid">${fields.map(f=>{
     const value=String(e[f[0]]??'').trim();
-    const conditionalNotRequired=f[0]==='cancellationDate'&&e.workingStatus!=='Inactive';
+    const certConfig=technicalCertificateConfigByField(f[0]);
+    const conditionalNotRequired=(f[0]==='cancellationDate'&&e.workingStatus!=='Inactive')||(certConfig&&!isTechnicalCertificateRequired(e,certConfig));
     const expiryClass=getExpiryDateClass(f[0],f[1],value);
     const fk=String(f[0]||'').toLowerCase(), fl=String(f[1]||'').toLowerCase();
     const isExpiryField=fk.includes('expiry')||fk.includes('expire')||fl.includes('expiry')||fl.includes('expire');
@@ -2016,7 +2058,18 @@ function closeModal(id){document.getElementById(id).classList.remove('show')}
 
 employeeForm.onsubmit=async e=>{
   e.preventDefault();let rec={},missingNow=[];
-  fields.forEach(f=>{let el=document.getElementById(f[0]);rec[f[0]]=el.value.trim();let wrap=document.querySelector(`.form-group[data-key="${f[0]}"]`);wrap.classList.remove('missing');if(f[4]&&!rec[f[0]]){missingNow.push(f[1]);wrap.classList.add('missing')}});
+  try{
+  fields.forEach(f=>{
+    const el=document.getElementById(f[0]);
+    rec[f[0]]=el ? String(el.value||'').trim() : '';
+    const wrap=document.querySelector(`.form-group[data-key="${f[0]}"]`);
+    if(wrap)wrap.classList.remove('missing');
+    if(f[4]&&!rec[f[0]]){missingNow.push(f[1]);if(wrap)wrap.classList.add('missing');}
+  });
+  Object.values(technicalCertificateConfig).forEach(c=>{
+    rec[c.requiredKey]=!!document.getElementById(c.requiredKey)?.checked;
+    if(!rec[c.requiredKey]){rec[c.expiryKey]='';rec[c.detailKey]='';}
+  });
   if(editingId){const existingStatus=employees.find(x=>x.id===editingId);rec.siteStatus=existingStatus?.siteStatus||'Idle';}else rec.siteStatus='Idle';
   rec.additionalCertificates=readEmployeeCertificates();
   const existingPhoto=editingId?(employees.find(x=>x.id===editingId)?.photo||''):'';
@@ -2024,7 +2077,7 @@ employeeForm.onsubmit=async e=>{
   if(rec.workingStatus==='Inactive'&&!rec.cancellationDate){missingNow.push('Cancellation Date');document.querySelector('.form-group[data-key="cancellationDate"]').classList.add('missing')}
   let duplicate=employees.find(x=>x.id!==editingId&&(x.employeeId===rec.employeeId||(rec.emiratesId&&x.emiratesId===rec.emiratesId)));
   if(duplicate){alert(duplicate.employeeId===rec.employeeId?'Already have this Employee ID.':'Already have this Emirates ID.');return}
-  if(missingNow.length&&saveAttempt===0){saveAttempt++;missingList.innerHTML=missingNow.map(x=>`<li>${esc(x)}</li>`).join('');warningModal.classList.add('show');return}
+  if(missingNow.length){missingList.innerHTML=missingNow.map(x=>`<li>${esc(x)}</li>`).join('');}
   let old=editingId?employees.find(x=>x.id===editingId):null,changes=[];
   if(old)fields.forEach(f=>{if(String(old[f[0]]||'')!==String(rec[f[0]]||''))changes.push({field:f[1],old:old[f[0]]||'',new:rec[f[0]]||''})});
   const actionId=String(Date.now())+'_'+Math.random().toString(36).slice(2);
@@ -2036,8 +2089,14 @@ employeeForm.onsubmit=async e=>{
   }
   if(!persist()) return;
   syncAllEmployeeSiteStatuses('Employee Record Saved');
-  await flushCloudWrites();
+  // Do not hold the form open while waiting for the internet/Firebase.
+  flushCloudWrites().catch(err=>console.error('Background cloud sync failed:',err));
   editingId=null;saveAttempt=0;showPage('employees');
+  alert('Employee data saved successfully.');
+  }catch(err){
+    console.error('Employee save error:',err);
+    alert('Employee data could not be saved: '+(err?.message||err));
+  }
 };
 
 function renderReview(){

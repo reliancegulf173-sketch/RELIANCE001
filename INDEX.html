@@ -2173,7 +2173,22 @@ function employeeFromJoiningFormFields(){
   };
 }
 function downloadJoiningFormForEmployee(employee){
-  const e={...employeeFromJoiningFormFields(),...(employee||{})};
+  const raw=employee||{};
+  const e={
+    ...employeeFromJoiningFormFields(),
+    ...raw,
+    employeeId:raw.employeeId||raw.employeeCode||raw.code||'',
+    nameEnglish:raw.nameEnglish||raw.employeeName||raw.name||'',
+    department:raw.department||'',
+    designation:raw.designation||raw.actualDesignation||raw.trade||'',
+    nationality:raw.nationality||'',
+    joiningDate:raw.joiningDate||raw.dateOfJoining||'',
+    uaeContact:raw.uaeContact||raw.contactNo||raw.mobile||raw.phone||'',
+    email:raw.email||'',
+    homeContact:raw.homeContact||raw.homeCountryContact||'',
+    company:raw.company||raw.companyName||'',
+    photo:raw.photo||raw.employeePhoto||''
+  };
   const company=String(e.company||'').trim().toUpperCase();
   if(!company||(!company.includes('RELIANCE GULF')&&!company.includes('RELIANCE INTERNATIONAL'))){
     alert('Please select Reliance Gulf or Reliance International.');return;
@@ -2268,20 +2283,14 @@ function showJoiningFormPrompt(employee){
     </div>`;
     document.body.appendChild(modal);
   }else modal.style.display='flex';
-  document.getElementById('joiningPromptText').innerHTML=`Employee joining date has been entered.<br><b>Company:</b> ${company}<br><b>Date of Joining:</b> ${joiningDate}<br><br>Download auto-filled <b>${joiningFormFileName(pendingJoiningFormEmployee)}</b>?`;
+  document.getElementById('joiningPromptText').innerHTML=`Employee saved successfully.<br><b>Employee:</b> ${joiningFormEsc(pendingJoiningFormEmployee.nameEnglish||pendingJoiningFormEmployee.employeeName||'')}<br><b>Employee Code:</b> ${joiningFormEsc(pendingJoiningFormEmployee.employeeId||pendingJoiningFormEmployee.employeeCode||'')}<br><b>Company:</b> ${joiningFormEsc(company)}<br><b>Date of Joining:</b> ${joiningFormEsc(joiningDate)}<br><br>Download auto-filled <b>${joiningFormFileName(pendingJoiningFormEmployee)}</b>?`;
   document.getElementById('joiningPromptLater').onclick=()=>{modal.style.display='none'};
   document.getElementById('joiningPromptDownload').onclick=()=>{downloadJoiningFormForEmployee(pendingJoiningFormEmployee);modal.style.display='none'};
   return true;
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const companyEl=document.getElementById('company');
-  const joiningEl=document.getElementById('joiningDate');
-  const handler=()=>{lastJoiningPromptKey='';setTimeout(showJoiningFormPrompt,0)};
-  companyEl?.addEventListener('change',handler);
-  joiningEl?.addEventListener('change',handler);
-  joiningEl?.addEventListener('blur',handler);
-});
+// Joining form prompt must run only after a successful employee Save.
+// Do not open it while the user is still entering Company or Date of Joining.
 
 employeeForm.onsubmit=async e=>{
   e.preventDefault();let rec={},missingNow=[];

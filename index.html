@@ -3149,7 +3149,19 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     setText('rgNotificationTotal',Object.values(counts).reduce((a,b)=>a+b,0)+onsite.length+onleave.length+idle.length);
 
     chart('rgCompanyChart',countBy(emps,e=>e.company||e.companyName));
-    chart('rgStatusChart',countBy(emps,e=>e.siteStatus));
+
+    // Show available employees plus the manpower deployed at each individual site.
+    // On-site employees are grouped by their current site name instead of showing
+    // only one combined "On Site" total.
+    const siteStatusBreakdown={};
+    if(idle.length) siteStatusBreakdown['Idle']=idle.length;
+    if(onleave.length) siteStatusBreakdown['On Leave']=onleave.length;
+    onsite.forEach(e=>{
+      const site=String(e.currentSiteName||e.siteLocation||e.projectName||'Site Not Specified').trim()||'Site Not Specified';
+      siteStatusBreakdown[site]=(siteStatusBreakdown[site]||0)+1;
+    });
+    chart('rgStatusChart',siteStatusBreakdown);
+
     chart('rgNationalityChart',countBy(emps,e=>e.nationality));
   };
 

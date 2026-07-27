@@ -667,6 +667,11 @@ th{background:#edf3f8;color:#294d6a}
 #certGrid .certificate-checkbox-text b{font-size:15px!important;}
 #certGrid .certificate-checkbox-text small{font-size:12px!important;color:#64748b!important;font-weight:600!important;}
 </style>
+
+<style id="clientMultiContactFix">
+@media(max-width:1100px){.client-contact-row{grid-template-columns:1fr 1fr!important}}
+@media(max-width:650px){.client-contact-row{grid-template-columns:1fr!important}}
+</style>
 </head>
 <body>
 
@@ -869,7 +874,7 @@ th{background:#edf3f8;color:#294d6a}
             <select id="clientExpiryFilter" class="input" onchange="renderClientList()"><option value="all">All License Expiry</option><option value="soon">Expiring ≤30 Days</option><option value="expired">Expired</option><option value="missing">Missing Expiry Date</option></select>
             <button class="btn success" onclick="exportClientsExcel()">Export Excel</button><button class="btn danger" onclick="printClients()">PDF / Print</button>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Client Code</th><th>Client Name</th><th>Address</th><th>Contact Persons</th><th>Contact Remarks</th><th>Trade License No.</th><th>License Expiry</th><th>VAT No.</th><th>Status</th><th>Documents</th><th>Projects</th><th>Actions</th></tr></thead><tbody id="clientListBody"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Client Code</th><th>Client Name</th><th>Address</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>Trade License No.</th><th>License Expiry</th><th>VAT No.</th><th>Status</th><th>Documents</th><th>Projects</th><th>Actions</th></tr></thead><tbody id="clientListBody"></tbody></table></div>
         </div>
 
         <div id="clientProjectsModule" class="hidden">
@@ -890,10 +895,20 @@ th{background:#edf3f8;color:#294d6a}
                 <label>Client Code<input id="clientCode" class="input" readonly placeholder="Automatically generated"></label>
                 <label>Client Name *<input id="clientName" class="input" required></label>
                 <label>Company Address *<input id="clientAddress" class="input" required></label>
-                <div style="grid-column:1/-1">
-                  <label>Contact Persons *</label>
-                  <div id="clientContactsContainer"></div>
-                  <button type="button" class="btn light" style="margin-top:10px" onclick="addClientContactRow()">+ Add More Contact Person</button>
+                <div class="full" style="grid-column:1/-1">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+                    <label style="margin:0;font-weight:800">Contact Persons *</label>
+                    <button type="button" class="btn primary" onclick="addClientContactRow()">+ Add More Contact Person</button>
+                  </div>
+                  <div id="clientContactsContainer">
+                    <div class="client-contact-row" style="display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc">
+                      <label>Contact Person Name *<input class="input client-contact-name" required></label>
+                      <label>Mobile Number *<input class="input client-contact-mobile" required></label>
+                      <label>Email Address *<input type="email" class="input client-contact-email" required></label>
+                      <label>Remark<input class="input client-contact-remark" placeholder="Designation / department / notes"></label>
+                      <button type="button" class="btn danger" onclick="removeClientContactRow(this)">Remove</button>
+                    </div>
+                  </div>
                 </div>
                 <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
                 <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>
@@ -1043,7 +1058,7 @@ th{background:#edf3f8;color:#294d6a}
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Subcontractor Code</th><th>Type of Business</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Persons</th><th>Remarks</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
+              <thead><tr><th>Name</th><th>Subcontractor Code</th><th>Type of Business</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
               <tbody id="scTableBody"></tbody>
             </table>
           </div>
@@ -1091,12 +1106,9 @@ th{background:#edf3f8;color:#294d6a}
               <div class="form-group"><label>Trade License Number *</label><input id="scLicense" class="input" required></div>
               <div class="form-group"><label>Trade License Expiry Date *</label><input id="scLicenseExpiry" type="date" class="input" required></div>
               <div class="form-group"><label>VAT Registration Number *</label><input id="scVat" class="input" required></div>
-              <div class="form-group" style="grid-column:1/-1">
-                <label>Contact Persons</label>
-                <div id="scContactsContainer"></div>
-                <button type="button" class="btn light" style="margin-top:10px" onclick="addScContactRow()">+ Add More Contact Person</button>
-              </div>
-              <div class="form-group" style="grid-column:1/-1"><label>General Remark</label><textarea id="scRemark" class="input" rows="3" placeholder="Enter subcontractor remark"></textarea></div>
+              <div class="form-group"><label>Contact Person</label><input id="scContact" class="input"></div>
+              <div class="form-group"><label>Mobile Number</label><input id="scMobile" class="input"></div>
+              <div class="form-group"><label>Email Address</label><input id="scEmail" type="email" class="input"></div>
               <div class="form-group"><label>ICV Status</label><select id="scIcv" class="input"><option value="Yes">Yes</option><option value="No">No</option></select></div>
               <div class="form-group"><label>Working Status</label><select id="scWorkingStatus" class="input"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
             </div>
@@ -2394,42 +2406,6 @@ function toggleScOtherBusiness(){
 function getSubcontractorBusinessType(r){
   return r.businessType==='Other'?(r.otherBusinessType||'Other'):(r.businessType||'');
 }
-function normalizedScContacts(r){
-  if(Array.isArray(r?.contacts)&&r.contacts.length)return r.contacts;
-  if(r&&(r.contact||r.mobile||r.email))return [{name:r.contact||'',mobile:r.mobile||'',email:r.email||'',remark:r.contactRemark||''}];
-  return [];
-}
-function addScContactRow(contact={}){
-  const box=document.getElementById('scContactsContainer');
-  if(!box)return;
-  const row=document.createElement('div');
-  row.className='sc-contact-row';
-  row.style.cssText='display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.2fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc';
-  row.innerHTML=`<div class="form-group"><label>Contact Person</label><input class="input sc-contact-name" value="${scEscape(contact.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input class="input sc-contact-mobile" value="${scEscape(contact.mobile||'')}"></div><div class="form-group"><label>Email Address</label><input type="email" class="input sc-contact-email" value="${scEscape(contact.email||'')}"></div><div class="form-group"><label>Remark</label><input class="input sc-contact-remark" value="${scEscape(contact.remark||'')}" placeholder="Designation / department / notes"></div><button type="button" class="btn danger" onclick="removeScContactRow(this)">Remove</button>`;
-  box.appendChild(row);
-}
-function removeScContactRow(btn){
-  const box=document.getElementById('scContactsContainer');
-  btn.closest('.sc-contact-row')?.remove();
-  if(box&&!box.querySelector('.sc-contact-row'))addScContactRow();
-}
-function collectScContacts(){
-  return [...document.querySelectorAll('#scContactsContainer .sc-contact-row')].map(row=>({
-    name:row.querySelector('.sc-contact-name')?.value.trim()||'',
-    mobile:row.querySelector('.sc-contact-mobile')?.value.trim()||'',
-    email:row.querySelector('.sc-contact-email')?.value.trim()||'',
-    remark:row.querySelector('.sc-contact-remark')?.value.trim()||''
-  })).filter(c=>c.name||c.mobile||c.email||c.remark);
-}
-function scContactsHtml(r){
-  const contacts=normalizedScContacts(r);
-  return contacts.length?contacts.map((c,i)=>`<div style="margin-bottom:${i===contacts.length-1?'0':'8px'}"><b>${scEscape(c.name||'Unnamed')}</b>${c.mobile?`<br>${scEscape(c.mobile)}`:''}${c.email?`<br>${scEscape(c.email)}`:''}</div>`).join(''):'—';
-}
-function scContactRemarksHtml(r){
-  const contactRemarks=normalizedScContacts(r).filter(c=>c.remark).map(c=>`<div><b>${scEscape(c.name||'Contact')}:</b> ${scEscape(c.remark)}</div>`).join('');
-  const general=r.remark?`<div${contactRemarks?' style="margin-top:8px"':''}><b>General:</b> ${scEscape(r.remark)}</div>`:'';
-  return contactRemarks+general||'—';
-}
 function showSubcontractorModule(module){
   document.getElementById('scCompaniesModule').classList.toggle('hidden',module!=='companies');
   document.getElementById('scEmployeesModule').classList.toggle('hidden',module!=='employees');
@@ -2445,11 +2421,8 @@ function openSubcontractorForm(id=null){
   document.getElementById('scFormError').classList.remove('show');
   const r=id?subcontractors.find(x=>x.id===id):null;
   document.getElementById('scFormTitle').textContent=r?'Edit Subcontractor':'Add Subcontractor';
-  const values={scName:r?.name||'',scCode:r?.code||generateSubcontractorCode(),scBusinessType:r?.businessType||'',scOtherBusiness:r?.otherBusinessType||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scRemark:r?.remark||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
+  const values={scName:r?.name||'',scCode:r?.code||generateSubcontractorCode(),scBusinessType:r?.businessType||'',scOtherBusiness:r?.otherBusinessType||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scContact:r?.contact||'',scMobile:r?.mobile||'',scEmail:r?.email||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
   Object.entries(values).forEach(([id,val])=>document.getElementById(id).value=val);
-  document.getElementById('scContactsContainer').innerHTML='';
-  const contacts=normalizedScContacts(r);
-  (contacts.length?contacts:[{}]).forEach(addScContactRow);
   toggleScOtherBusiness();
   document.getElementById('subcontractorModal').classList.add('show');
 }
@@ -2475,22 +2448,20 @@ function renderSubcontractors(){
   document.getElementById('scSoon').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='soon').length;
   document.getElementById('scExpired').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='expired').length;
   const rows=subcontractors.filter(x=>{
-    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.remark,...normalizedScContacts(x).flatMap(c=>[c.name,c.mobile,c.email,c.remark])].join(' ').toLowerCase();
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
     return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
   });
   document.getElementById('scTableBody').innerHTML=rows.map(x=>{
     const state=scExpiryState(x.licenseExpiry),days=scDays(x.licenseExpiry);
     const label=state==='expired'?`Expired ${Math.abs(days)} day(s) ago`:state==='soon'?`${days} day(s) remaining`:'Valid';
-    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(getSubcontractorBusinessType(x))}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scContactsHtml(x)}</td><td>${scContactRemarksHtml(x)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
-  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
+    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(getSubcontractorBusinessType(x))}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scEscape(x.contact)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.email)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
+  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
 }
 
 document.getElementById('subcontractorForm').addEventListener('submit',function(e){
   e.preventDefault();
   const selectedBusinessType=scBusinessType.value;
-  const contacts=collectScContacts();
-  const primary=contacts[0]||{};
-  const data={name:scName.value.trim(),code:scEditingId?scCode.value.trim():generateSubcontractorCode(),businessType:selectedBusinessType,otherBusinessType:selectedBusinessType==='Other'?scOtherBusiness.value.trim():'',license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contacts,contact:primary.name||'',mobile:primary.mobile||'',email:primary.email||'',remark:scRemark.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
+  const data={name:scName.value.trim(),code:scEditingId?scCode.value.trim():generateSubcontractorCode(),businessType:selectedBusinessType,otherBusinessType:selectedBusinessType==='Other'?scOtherBusiness.value.trim():'',license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contact:scContact.value.trim(),mobile:scMobile.value.trim(),email:scEmail.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
   document.querySelectorAll('#subcontractorForm .subcontractor-duplicate').forEach(x=>x.classList.remove('subcontractor-duplicate'));
   const checks=[['license','scLicense','Trade License Number'],['vat','scVat','VAT Registration Number']];
   const duplicateFields=[];
@@ -2507,7 +2478,7 @@ function getFilteredSubcontractors(){
   const sf=document.getElementById('scStatusFilter')?.value||'all';
   const ef=document.getElementById('scExpiryFilter')?.value||'all';
   return subcontractors.filter(x=>{
-    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.remark,...normalizedScContacts(x).flatMap(c=>[c.name,c.mobile,c.email,c.remark])].join(' ').toLowerCase();
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
     return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
   });
 }
@@ -2520,11 +2491,9 @@ function subcontractorExportRows(){
     'Trade License Number':x.license||'',
     'Trade License Expiry Date':x.licenseExpiry||'',
     'VAT Registration Number':x.vat||'',
-    'Contact Persons':normalizedScContacts(x).map(c=>c.name).filter(Boolean).join('; '),
-    'Mobile Numbers':normalizedScContacts(x).map(c=>c.mobile).filter(Boolean).join('; '),
-    'Email Addresses':normalizedScContacts(x).map(c=>c.email).filter(Boolean).join('; '),
-    'Contact Remarks':normalizedScContacts(x).map(c=>c.remark?`${c.name||'Contact'}: ${c.remark}`:'').filter(Boolean).join('; '),
-    'General Remark':x.remark||'',
+    'Contact Person':x.contact||'',
+    'Mobile Number':x.mobile||'',
+    'Email Address':x.email||'',
     'ICV Status':x.icv||'',
     'Working Status':x.workingStatus||''
   }));
@@ -2734,7 +2703,7 @@ function isLeaveActiveToday(r){
 }
 function leaveFilteredRecords(){const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=isLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){syncEmployeeLeaveStatuses();document.getElementById('leaveTotalEmployees').textContent=(employees||[]).length;document.getElementById('leaveToday').textContent=leaveRecords.filter(isLeaveActiveToday).length;document.getElementById('leaveReturn15').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.rejoiningDate);return d>=0&&d<=15&&r.status==='Approved'}).length;document.getElementById('leaveGoing7').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.startDate);return d>=0&&d<=7&&r.status==='Approved'}).length;const alerts=[];leaveRecords.forEach(r=>{const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(r.status==='Approved'&&ret>=0&&ret<=15)alerts.push(`${r.employeeName} (${r.company}) is returning in ${ret} day(s).`);if(r.status==='Approved'&&go>=0&&go<=7)alerts.push(`${r.employeeName} (${r.company}) is going on leave in ${go} day(s).`);if(r.status==='Approved'&&ret<0&&!r.returnConfirmed)alerts.push(`${r.employeeName} has not returned after the leave expiry date.`)});document.getElementById('leaveNotifications').innerHTML=alerts.length?alerts.map(x=>'<div class="leave-alert">'+esc(x)+'</div>').join(''):'<p class="muted">No leave alerts.</p>';const companies={};const companyField=(typeof fields!=='undefined'?fields.find(f=>f[0]==='company'):null);const employeePortalCompanies=(companyField&&Array.isArray(companyField[5])?companyField[5]:['RELIANCE GULF','RELIANCE INTERNATIONAL']);employeePortalCompanies.forEach(company=>{const name=String(company||'').trim();if(name)companies[name]={totalEmployees:0,today:0,return15:0,going7:0}});(employees||[]).forEach(e=>{const company=String(e.company||e.companyName||'').trim();if(company&&!companies[company])companies[company]={totalEmployees:0,today:0,return15:0,going7:0};if(company)companies[company].totalEmployees++});leaveRecords.forEach(r=>{if(r.status!=='Approved')return;const company=String(r.company||'Unassigned').trim()||'Unassigned';companies[company]=companies[company]||{totalEmployees:0,today:0,return15:0,going7:0};const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(isLeaveActiveToday(r))companies[company].today++;if(ret>=0&&ret<=15)companies[company].return15++;if(go>=0&&go<=7)companies[company].going7++});document.getElementById('leaveCompanySummary').innerHTML=Object.keys(companies).length?'<div class="table-wrap"><table><thead><tr><th>Company Name</th><th>Total Employees</th><th>On Leave Today</th><th>Returning ≤15 Days</th><th>Going ≤7 Days</th></tr></thead><tbody>'+Object.entries(companies).sort((a,b)=>a[0].localeCompare(b[0])).map(([c,v])=>`<tr><td><b>${esc(c)}</b></td><td>${v.totalEmployees}</td><td>${v.today}</td><td>${v.return15}</td><td>${v.going7}</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">No company names are available in the Employee Portal.</p>';renderLeaveTable()}
-function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td style="min-width:180px;white-space:normal">${esc(r.remarks||'-')}</td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="12" style="text-align:center">No leave records found.</td></tr>'}
+function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td style="min-width:180px;white-space:normal">${esc(r.remarks||'-')}</td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="13" style="text-align:center">No leave records found.</td></tr>'}
 function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySearch')?.value||'').toLowerCase();const groups={};leaveRecords.filter(r=>!q||[r.employeeId,r.employeeName].join(' ').toLowerCase().includes(q)).forEach(r=>(groups[r.employeeId]??=[]).push(r));document.getElementById('leaveHistoryContent').innerHTML=Object.entries(groups).map(([id,rs])=>{const e=leaveEmployeeById(id)||rs[0];rs.sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));return `<div class="panel" style="margin:14px 0"><h3>${esc(e.employeeName||e.nameEnglish)} <small>(${esc(id)})</small></h3><p>${esc(e.company||'')} · ${esc(e.designation||'')} · Joining: ${esc(e.joiningDate||'-')}</p><div class="table-wrap"><table><thead><tr><th>Step</th><th>Leave Type</th><th>Went on Leave</th><th>Returned / Rejoining</th><th>Total Days</th><th>Paid</th><th>Unpaid</th><th>Status</th><th>Audit Trail</th></tr></thead><tbody>${rs.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${r.paidDays}</td><td>${r.unpaidDays}</td><td>${esc(leaveCurrentStatus(r))}</td><td class="leave-audit">${(r.audit||[]).map(a=>`${esc(a.action)} by ${esc(a.by)} — ${esc(a.date)}${a.comment?'<br>'+esc(a.comment):''}`).join('<hr>')}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')||'<p class="muted">No employee leave history found.</p>'}
 function addLeaveType(){const v=document.getElementById('newLeaveType').value.trim();if(!v)return;if(leaveTypes.some(x=>x.toLowerCase()===v.toLowerCase())){alert('This leave type already exists.');return}leaveTypes.push(v);leavePersist();document.getElementById('newLeaveType').value='';renderLeaveTypes();refreshLeaveTypeOptions()}
 function removeLeaveType(i){const type=leaveTypes[i];if(DEFAULT_LEAVE_TYPES.includes(type)){alert('This is a required leave type and cannot be removed.');return}if(confirm('Remove this leave type?')){leaveTypes.splice(i,1);leavePersist();renderLeaveTypes();refreshLeaveTypeOptions()}}
@@ -2771,22 +2740,6 @@ function nextClientCode(){let max=clientRecords.reduce((m,x)=>Math.max(m,parseIn
 function nextProjectCode(){let max=projectRecords.reduce((m,x)=>Math.max(m,parseInt(String(x.code||'').replace(/\D/g,''))||0),0);return 'PRJ-'+String(max+1).padStart(4,'0')}
 function fileNames(id){const el=document.getElementById(id);return el&&el.files?Array.from(el.files).map(f=>f.name):[]}
 function clientDocsText(c){return [c.docs?.license&&'Trade License',c.docs?.vat&&'VAT Certificate',c.docs?.profile&&'Company Profile',...(c.docs?.other||[])].filter(Boolean).join(', ')||'Missing'}
-function normalizedClientContacts(c){
-  if(Array.isArray(c?.contacts)&&c.contacts.length)return c.contacts;
-  if(c&&(c.contact||c.mobile||c.email))return [{name:c.contact||'',mobile:c.mobile||'',email:c.email||'',remark:c.contactRemark||''}];
-  return [];
-}
-function addClientContactRow(contact={}){
-  const box=document.getElementById('clientContactsContainer');if(!box)return;
-  const row=document.createElement('div');row.className='client-contact-row';
-  row.style.cssText='display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.2fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc';
-  row.innerHTML=`<label>Contact Person Name *<input class="input client-contact-name" value="${cEsc(contact.name||'')}"></label><label>Mobile Number *<input class="input client-contact-mobile" value="${cEsc(contact.mobile||'')}"></label><label>Email Address *<input type="email" class="input client-contact-email" value="${cEsc(contact.email||'')}"></label><label>Remark<input class="input client-contact-remark" value="${cEsc(contact.remark||'')}" placeholder="Designation / department / notes"></label><button type="button" class="btn danger" onclick="removeClientContactRow(this)">Remove</button>`;
-  box.appendChild(row);
-}
-function removeClientContactRow(btn){const box=document.getElementById('clientContactsContainer');btn.closest('.client-contact-row')?.remove();if(box&&!box.querySelector('.client-contact-row'))addClientContactRow()}
-function collectClientContacts(){return [...document.querySelectorAll('#clientContactsContainer .client-contact-row')].map(row=>({name:row.querySelector('.client-contact-name')?.value.trim()||'',mobile:row.querySelector('.client-contact-mobile')?.value.trim()||'',email:row.querySelector('.client-contact-email')?.value.trim()||'',remark:row.querySelector('.client-contact-remark')?.value.trim()||''})).filter(c=>c.name||c.mobile||c.email||c.remark)}
-function clientContactsHtml(c){const a=normalizedClientContacts(c);return a.length?a.map((x,i)=>`<div style="margin-bottom:${i===a.length-1?'0':'8px'}"><b>${cEsc(x.name||'Unnamed')}</b>${x.mobile?`<br>${cEsc(x.mobile)}`:''}${x.email?`<br>${cEsc(x.email)}`:''}</div>`).join(''):'—'}
-function clientContactRemarksHtml(c){const a=normalizedClientContacts(c).filter(x=>x.remark);return a.length?a.map(x=>`<div><b>${cEsc(x.name||'Contact')}:</b> ${cEsc(x.remark)}</div>`).join(''):'—'}
 function clientMissing(c){const contacts=normalizedClientContacts(c);return !c.name||!c.address||!contacts.length||contacts.some(x=>!x.name||!x.mobile||!x.email)||!c.licenseNo||!c.licenseExpiry||!c.docs?.license||!c.docs?.vat}
 function clientExpiryClass(c){const d=cDays(c.licenseExpiry);return d===null?'client-alert-missing':d<0?'client-alert-expired':d<=30?'client-alert-soon':''}
 function openClientPortal(){showPage('clientPortal');showClientModule('dashboard')}
@@ -2810,25 +2763,51 @@ function filteredClients(){
   let q=(clientSearch?.value||'').toLowerCase(),status=clientStatusFilter?.value||'all',expiry=clientExpiryFilter?.value||'all';
   return clientRecords.filter(c=>{let d=cDays(c.licenseExpiry),hay=[c.code,c.name,c.address,c.licenseNo,c.vatNo,...normalizedClientContacts(c).flatMap(x=>[x.name,x.mobile,x.email,x.remark])].join(' ').toLowerCase();let okQ=!q||hay.includes(q),okS=status==='all'||c.status===status,okE=expiry==='all'||(expiry==='soon'&&d!==null&&d>=0&&d<=30)||(expiry==='expired'&&d!==null&&d<0)||(expiry==='missing'&&d===null),okQuick=clientQuickFilter==='all'||(clientQuickFilter==='active'&&c.status==='Active')||(clientQuickFilter==='soon'&&d!==null&&d>=0&&d<=30)||(clientQuickFilter==='expired'&&d!==null&&d<0);return okQ&&okS&&okE&&okQuick})
 }
+function clientContactsHtml(c){const a=normalizedClientContacts(c);return a.length?a.map((x,i)=>`<div style="margin-bottom:${i===a.length-1?'0':'8px'}"><b>${cEsc(x.name||'Unnamed')}</b>${x.mobile?`<br>${cEsc(x.mobile)}`:''}${x.email?`<br>${cEsc(x.email)}`:''}${x.remark?`<br><small>${cEsc(x.remark)}</small>`:''}</div>`).join(''):'—'}
 function renderClientList(){
-  const rows=filteredClients();clientListBody.innerHTML=rows.map(c=>{let docs=clientDocsText(c),pc=projectRecords.filter(p=>p.clientId===c.id).length,miss=clientMissing(c);return `<tr class="${miss?'client-alert-missing':''}"><td>${cEsc(c.code)}</td><td>${cEsc(c.name)}</td><td>${cEsc(c.address)}</td><td>${clientContactsHtml(c)}</td><td>${clientContactRemarksHtml(c)}</td><td>${cEsc(c.licenseNo)}</td><td class="${clientExpiryClass(c)}">${cEsc(c.licenseExpiry||'Missing')}</td><td>${cEsc(c.vatNo)}</td><td>${cEsc(c.status)}</td><td>${cEsc(docs)}</td><td>${pc}</td><td><button class="mini" onclick="viewClient('${c.id}')">View</button> <button class="mini" onclick="editClient('${c.id}')">Edit</button> <button class="mini danger" onclick="deleteClient('${c.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="13" class="empty">No client records found.</td></tr>';clientQuickFilter='all'
+  const rows=filteredClients();clientListBody.innerHTML=rows.map(c=>{let docs=clientDocsText(c),pc=projectRecords.filter(p=>p.clientId===c.id).length,miss=clientMissing(c);return `<tr class="${miss?'client-alert-missing':''}"><td>${cEsc(c.code)}</td><td>${cEsc(c.name)}</td><td>${cEsc(c.address)}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.name)).join('<br>')}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.mobile)).join('<br>')}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.email)+(x.remark?'<br><small>'+cEsc(x.remark)+'</small>':'')).join('<hr>')}</td><td>${cEsc(c.licenseNo)}</td><td class="${clientExpiryClass(c)}">${cEsc(c.licenseExpiry||'Missing')}</td><td>${cEsc(c.vatNo)}</td><td>${cEsc(c.status)}</td><td>${cEsc(docs)}</td><td>${pc}</td><td><button class="mini" onclick="viewClient('${c.id}')">View</button> <button class="mini" onclick="editClient('${c.id}')">Edit</button> <button class="mini danger" onclick="deleteClient('${c.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="13" class="empty">No client records found.</td></tr>';clientQuickFilter='all'
 }
-function resetClientForm(){clientForm.reset();clientEditId.value='';clientCode.value=nextClientCode();clientFormTitle.textContent='Add New Client';const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';addClientContactRow()}}
+function normalizedClientContacts(c){
+  if(Array.isArray(c?.contacts)&&c.contacts.length)return c.contacts;
+  if(c&&(c.contact||c.mobile||c.email))return [{name:c.contact||'',mobile:c.mobile||'',email:c.email||'',remark:c.contactRemark||''}];
+  return [];
+}
+function addClientContactRow(contact={}){
+  const box=document.getElementById('clientContactsContainer');if(!box)return;
+  const row=document.createElement('div');row.className='client-contact-row';
+  row.style.cssText='display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc';
+  row.innerHTML=`<label>Contact Person Name *<input class="input client-contact-name" required value="${cEsc(contact.name||'')}"></label><label>Mobile Number *<input class="input client-contact-mobile" required value="${cEsc(contact.mobile||'')}"></label><label>Email Address *<input type="email" class="input client-contact-email" required value="${cEsc(contact.email||'')}"></label><label>Remark<input class="input client-contact-remark" value="${cEsc(contact.remark||'')}" placeholder="Designation / department / notes"></label><button type="button" class="btn danger" onclick="removeClientContactRow(this)">Remove</button>`;
+  box.appendChild(row);
+}
+function removeClientContactRow(btn){
+  const box=document.getElementById('clientContactsContainer');
+  const rows=box?box.querySelectorAll('.client-contact-row'):[];
+  if(rows.length<=1){alert('At least one contact person is required.');return;}
+  btn.closest('.client-contact-row')?.remove();
+}
+function collectClientContacts(){
+  return [...document.querySelectorAll('#clientContactsContainer .client-contact-row')].map(row=>({
+    name:row.querySelector('.client-contact-name')?.value.trim()||'',
+    mobile:row.querySelector('.client-contact-mobile')?.value.trim()||'',
+    email:row.querySelector('.client-contact-email')?.value.trim()||'',
+    remark:row.querySelector('.client-contact-remark')?.value.trim()||''
+  })).filter(c=>c.name||c.mobile||c.email||c.remark);
+}
+function resetClientForm(){clientForm.reset();clientEditId.value='';clientCode.value=nextClientCode();clientFormTitle.textContent='Add New Client';const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';addClientContactRow();}}
 function saveClient(e){
   e.preventDefault();let id=clientEditId.value,lic=clientLicenseNo.value.trim(),duplicate=clientRecords.find(c=>c.licenseNo.trim().toLowerCase()===lic.toLowerCase()&&c.id!==id);if(duplicate){alert('A client with the same Trade License Number already exists.');return}
-  let contacts=collectClientContacts();if(!contacts.length||contacts.some(x=>!x.name||!x.mobile||!x.email)){alert('Please complete Contact Person Name, Mobile Number and Email Address for every contact person.');return}
   let old=id?clientRecords.find(c=>c.id===id):null,docs={license:fileNames('clientDocLicense')[0]||old?.docs?.license||'',vat:fileNames('clientDocVat')[0]||old?.docs?.vat||'',profile:fileNames('clientDocProfile')[0]||old?.docs?.profile||'',other:fileNames('clientDocOther').length?fileNames('clientDocOther'):(old?.docs?.other||[])};
-  let first=contacts[0],rec={id:id||String(Date.now()),code:clientCode.value||nextClientCode(),name:clientName.value.trim(),address:clientAddress.value.trim(),contacts,contact:first.name,mobile:first.mobile,email:first.email,licenseNo:lic,licenseExpiry:clientLicenseExpiry.value,vatNo:clientVatNo.value.trim(),status:clientStatus.value,remarks:clientRemarks.value.trim(),docs,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  let contacts=collectClientContacts();if(!contacts.length||contacts.some(x=>!x.name||!x.mobile||!x.email)){alert('Please complete Contact Person Name, Mobile Number and Email Address for every contact person.');return;}let primary=contacts[0];let rec={id:id||String(Date.now()),code:clientCode.value||nextClientCode(),name:clientName.value.trim(),address:clientAddress.value.trim(),contacts,contact:primary.name,mobile:primary.mobile,email:primary.email,contactRemark:primary.remark||'',licenseNo:lic,licenseExpiry:clientLicenseExpiry.value,vatNo:clientVatNo.value.trim(),status:clientStatus.value,remarks:clientRemarks.value.trim(),docs,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(id)clientRecords=clientRecords.map(c=>c.id===id?rec:c);else clientRecords.push(rec);clientLog('client',rec.id,id?'Edited client':'Created client',rec.name);clientPersist();resetClientForm();renderClientDashboard();showClientModule('clients')
 }
-function editClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;clientEditId.value=c.id;clientCode.value=c.code;clientName.value=c.name;clientAddress.value=c.address;clientLicenseNo.value=c.licenseNo;clientLicenseExpiry.value=c.licenseExpiry;clientVatNo.value=c.vatNo||'';clientStatus.value=c.status;clientRemarks.value=c.remarks||'';const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';const contacts=normalizedClientContacts(c);(contacts.length?contacts:[{}]).forEach(addClientContactRow)}clientFormTitle.textContent='Edit Client – '+c.name;showClientModule('addClient')}
+function editClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;clientEditId.value=c.id;clientCode.value=c.code;clientName.value=c.name;clientAddress.value=c.address;const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';const contacts=normalizedClientContacts(c);(contacts.length?contacts:[{}]).forEach(addClientContactRow)}clientLicenseNo.value=c.licenseNo;clientLicenseExpiry.value=c.licenseExpiry;clientVatNo.value=c.vatNo||'';clientStatus.value=c.status;clientRemarks.value=c.remarks||'';clientFormTitle.textContent='Edit Client – '+c.name;showClientModule('addClient')}
 function deleteClient(id){let c=clientRecords.find(x=>x.id===id),count=projectRecords.filter(p=>p.clientId===id).length;if(!c)return;if(count){alert('This client has linked projects. Delete or reassign those projects first.');return}if(confirm('Delete client '+c.name+'?')){clientRecords=clientRecords.filter(x=>x.id!==id);clientLog('client',id,'Deleted client',c.name);clientPersist();renderClientList();renderClientDashboard()}}
 function refreshClientOptions(){
   const opts='<option value="">Select Client</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)} (${cEsc(c.code)})</option>`).join('');
   if(projectClientId){let v=projectClientId.value;projectClientId.innerHTML=opts;projectClientId.value=v}
   if(projectClientFilter){let v=projectClientFilter.value;projectClientFilter.innerHTML='<option value="all">All Clients</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)}</option>`).join('');projectClientFilter.value=v||'all'}
 }
-function updateSelectedClientProjects(){let id=projectClientId.value,c=clientRecords.find(x=>x.id===id),ps=projectRecords.filter(p=>p.clientId===id);if(!c){selectedClientProjects.classList.add('hidden');return}projectContact.value=projectContact.value||c.contact;projectInvoiceEmail.value=projectInvoiceEmail.value||c.email;selectedClientProjects.classList.remove('hidden');selectedClientProjects.innerHTML=`<h4>Existing Projects for ${cEsc(c.name)}</h4>`+(ps.length?ps.map(p=>`<div>${cEsc(p.code)} — ${cEsc(p.name)} — ${cEsc(p.status)}</div>`).join(''):'<div class="muted">No projects currently linked.</div>')}
+function updateSelectedClientProjects(){let id=projectClientId.value,c=clientRecords.find(x=>x.id===id),ps=projectRecords.filter(p=>p.clientId===id);if(!c){selectedClientProjects.classList.add('hidden');return}let first=normalizedClientContacts(c)[0]||{};projectContact.value=projectContact.value||first.name||c.contact||'';projectInvoiceEmail.value=projectInvoiceEmail.value||first.email||c.email||'';selectedClientProjects.classList.remove('hidden');selectedClientProjects.innerHTML=`<h4>Existing Projects for ${cEsc(c.name)}</h4>`+(ps.length?ps.map(p=>`<div>${cEsc(p.code)} — ${cEsc(p.name)} — ${cEsc(p.status)}</div>`).join(''):'<div class="muted">No projects currently linked.</div>')}
 function resetProjectForm(){projectForm.reset();projectEditId.value='';projectCode.value=nextProjectCode();projectFormTitle.textContent='Add New Project';selectedClientProjects.classList.add('hidden');refreshClientOptions()}
 function saveProject(e){
   e.preventDefault();let id=projectEditId.value,old=id?projectRecords.find(p=>p.id===id):null,rec={id:id||String(Date.now()),code:projectCode.value||nextProjectCode(),name:projectName.value.trim(),clientId:projectClientId.value,location:projectLocation.value.trim(),emirate:projectEmirate.value.trim(),start:projectStart.value,completion:projectCompletion.value,contractNo:projectContractNo.value.trim(),poNo:projectPoNo.value.trim(),value:projectValue.value,invoiceEmail:projectInvoiceEmail.value.trim(),contact:projectContact.value.trim(),status:projectStatus.value,scope:projectScope.value.trim(),remarks:projectRemarks.value.trim(),documents:fileNames('projectDocuments').length?fileNames('projectDocuments'):(old?.documents||[]),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
@@ -2844,10 +2823,10 @@ function renderProjectList(){
 function editProject(id){let p=projectRecords.find(x=>x.id===id);if(!p)return;refreshClientOptions();projectEditId.value=p.id;projectCode.value=p.code;projectName.value=p.name;projectClientId.value=p.clientId;projectLocation.value=p.location;projectEmirate.value=p.emirate;projectStart.value=p.start||'';projectCompletion.value=p.completion||'';projectContractNo.value=p.contractNo||'';projectPoNo.value=p.poNo||'';projectValue.value=p.value||'';projectInvoiceEmail.value=p.invoiceEmail||'';projectContact.value=p.contact||'';projectStatus.value=p.status;projectScope.value=p.scope||'';projectRemarks.value=p.remarks||'';projectFormTitle.textContent='Edit Project – '+p.name;showClientModule('addProject');projectClientId.value=p.clientId;updateSelectedClientProjects()}
 function deleteProject(id){let p=projectRecords.find(x=>x.id===id);if(p&&confirm('Delete project '+p.name+'?')){projectRecords=projectRecords.filter(x=>x.id!==id);clientLog('project',id,'Deleted project',p.name);clientPersist();renderProjectList();renderClientDashboard()}}
 function activityHtml(type,id){let a=clientActivities.filter(x=>x.entityType===type&&x.entityId===id);return a.length?a.map(x=>`<div class="client-history-item"><b>${cEsc(x.action)}</b> — ${cEsc(x.user)}<br>${cEsc(x.date)}${x.comments?'<br>'+cEsc(x.comments):''}</div>`).join(''):'<div class="muted">No activity history.</div>'}
-function viewClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;let ps=projectRecords.filter(p=>p.clientId===id);clientViewContent.innerHTML=`<h2>${cEsc(c.name)}</h2><div class="client-detail-grid">${[['Client Code',c.code],['Address',c.address],['Contact Persons',normalizedClientContacts(c).map(x=>[x.name,x.mobile,x.email].filter(Boolean).join(' | ')).join('\n')],['Contact Remarks',normalizedClientContacts(c).filter(x=>x.remark).map(x=>(x.name||'Contact')+': '+x.remark).join('\n')],['Trade License',c.licenseNo],['License Expiry',c.licenseExpiry],['VAT Number',c.vatNo],['Status',c.status],['Documents',clientDocsText(c)],['Remarks',c.remarks]].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Linked Projects (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="client-history-item"><b>${cEsc(p.code)} — ${cEsc(p.name)}</b><br>${cEsc(p.location)} | ${cEsc(p.status)} | Value: ${cFmt(p.value)}</div>`).join(''):'<div class="muted">No linked projects.</div>'}<h3>Activity History</h3><div class="client-history">${activityHtml('client',id)}</div>`;clientViewModal.classList.add('show')}
+function viewClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;let ps=projectRecords.filter(p=>p.clientId===id);clientViewContent.innerHTML=`<h2>${cEsc(c.name)}</h2><div class="client-detail-grid">${[['Client Code',c.code],['Address',c.address],['Contact Person',c.contact],['Mobile',c.mobile],['Email',c.email],['Trade License',c.licenseNo],['License Expiry',c.licenseExpiry],['VAT Number',c.vatNo],['Status',c.status],['Documents',clientDocsText(c)],['Remarks',c.remarks]].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Linked Projects (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="client-history-item"><b>${cEsc(p.code)} — ${cEsc(p.name)}</b><br>${cEsc(p.location)} | ${cEsc(p.status)} | Value: ${cFmt(p.value)}</div>`).join(''):'<div class="muted">No linked projects.</div>'}<h3>Activity History</h3><div class="client-history">${activityHtml('client',id)}</div>`;clientViewModal.classList.add('show')}
 function viewProject(id){let p=projectRecords.find(x=>x.id===id),c=clientRecords.find(x=>x.id===p?.clientId);if(!p)return;clientViewContent.innerHTML=`<h2>${cEsc(p.name)}</h2><div class="client-detail-grid">${[['Project Code',p.code],['Client',c?.name],['Location',p.location],['State / Emirate',p.emirate],['Start Date',p.start],['Completion Date',p.completion],['Contract Number',p.contractNo],['PO Number',p.poNo],['Contract Value',cFmt(p.value)],['Invoice / SOA Email',p.invoiceEmail],['Contact Person',p.contact],['Status',p.status],['Scope of Work',p.scope],['Remarks',p.remarks],['Documents',(p.documents||[]).join(', ')||'Missing']].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Activity History</h3><div class="client-history">${activityHtml('project',id)}</div>`;clientViewModal.classList.add('show')}
 function closeClientModal(){clientViewModal.classList.remove('show')}
-function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Persons':normalizedClientContacts(c).map(x=>x.name).join('; '),'Mobile Numbers':normalizedClientContacts(c).map(x=>x.mobile).join('; '),'Email Addresses':normalizedClientContacts(c).map(x=>x.email).join('; '),'Contact Remarks':normalizedClientContacts(c).map(x=>x.remark).filter(Boolean).join('; '),'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
+function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Persons':normalizedClientContacts(c).map(x=>x.name).join('; '),'Mobile Numbers':normalizedClientContacts(c).map(x=>x.mobile).join('; '),'Email Addresses':normalizedClientContacts(c).map(x=>x.email).join('; '),'Contact Remarks':normalizedClientContacts(c).map(x=>x.remark||'').join('; '),'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
 function projectExportRows(){return filteredProjects().map(p=>{let c=clientRecords.find(x=>x.id===p.clientId);return {'Project Code':p.code,'Project Name':p.name,'Client Name':c?.name||'','Client Code':c?.code||'','Site Location':p.location,'Project State / Emirate':p.emirate,'Project Start Date':p.start,'Project Completion Date':p.completion,'Contract Number':p.contractNo,'Purchase Order Number':p.poNo,'Contract Value':p.value,'Email for Invoice and SOA':p.invoiceEmail,'Client Contact Person':p.contact,'Project Status':p.status,'Scope of Work':p.scope,'Remarks':p.remarks,'Project Documents':(p.documents||[]).join('; ')}})}
 function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records available to export.');return}let h=Object.keys(rows[0]),table='<table><thead><tr>'+h.map(x=>`<th>${cEsc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')+'</tbody></table>',html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\\@;vertical-align:top}</style></head><body><h2>${cEsc(title)}</h2>${table}</body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
@@ -3214,19 +3193,7 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     setText('rgNotificationTotal',Object.values(counts).reduce((a,b)=>a+b,0)+onsite.length+onleave.length+idle.length);
 
     chart('rgCompanyChart',countBy(emps,e=>e.company||e.companyName));
-
-    // Show available employees plus the manpower deployed at each individual site.
-    // On-site employees are grouped by their current site name instead of showing
-    // only one combined "On Site" total.
-    const siteStatusBreakdown={};
-    if(idle.length) siteStatusBreakdown['Idle']=idle.length;
-    if(onleave.length) siteStatusBreakdown['On Leave']=onleave.length;
-    onsite.forEach(e=>{
-      const site=String(e.currentSiteName||e.siteLocation||e.projectName||'Site Not Specified').trim()||'Site Not Specified';
-      siteStatusBreakdown[site]=(siteStatusBreakdown[site]||0)+1;
-    });
-    chart('rgStatusChart',siteStatusBreakdown);
-
+    chart('rgStatusChart',countBy(emps,e=>e.siteStatus));
     chart('rgNationalityChart',countBy(emps,e=>e.nationality));
   };
 
@@ -3243,7 +3210,6 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   };
 
   document.addEventListener('DOMContentLoaded',()=>{
-    if(document.getElementById('clientContactsContainer')&&!document.querySelector('#clientContactsContainer .client-contact-row'))addClientContactRow();
     setTimeout(window.rgRenderProfessionalDashboard,150);
     setTimeout(window.rgRenderProfessionalDashboard,1000);
   });

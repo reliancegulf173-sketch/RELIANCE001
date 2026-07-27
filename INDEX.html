@@ -493,6 +493,48 @@ th{background:#edf3f8;color:#294d6a}
 <style>
 
 
+
+/* Technical Certificate Required checkboxes */
+.certificate-required-selector{
+  grid-column:1 / -1!important;
+  margin:6px 0 2px;
+  padding:12px 14px;
+  border:1px solid #d7e2ec;
+  border-radius:12px;
+  background:#f7fafc;
+}
+.certificate-required-selector label{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin:0!important;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:800;
+  color:#173a59;
+}
+.certificate-required-selector input[type="checkbox"]{
+  appearance:auto!important;
+  -webkit-appearance:checkbox!important;
+  width:20px!important;
+  height:20px!important;
+  min-width:20px!important;
+  max-width:20px!important;
+  padding:0!important;
+  margin:0!important;
+  border:initial!important;
+  border-radius:3px!important;
+  background:initial!important;
+  box-shadow:none!important;
+  accent-color:#0b6fb8;
+  cursor:pointer;
+}
+.certificate-required-selector .certificate-help{
+  margin-left:auto;
+  font-size:12px;
+  font-weight:600;
+  color:#6b7f91;
+}
 </style>
 
 <style id="new-sidebar-logo-design">
@@ -1778,7 +1820,7 @@ function buildForm(){
       const selector=document.createElement('div');
       selector.className='form-group certificate-required-selector';
       selector.style.gridColumn='1 / -1';
-      selector.innerHTML=`<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px"><input type="checkbox" id="${config.requiredKey}" style="width:19px;height:19px"> ${config.label} Required</label>`;
+      selector.innerHTML=`<label><input type="checkbox" id="${config.requiredKey}"><span>${config.label} Required</span><span class="certificate-help">Check only when applicable</span></label>`;
       certHost.insertBefore(selector,expiryWrap);
       const toggle=()=>{
         const required=document.getElementById(config.requiredKey).checked;

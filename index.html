@@ -1534,6 +1534,11 @@ function missing(e){
 }
 function daysTo(d){if(!d)return 99999;return Math.ceil((new Date(d+'T00:00:00')-new Date())/86400000)}
 function expiryInfo(e){let arr=[];[['Passport',e.passportExpiry,'passportExpiry'],['Emirates ID',e.idExpiry,'idExpiry'],['Labour Card',e.labourExpiry,'labourExpiry'],['IOLE',e.ioleExpiry,'ioleExpiry'],['H2S',e.h2sExpiry,'h2sExpiry'],['ATA Training',e.ataExpiry,'ataExpiry'],['Rigger Certificate',e.riggerExpiry,'riggerExpiry'],['Scaffolder Certificate',e.scaffolderExpiry,'scaffolderExpiry'],['ADNOC Medical',e.adnocMedicalExpiry,'adnocMedicalExpiry'],...(e.additionalCertificates||[]).map(c=>[c.name||'Additional Certificate',c.expiryDate,''])].forEach(x=>{if(x[2]&&isTechnicalCertificateNotApplicable(e,x[2]))return;let d=daysTo(x[1]);if(x[1]&&d<=60)arr.push({name:x[0],date:x[1],days:d})});return arr}
+
+function deleteEmployeesWithExpiredDocuments(){
+  // Automatic deletion disabled. Expired documents are shown only as alerts.
+  return 0;
+}
 function addNotification(type,e,message,recipientRole='All',status='Open',actionId=''){
   notifications.unshift({id:Date.now()+Math.random(),type,employeeId:e.employeeId||'',employeeName:e.nameEnglish||'',message,date:new Date().toLocaleString(),read:false,status,recipientRole,actionId});
 }
@@ -2700,6 +2705,11 @@ function exportSiteExcel(kind){const rows=siteExportRows(kind);if(!rows.length){
 function printSiteReport(kind){const rows=siteExportRows(kind);if(!rows.length){alert('No records available.');return}printRows(rows,'Site Management '+kind+' Report')}
 // Site Portal initialization is handled directly inside showPage().
 document.addEventListener('DOMContentLoaded',()=>{try{if(siteReportMonth)siteReportMonth.value=siteToday().slice(0,7);if(siteDatePreset)siteApplyDatePreset();if(siteTotalMobilized)renderSiteDashboard()}catch(err){console.error('Site Management startup error:',err)}});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  // Employee profiles are never deleted automatically because of document expiry.
+  // Expiry notifications and filters remain active.
+});
 
 </script>
 

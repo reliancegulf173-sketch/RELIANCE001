@@ -1041,7 +1041,7 @@ th{background:#edf3f8;color:#294d6a}
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Subcontractor Code</th><th>Type of Business</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Person</th><th>Mobile</th><th>Email</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
+              <thead><tr><th>Name</th><th>Subcontractor Code</th><th>Type of Business</th><th>Trade License</th><th>Expiry Date</th><th>VAT Number</th><th>Contact Persons</th><th>Remarks</th><th>ICV</th><th>Status</th><th>Action</th></tr></thead>
               <tbody id="scTableBody"></tbody>
             </table>
           </div>
@@ -1089,9 +1089,12 @@ th{background:#edf3f8;color:#294d6a}
               <div class="form-group"><label>Trade License Number *</label><input id="scLicense" class="input" required></div>
               <div class="form-group"><label>Trade License Expiry Date *</label><input id="scLicenseExpiry" type="date" class="input" required></div>
               <div class="form-group"><label>VAT Registration Number *</label><input id="scVat" class="input" required></div>
-              <div class="form-group"><label>Contact Person</label><input id="scContact" class="input"></div>
-              <div class="form-group"><label>Mobile Number</label><input id="scMobile" class="input"></div>
-              <div class="form-group"><label>Email Address</label><input id="scEmail" type="email" class="input"></div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label>Contact Persons</label>
+                <div id="scContactsContainer"></div>
+                <button type="button" class="btn light" style="margin-top:10px" onclick="addScContactRow()">+ Add More Contact Person</button>
+              </div>
+              <div class="form-group" style="grid-column:1/-1"><label>General Remark</label><textarea id="scRemark" class="input" rows="3" placeholder="Enter subcontractor remark"></textarea></div>
               <div class="form-group"><label>ICV Status</label><select id="scIcv" class="input"><option value="Yes">Yes</option><option value="No">No</option></select></div>
               <div class="form-group"><label>Working Status</label><select id="scWorkingStatus" class="input"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
             </div>
@@ -2389,6 +2392,42 @@ function toggleScOtherBusiness(){
 function getSubcontractorBusinessType(r){
   return r.businessType==='Other'?(r.otherBusinessType||'Other'):(r.businessType||'');
 }
+function normalizedScContacts(r){
+  if(Array.isArray(r?.contacts)&&r.contacts.length)return r.contacts;
+  if(r&&(r.contact||r.mobile||r.email))return [{name:r.contact||'',mobile:r.mobile||'',email:r.email||'',remark:r.contactRemark||''}];
+  return [];
+}
+function addScContactRow(contact={}){
+  const box=document.getElementById('scContactsContainer');
+  if(!box)return;
+  const row=document.createElement('div');
+  row.className='sc-contact-row';
+  row.style.cssText='display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.2fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc';
+  row.innerHTML=`<div class="form-group"><label>Contact Person</label><input class="input sc-contact-name" value="${scEscape(contact.name||'')}"></div><div class="form-group"><label>Mobile Number</label><input class="input sc-contact-mobile" value="${scEscape(contact.mobile||'')}"></div><div class="form-group"><label>Email Address</label><input type="email" class="input sc-contact-email" value="${scEscape(contact.email||'')}"></div><div class="form-group"><label>Remark</label><input class="input sc-contact-remark" value="${scEscape(contact.remark||'')}" placeholder="Designation / department / notes"></div><button type="button" class="btn danger" onclick="removeScContactRow(this)">Remove</button>`;
+  box.appendChild(row);
+}
+function removeScContactRow(btn){
+  const box=document.getElementById('scContactsContainer');
+  btn.closest('.sc-contact-row')?.remove();
+  if(box&&!box.querySelector('.sc-contact-row'))addScContactRow();
+}
+function collectScContacts(){
+  return [...document.querySelectorAll('#scContactsContainer .sc-contact-row')].map(row=>({
+    name:row.querySelector('.sc-contact-name')?.value.trim()||'',
+    mobile:row.querySelector('.sc-contact-mobile')?.value.trim()||'',
+    email:row.querySelector('.sc-contact-email')?.value.trim()||'',
+    remark:row.querySelector('.sc-contact-remark')?.value.trim()||''
+  })).filter(c=>c.name||c.mobile||c.email||c.remark);
+}
+function scContactsHtml(r){
+  const contacts=normalizedScContacts(r);
+  return contacts.length?contacts.map((c,i)=>`<div style="margin-bottom:${i===contacts.length-1?'0':'8px'}"><b>${scEscape(c.name||'Unnamed')}</b>${c.mobile?`<br>${scEscape(c.mobile)}`:''}${c.email?`<br>${scEscape(c.email)}`:''}</div>`).join(''):'—';
+}
+function scContactRemarksHtml(r){
+  const contactRemarks=normalizedScContacts(r).filter(c=>c.remark).map(c=>`<div><b>${scEscape(c.name||'Contact')}:</b> ${scEscape(c.remark)}</div>`).join('');
+  const general=r.remark?`<div${contactRemarks?' style="margin-top:8px"':''}><b>General:</b> ${scEscape(r.remark)}</div>`:'';
+  return contactRemarks+general||'—';
+}
 function showSubcontractorModule(module){
   document.getElementById('scCompaniesModule').classList.toggle('hidden',module!=='companies');
   document.getElementById('scEmployeesModule').classList.toggle('hidden',module!=='employees');
@@ -2404,8 +2443,11 @@ function openSubcontractorForm(id=null){
   document.getElementById('scFormError').classList.remove('show');
   const r=id?subcontractors.find(x=>x.id===id):null;
   document.getElementById('scFormTitle').textContent=r?'Edit Subcontractor':'Add Subcontractor';
-  const values={scName:r?.name||'',scCode:r?.code||generateSubcontractorCode(),scBusinessType:r?.businessType||'',scOtherBusiness:r?.otherBusinessType||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scContact:r?.contact||'',scMobile:r?.mobile||'',scEmail:r?.email||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
+  const values={scName:r?.name||'',scCode:r?.code||generateSubcontractorCode(),scBusinessType:r?.businessType||'',scOtherBusiness:r?.otherBusinessType||'',scLicense:r?.license||'',scLicenseExpiry:r?.licenseExpiry||'',scVat:r?.vat||'',scRemark:r?.remark||'',scIcv:r?.icv||'Yes',scWorkingStatus:r?.workingStatus||'Active'};
   Object.entries(values).forEach(([id,val])=>document.getElementById(id).value=val);
+  document.getElementById('scContactsContainer').innerHTML='';
+  const contacts=normalizedScContacts(r);
+  (contacts.length?contacts:[{}]).forEach(addScContactRow);
   toggleScOtherBusiness();
   document.getElementById('subcontractorModal').classList.add('show');
 }
@@ -2431,20 +2473,22 @@ function renderSubcontractors(){
   document.getElementById('scSoon').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='soon').length;
   document.getElementById('scExpired').textContent=subcontractors.filter(x=>scExpiryState(x.licenseExpiry)==='expired').length;
   const rows=subcontractors.filter(x=>{
-    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.remark,...normalizedScContacts(x).flatMap(c=>[c.name,c.mobile,c.email,c.remark])].join(' ').toLowerCase();
     return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
   });
   document.getElementById('scTableBody').innerHTML=rows.map(x=>{
     const state=scExpiryState(x.licenseExpiry),days=scDays(x.licenseExpiry);
     const label=state==='expired'?`Expired ${Math.abs(days)} day(s) ago`:state==='soon'?`${days} day(s) remaining`:'Valid';
-    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(getSubcontractorBusinessType(x))}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scEscape(x.contact)}</td><td>${scEscape(x.mobile)}</td><td>${scEscape(x.email)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
-  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
+    return `<tr><td><b>${scEscape(x.name)}</b></td><td>${scEscape(x.code)}</td><td>${scEscape(getSubcontractorBusinessType(x))}</td><td>${scEscape(x.license)}</td><td class="subcontractor-status-${state}">${scEscape(x.licenseExpiry)}<br><small>${label}</small></td><td>${scEscape(x.vat)}</td><td>${scContactsHtml(x)}</td><td>${scContactRemarksHtml(x)}</td><td>${scEscape(x.icv)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus)}</span></td><td><button class="btn primary" onclick="openSubcontractorForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteSubcontractor('${x.id}')">Delete</button></td></tr>`;
+  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:28px" class="muted">No subcontractor records found.</td></tr>';
 }
 
 document.getElementById('subcontractorForm').addEventListener('submit',function(e){
   e.preventDefault();
   const selectedBusinessType=scBusinessType.value;
-  const data={name:scName.value.trim(),code:scEditingId?scCode.value.trim():generateSubcontractorCode(),businessType:selectedBusinessType,otherBusinessType:selectedBusinessType==='Other'?scOtherBusiness.value.trim():'',license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contact:scContact.value.trim(),mobile:scMobile.value.trim(),email:scEmail.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
+  const contacts=collectScContacts();
+  const primary=contacts[0]||{};
+  const data={name:scName.value.trim(),code:scEditingId?scCode.value.trim():generateSubcontractorCode(),businessType:selectedBusinessType,otherBusinessType:selectedBusinessType==='Other'?scOtherBusiness.value.trim():'',license:scLicense.value.trim(),licenseExpiry:scLicenseExpiry.value,vat:scVat.value.trim(),contacts,contact:primary.name||'',mobile:primary.mobile||'',email:primary.email||'',remark:scRemark.value.trim(),icv:scIcv.value,workingStatus:scWorkingStatus.value};
   document.querySelectorAll('#subcontractorForm .subcontractor-duplicate').forEach(x=>x.classList.remove('subcontractor-duplicate'));
   const checks=[['license','scLicense','Trade License Number'],['vat','scVat','VAT Registration Number']];
   const duplicateFields=[];
@@ -2461,7 +2505,7 @@ function getFilteredSubcontractors(){
   const sf=document.getElementById('scStatusFilter')?.value||'all';
   const ef=document.getElementById('scExpiryFilter')?.value||'all';
   return subcontractors.filter(x=>{
-    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.contact,x.mobile,x.email].join(' ').toLowerCase();
+    const hay=[x.name,x.code,getSubcontractorBusinessType(x),x.license,x.vat,x.remark,...normalizedScContacts(x).flatMap(c=>[c.name,c.mobile,c.email,c.remark])].join(' ').toLowerCase();
     return (!q||hay.includes(q))&&(sf==='all'||x.workingStatus===sf)&&(ef==='all'||scExpiryState(x.licenseExpiry)===ef);
   });
 }
@@ -2474,9 +2518,11 @@ function subcontractorExportRows(){
     'Trade License Number':x.license||'',
     'Trade License Expiry Date':x.licenseExpiry||'',
     'VAT Registration Number':x.vat||'',
-    'Contact Person':x.contact||'',
-    'Mobile Number':x.mobile||'',
-    'Email Address':x.email||'',
+    'Contact Persons':normalizedScContacts(x).map(c=>c.name).filter(Boolean).join('; '),
+    'Mobile Numbers':normalizedScContacts(x).map(c=>c.mobile).filter(Boolean).join('; '),
+    'Email Addresses':normalizedScContacts(x).map(c=>c.email).filter(Boolean).join('; '),
+    'Contact Remarks':normalizedScContacts(x).map(c=>c.remark?`${c.name||'Contact'}: ${c.remark}`:'').filter(Boolean).join('; '),
+    'General Remark':x.remark||'',
     'ICV Status':x.icv||'',
     'Working Status':x.workingStatus||''
   }));

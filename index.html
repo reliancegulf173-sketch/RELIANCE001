@@ -2918,6 +2918,86 @@ function openRequestedPortalFromUrl(){
 document.addEventListener('DOMContentLoaded', openRequestedPortalFromUrl);
 document.addEventListener('DOMContentLoaded',()=>{const statusField=document.getElementById('siteStatus');if(statusField){statusField.disabled=true;statusField.title='Automatically controlled by Leave and Site Management portals';const label=statusField.closest('.form-group')?.querySelector('label');if(label&&!label.textContent.includes('Automatic'))label.textContent+=' (Automatic)';}startAutomaticEmployeeStatusScheduler();});
 
+
+/* ===== Professional Dashboard Functionality Fix ===== */
+(function(){
+  const byId=id=>document.getElementById(id);
+  const setText=(id,value)=>{const el=byId(id); if(el) el.textContent=String(value ?? 0)};
+  const arr=v=>Array.isArray(v)?v:[];
+  const norm=v=>String(v||'').trim().toLowerCase();
+  const daysFromToday=value=>{
+    if(!value) return null;
+    const d=new Date(String(value).length===10?value+'T00:00:00':value);
+    if(Number.isNaN(d.getTime())) return null;
+    const t=new Date(); t.setHours(0,0,0,0); d.setHours(0,0,0,0);
+    return Math.ceil((d-t)/86400000);
+  };
+  const within=(value,n)=>{const d=daysFromToday(value); return d!==null && d>=0 && d<=n};
+  const countBy=(list,keyFn)=>list.reduce((o,x)=>{const k=keyFn(x)||'Not Specified';o[k]=(o[k]||0)+1;return o},{});
+  const chart=(id,data)=>{
+    const el=byId(id); if(!el) return;
+    const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const max=Math.max(1,...entries.map(x=>x[1]));
+    el.innerHTML=entries.length?entries.map(([label,val])=>`<div style="display:grid;grid-template-columns:minmax(90px,1fr) 2fr 34px;gap:9px;align-items:center;margin:10px 0"><span title="${typeof esc==='function'?esc(label):label}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof esc==='function'?esc(label):label}</span><span style="height:9px;background:#e8eef8;border-radius:10px;overflow:hidden"><i style="display:block;height:100%;width:${Math.max(4,val/max*100)}%;background:linear-gradient(90deg,#0875e8,#36a3ff);border-radius:10px"></i></span><b>${val}</b></div>`).join(''):'<p class="muted">No data available.</p>';
+  };
+
+  window.rgRenderProfessionalDashboard=function(){
+    const emps=arr(window.employees || (typeof employees!=='undefined'?employees:[]));
+    const leaves=arr(window.leaveRecords || (typeof leaveRecords!=='undefined'?leaveRecords:[]));
+    const cicpas=arr(window.cicpaRecords || (typeof cicpaRecords!=='undefined'?cicpaRecords:[]));
+    const today=new Date();
+    setText('rgTodayDate',today.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}));
+    setText('rgTodayDay',today.toLocaleDateString('en-US',{weekday:'long'}));
+
+    const onsite=emps.filter(e=>norm(e.siteStatus)==='on site');
+    const onleave=emps.filter(e=>norm(e.siteStatus)==='on leave');
+    const idle=emps.filter(e=>norm(e.siteStatus)==='idle');
+    setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',onsite.length);
+    setText('rgOnLeaveEmployees',onleave.length); setText('rgIdleEmployees',idle.length);
+    setText('rgOnSiteAlertCount',onsite.length); setText('rgOnLeaveAlertCount',onleave.length); setText('rgIdleAlertCount',idle.length);
+
+    const counts={
+      passport:emps.filter(e=>within(e.passportExpiry,30)).length,
+      visa:emps.filter(e=>within(e.visaExpiry||e.residenceExpiry,30)).length,
+      emirates:emps.filter(e=>within(e.idExpiry||e.emiratesIdExpiry,30)).length,
+      medical:emps.filter(e=>within(e.adnocMedicalExpiry||e.medicalExpiry,30)).length,
+      ata:emps.filter(e=>within(e.ataExpiry,30)).length,
+      twp:emps.filter(e=>within(e.twpExpiry,30)).length,
+      labour:emps.filter(e=>within(e.labourExpiry,30)).length,
+      cicpa:cicpas.reduce((n,r)=>n+arr(r.passes).filter(p=>!p.cancelled&&within(p.expiryDate,30)).length,0),
+      return7:leaves.filter(r=>norm(r.status)==='approved'&&within(r.rejoiningDate,7)).length,
+      going7:leaves.filter(r=>norm(r.status)==='approved'&&within(r.startDate,7)).length
+    };
+    const idMap={cicpa:'rgCicpaCount',passport:'rgPassportCount',visa:'rgVisaCount',emirates:'rgEmiratesCount',medical:'rgMedicalCount',ata:'rgAtaCount',twp:'rgTwpCount',labour:'rgLabourCount',return7:'rgReturnCount',going7:'rgGoingCount'};
+    Object.entries(idMap).forEach(([k,id])=>setText(id,counts[k]));
+    setText('rgNotificationTotal',Object.values(counts).reduce((a,b)=>a+b,0)+onsite.length+onleave.length+idle.length);
+
+    chart('rgCompanyChart',countBy(emps,e=>e.company||e.companyName));
+    chart('rgStatusChart',countBy(emps,e=>e.siteStatus));
+    chart('rgNationalityChart',countBy(emps,e=>e.nationality));
+  };
+
+  window.rgOpenDashboardList=function(type){
+    try{
+      if(type==='total') return openEmployeeList('all');
+      if(['onsite','onleave','idle'].includes(type)) return openEmployeeList(type);
+      if(type==='cicpa'){openCicpaPortal(); if(typeof showCicpaModule==='function') showCicpaModule('manpower'); return;}
+      if(type==='return7'||type==='going7'){openLeavePortal(); if(typeof showLeaveModule==='function') showLeaveModule('history'); return;}
+      if(type==='allalerts'){openEmployeePortal(); specialFilter('expiry'); return;}
+      openEmployeePortal();
+      if(['passport','visa','emirates','medical','ata','twp','labour'].includes(type)) specialFilter('expiry');
+    }catch(err){console.error('Dashboard navigation error',err); alert('Unable to open this dashboard item.');}
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    setTimeout(window.rgRenderProfessionalDashboard,150);
+    setTimeout(window.rgRenderProfessionalDashboard,1000);
+  });
+  const oldPersist=window.persist;
+  if(typeof oldPersist==='function') window.persist=function(){const r=oldPersist.apply(this,arguments);setTimeout(window.rgRenderProfessionalDashboard,0);return r};
+  setInterval(()=>{const page=byId('dashboard'); if(page&&page.classList.contains('active')) window.rgRenderProfessionalDashboard()},5000);
+})();
+
 </script>
 </body>
 </html>

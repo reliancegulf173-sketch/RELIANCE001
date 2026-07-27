@@ -535,6 +535,30 @@ th{background:#edf3f8;color:#294d6a}
   font-weight:600;
   color:#6b7f91;
 }
+
+/* Employee 360 Profile */
+.employee360{max-width:1180px;margin:auto}
+.e360-hero{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:18px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(135deg,#f7fbff,#eef6ff)}
+.e360-name h2{margin:0 0 5px}.e360-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.e360-tabs{display:flex;gap:8px;overflow:auto;padding:12px 0;position:sticky;top:0;background:#fff;z-index:3}
+.e360-tab{border:1px solid var(--border);background:#f6f9fc;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.e360-tab.active{background:#0b6cb8;color:#fff;border-color:#0b6cb8}
+.e360-panel{display:none}.e360-panel.active{display:block}
+.e360-section{border:1px solid var(--border);border-radius:14px;padding:16px;margin:10px 0;background:#fff}
+.e360-section h3{margin:0 0 12px;color:#06385b}
+.e360-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.e360-item{padding:10px;border:1px solid #dbe6ef;border-radius:10px;background:#fbfdff;min-height:62px}
+.e360-item b{display:block;font-size:11px;color:#60758a;text-transform:uppercase;margin-bottom:5px}
+.e360-table{width:100%;border-collapse:collapse}.e360-table th,.e360-table td{padding:9px;border-bottom:1px solid #e2e9f0;text-align:left;vertical-align:top}
+.e360-empty{padding:18px;text-align:center;color:#718397;background:#f7f9fb;border-radius:10px}
+.e360-timeline{border-left:3px solid #c7dbea;margin-left:8px;padding-left:18px}
+.e360-event{position:relative;padding:0 0 16px}.e360-event:before{content:"";position:absolute;left:-25px;top:4px;width:11px;height:11px;background:#0b6cb8;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #0b6cb8}
+.e360-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.e360-doc{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid #dbe6ef;border-radius:10px;margin-bottom:8px}
+.e360-input-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-top:10px}
+@media(max-width:900px){.e360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.e360-hero{grid-template-columns:auto 1fr}.e360-actions{grid-column:1/-1;justify-content:flex-start}}
+@media(max-width:620px){.e360-grid,.e360-input-row{grid-template-columns:1fr}.e360-hero{grid-template-columns:1fr;text-align:center}.e360-meta{justify-content:center}}
+
 </style>
 
 <style id="new-sidebar-logo-design">
@@ -1447,12 +1471,19 @@ let employees=readStoredArray(EMPLOYEE_STORAGE_KEY,['rg_employees_v2','rg_employ
 let notifications=readStoredArray(NOTIFICATION_STORAGE_KEY,['rg_notifications_v2','rg_notifications_v1','rg_notifications']);
 let editingId=null,saveAttempt=0,bulkRows=[];
 
+// Dashboard always reads the live employee/notification arrays through these getters.
+window.rgGetEmployees=()=>Array.isArray(employees)?employees:[];
+window.rgGetNotifications=()=>Array.isArray(notifications)?notifications:[];
+
 function persist(){
   try{
     const employeeJson=JSON.stringify(employees);
     const notificationJson=JSON.stringify(notifications);
     localStorage.setItem(EMPLOYEE_STORAGE_KEY,employeeJson);
     localStorage.setItem(NOTIFICATION_STORAGE_KEY,notificationJson);
+    if(typeof window.rgRenderProfessionalDashboard==='function'){
+      setTimeout(window.rgRenderProfessionalDashboard,0);
+    }
     // Verify that the browser actually retained the record.
     if(localStorage.getItem(EMPLOYEE_STORAGE_KEY)!==employeeJson) throw new Error('Browser storage verification failed');
     return true;
@@ -1942,40 +1973,148 @@ function renderEmployees(){
       return `<td class="${[v?'':'empty-cell',expiryClass].filter(Boolean).join(' ')}">${esc(v||'Not Filled')}</td>`;
     }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`;
   }).join('');
-  employeeNotices.innerHTML=employees.some(e=>missing(e).length)?`<div class="notice" onclick="specialFilter('missing')"><b>Some employee information is missing.</b> Click to view affected employees.</div>`:'';
+  employeeNotices.innerHTML='';
 }
 ['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).addEventListener('input',renderEmployees));
 function clearFilters(){['search','filterCompany','filterWorkingStatus','filterSiteStatus','filterApproval','filterSpecial'].forEach(id=>document.getElementById(id).value='');renderEmployees()}
 function specialFilter(v){showPage('employees');filterSpecial.value=v;renderEmployees()}
 function openNew(){editingId=null;saveAttempt=0;employeeForm.reset();Object.values(technicalCertificateConfig).forEach(c=>{const cb=document.getElementById(c.requiredKey);if(cb){cb.checked=false;cb.dispatchEvent(new Event('change'));}});document.getElementById('employeePhotoPreview').innerHTML='';document.querySelectorAll('.form-group').forEach(x=>x.classList.remove('missing'));loadEmployeeCertificates([]);showPage('form');toggleCancellationDate()}
 function editEmployee(id){editingId=id;saveAttempt=0;let e=employees.find(x=>x.id===id);fields.forEach(f=>{let el=document.getElementById(f[0]);if(el)el.value=e[f[0]]||''});Object.values(technicalCertificateConfig).forEach(c=>{const cb=document.getElementById(c.requiredKey);if(cb){cb.checked=isTechnicalCertificateRequired(e,c);cb.dispatchEvent(new Event('change'));if(cb.checked){document.getElementById(c.expiryKey).value=e[c.expiryKey]||'';document.getElementById(c.detailKey).value=e[c.detailKey]||'';}}});document.getElementById('employeePhoto').value='';document.getElementById('employeePhotoPreview').innerHTML=e.photo?employeePhotoHtml(e.photo,e.nameEnglish,true):'';loadEmployeeCertificates(e.additionalCertificates||[]);showPage('form');toggleCancellationDate()}
+
+function e360Value(v){return String(v??'').trim()||'-'}
+function e360Date(v){return v?String(v):'-'}
+function e360Rows(rows,headers,keys){
+  if(!rows.length)return '<div class="e360-empty">No records available.</div>';
+  return `<div class="table-wrap"><table class="e360-table"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${keys.map(k=>`<td>${esc(typeof k==='function'?k(r):e360Value(r[k]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function e360Info(items){
+  return `<div class="e360-grid">${items.map(([label,value])=>`<div class="e360-item"><b>${esc(label)}</b><div>${esc(e360Value(value))}</div></div>`).join('')}</div>`;
+}
+function e360EmployeeMatch(record,e){
+  const values=[record?.employeeId,record?.employeeCode,record?.employeeKey,record?.employee,record?.code,record?.refId].map(v=>String(v||'').toLowerCase());
+  return values.some(v=>v&&[String(e.id||'').toLowerCase(),String(e.employeeId||'').toLowerCase(),'emp:'+String(e.id||'').toLowerCase()].includes(v));
+}
+function e360SiteRows(e){
+  const rows=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>e360EmployeeMatch(r,e));
+  return rows.sort((a,b)=>String(b.mobilizationDate||b.mobDate||b.date||'').localeCompare(String(a.mobilizationDate||a.mobDate||a.date||'')));
+}
+function e360LeaveRows(e){
+  return (typeof leaveRecords!=='undefined'&&Array.isArray(leaveRecords)?leaveRecords:[]).filter(r=>e360EmployeeMatch(r,e)||String(r.employeeId||r.employeeCode||'').toLowerCase()===String(e.employeeId||'').toLowerCase()).sort((a,b)=>String(b.startDate||'').localeCompare(String(a.startDate||'')));
+}
+function e360CicpaRows(e){
+  return (typeof cicpaRecords!=='undefined'&&Array.isArray(cicpaRecords)?cicpaRecords:[]).filter(r=>String(r.employeeId||'').toLowerCase()===String(e.employeeId||'').toLowerCase()||String(r.employeeKey||'').toLowerCase()===String(e.id||'').toLowerCase()).flatMap(r=>(r.passes||[]).map(p=>({...p,locations:(p.locations||[]).join(', ')})));
+}
+function e360Timeline(e,sites,leaves){
+  const events=[...(e.history||[]).map(h=>({date:h.date||'',title:h.action||'Employee updated',detail:[h.by,h.role].filter(Boolean).join(' — ')}))];
+  sites.forEach(s=>events.push({date:s.mobilizationDate||s.mobDate||s.date||'',title:'Site Mobilization',detail:[s.project||s.projectName,s.client||s.clientName,s.location||s.siteName].filter(Boolean).join(' — ')}));
+  sites.filter(s=>s.demobilizationDate||s.demobDate).forEach(s=>events.push({date:s.demobilizationDate||s.demobDate,title:'Site Demobilization',detail:[s.project||s.projectName,s.demobReason||s.reason].filter(Boolean).join(' — ')}));
+  leaves.forEach(l=>events.push({date:l.startDate||'',title:'Leave Started',detail:[l.leaveType||l.type,l.rejoiningDate||l.endDate?`Rejoining: ${l.rejoiningDate||l.endDate}`:''].filter(Boolean).join(' — ')}));
+  return events.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+function showE360Tab(name){
+  document.querySelectorAll('#detailContent .e360-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+  document.querySelectorAll('#detailContent .e360-panel').forEach(x=>x.classList.toggle('active',x.dataset.panel===name));
+}
+function addE360Salary(employeeId){
+  const date=document.getElementById('e360SalaryDate')?.value||'';
+  const amount=document.getElementById('e360SalaryAmount')?.value||'';
+  const type=document.getElementById('e360SalaryType')?.value.trim()||'';
+  if(!date&&!amount&&!type)return alert('Enter salary date, amount or type.');
+  const e=employees.find(x=>x.id===employeeId);if(!e)return;
+  e.salaryHistory=[...(e.salaryHistory||[]),{date,amount,type,addedBy:currentUser?.name||'User'}];
+  e.history=[...(e.history||[]),{action:`Salary record added: ${type||'Salary'} ${amount||''}`,by:currentUser?.name||'User',role:currentUser?.role||'',date:new Date().toLocaleString()}];
+  persist();viewEmployee(employeeId);showE360Tab('salary');
+}
+function addE360Remark(employeeId){
+  const note=document.getElementById('e360RemarkText')?.value.trim()||'';if(!note)return alert('Enter a remark.');
+  const e=employees.find(x=>x.id===employeeId);if(!e)return;
+  e.profileRemarks=[...(e.profileRemarks||[]),{note,by:currentUser?.name||'User',date:new Date().toLocaleString()}];
+  e.history=[...(e.history||[]),{action:'Profile remark added',by:currentUser?.name||'User',role:currentUser?.role||'',date:new Date().toLocaleString()}];
+  persist();viewEmployee(employeeId);showE360Tab('remarks');
+}
+async function addE360Attachment(employeeId){
+  const input=document.getElementById('e360AttachmentFile');const file=input?.files?.[0];if(!file)return alert('Select a file.');
+  if(file.size>1500000)return alert('Attachment is too large. Please use a file below 1.5 MB in local mode.');
+  const data=await fileToDataUrl(file);const e=employees.find(x=>x.id===employeeId);if(!e)return;
+  e.profileAttachments=[...(e.profileAttachments||[]),{id:String(Date.now()),name:file.name,type:file.type,size:file.size,data,date:new Date().toLocaleString(),by:currentUser?.name||'User'}];
+  e.history=[...(e.history||[]),{action:`Attachment added: ${file.name}`,by:currentUser?.name||'User',role:currentUser?.role||'',date:new Date().toLocaleString()}];
+  if(!persist())return;viewEmployee(employeeId);showE360Tab('attachments');
+}
+function openE360Attachment(employeeId,attachmentId){
+  const e=employees.find(x=>x.id===employeeId),a=(e?.profileAttachments||[]).find(x=>x.id===attachmentId);if(!a?.data)return;
+  const w=window.open();if(w){w.document.write(`<iframe src="${a.data}" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`);w.document.close();}
+}
+function deleteE360Attachment(employeeId,attachmentId){
+  if(!confirm('Delete this attachment?'))return;const e=employees.find(x=>x.id===employeeId);if(!e)return;
+  e.profileAttachments=(e.profileAttachments||[]).filter(x=>x.id!==attachmentId);persist();viewEmployee(employeeId);showE360Tab('attachments');
+}
 function viewEmployee(id){
-  let e=employees.find(x=>x.id===id);
-  const missingNames=missing(e);
-  detailContent.innerHTML=`<div class="employee-name-with-photo" style="margin-bottom:12px">${employeePhotoHtml(e.photo,e.nameEnglish,true)}<h2>${esc(e.nameEnglish||'Not Filled')} <small>(${esc(e.employeeId||'Not Filled')})</small></h2></div>
-  <p><span class="pill ${e.approvalStatus==='Approved'?'approved':e.approvalStatus==='Correction Required'?'correction':'review'}">${esc(e.approvalStatus||'Not Filled')}</span></p>
-  <div class="notice blue" style="margin-bottom:14px"><b>Automatic Site Status:</b> ${esc(e.siteStatus||'Idle')}<br><b>Current Site:</b> ${esc(e.currentSiteName||'-')}<br><b>Leave Rejoining Date:</b> ${esc(e.leaveRejoiningDate||'-')}<br><b>Last Status Updated:</b> ${esc(e.statusUpdatedAt||'-')}<br><b>Status Source:</b> ${esc(e.statusSource||'Automatic')}</div>
-  <div class="form-grid">${fields.map(f=>{
-    const value=String(e[f[0]]??'').trim();
-    const certConfig=technicalCertificateConfigByField(f[0]);
-    const conditionalNotRequired=(f[0]==='cancellationDate'&&e.workingStatus!=='Inactive')||(certConfig&&!isTechnicalCertificateRequired(e,certConfig));
-    const expiryClass=getExpiryDateClass(f[0],f[1],value);
-    const fk=String(f[0]||'').toLowerCase(), fl=String(f[1]||'').toLowerCase();
-    const isExpiryField=fk.includes('expiry')||fk.includes('expire')||fl.includes('expiry')||fl.includes('expire');
-    let validBadge='';
-    if(isExpiryField&&value&&!expiryClass){
-      const d=new Date(value),today=new Date(); today.setHours(0,0,0,0);
-      if(!Number.isNaN(d.getTime())&&d>today)validBadge=' <span class="expiry-date-valid" style="display:inline-block;padding:2px 6px;border-radius:6px;margin-left:5px">Valid</span>';
-    }
-    return `<div class="${expiryClass}" style="${!value&&!conditionalNotRequired?'background:#fff8e8;border:1px solid var(--warning);border-radius:10px;padding:10px;':expiryClass?'border-radius:10px;padding:10px;':''}">
-      <b style="font-size:12px;color:#53697d">${esc(f[1])}</b>
-      <div style="margin-top:5px;color:${!value&&!conditionalNotRequired?'#8a5a00':'inherit'};font-weight:${!value&&!conditionalNotRequired?'700':'400'}">${esc(value||(conditionalNotRequired?'Not Applicable':'Not Filled'))}${validBadge}</div>
-    </div>`;
-  }).join('')}</div>
-  <div style="margin-top:18px" class="${missingNames.length?'notice':''}">
-    <b>Missing Information:</b> ${esc(missingNames.join(', ')||'None')}
-  </div>
-  <div style="margin-top:20px"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button></div>`;
+  const e=employees.find(x=>x.id===id);if(!e)return;
+  const sites=e360SiteRows(e),leaves=e360LeaveRows(e),cicpas=e360CicpaRows(e),timeline=e360Timeline(e,sites,leaves);
+  const salary=e.salaryHistory||[],remarks=e.profileRemarks||[],attachments=e.profileAttachments||[];
+  const additional=e.additionalCertificates||[];
+  const documents=[
+    ['Passport',e.passportNumber||e.passportNo,e.passportExpiry],
+    ['Visa',e.visaNumber||e.visaNo,e.visaExpiry],
+    ['Emirates ID',e.emiratesId,e.idExpiry||e.emiratesIdExpiry],
+    ['Labour Card',e.labourCardNumber||e.labourCardNo,e.labourExpiry],
+    ...additional.map(c=>[c.name||'Certificate',c.number,c.expiryDate])
+  ];
+  const wqtItems=Object.keys(e).filter(k=>k.toLowerCase().includes('wqt')).map(k=>[k.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()),e[k]]);
+  const tabs=[['overview','Overview'],['documents','Documents'],['medical','Medical / WQT'],['cicpa','CICPA'],['sites','Site History'],['leave','Leave History'],['salary','Salary History'],['remarks','Remarks'],['attachments','Attachments'],['timeline','Timeline']];
+  detailContent.innerHTML=`<div class="employee360">
+    <div class="e360-hero">
+      ${employeePhotoHtml(e.photo,e.nameEnglish,true)}
+      <div class="e360-name"><h2>${esc(e.nameEnglish||'Not Filled')}</h2><div>${esc(e.employeeId||'-')} · ${esc(e.actualDesignation||e.designation||'-')} · ${esc(e.company||'-')}</div>
+        <div class="e360-meta"><span class="pill ${(e.workingStatus||'').toLowerCase()}">${esc(e.workingStatus||'Not Set')}</span><span class="pill ${(e.siteStatus||'idle').toLowerCase().replaceAll(' ','')}">${esc(e.siteStatus||'Idle')}</span><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus||'Under Review')}</span></div>
+      </div>
+      <div class="e360-actions"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button><button class="btn light" onclick="window.print()">Print Profile</button></div>
+    </div>
+    <div class="e360-tabs">${tabs.map((t,i)=>`<button class="e360-tab ${i===0?'active':''}" data-tab="${t[0]}" onclick="showE360Tab('${t[0]}')">${t[1]}</button>`).join('')}</div>
+
+    <div class="e360-panel active" data-panel="overview">
+      <div class="e360-section"><h3>Personal Information</h3>${e360Info([
+        ['Employee Code',e.employeeId],['Full Name',e.nameEnglish],['Arabic Name',e.nameArabic],['Nationality',e.nationality],['Date of Birth',e.dateOfBirth||e.dob],['Mobile',e.mobile||e.phone],
+        ['Company',e.company],['Designation',e.actualDesignation||e.designation],['Date of Joining',e.dateOfJoining||e.joiningDate],['Working Status',e.workingStatus],['Site Status',e.siteStatus],['Current Site',e.currentSiteName]
+      ])}</div>
+      <div class="e360-section"><h3>Identity & Employment Summary</h3>${e360Info([
+        ['Passport Number',e.passportNumber||e.passportNo],['Passport Expiry',e.passportExpiry],['Visa Number',e.visaNumber||e.visaNo],['Visa Expiry',e.visaExpiry],['Emirates ID',e.emiratesId],['Emirates ID Expiry',e.idExpiry||e.emiratesIdExpiry],
+        ['Labour Card',e.labourCardNumber||e.labourCardNo],['Labour Expiry',e.labourExpiry],['Approval Status',e.approvalStatus],['Updated By',e.updatedBy],['Updated At',e.updatedAt],['Status Source',e.statusSource]
+      ])}</div>
+    </div>
+
+    <div class="e360-panel" data-panel="documents"><div class="e360-section"><h3>Documents & Certificates</h3>
+      ${documents.length?documents.map(d=>`<div class="e360-doc"><div><b>${esc(d[0])}</b><div>Number: ${esc(e360Value(d[1]))}</div></div><div>Expiry: ${esc(e360Date(d[2]))}</div></div>`).join(''):'<div class="e360-empty">No documents recorded.</div>'}
+    </div></div>
+
+    <div class="e360-panel" data-panel="medical"><div class="e360-section"><h3>Medical Information</h3>${e360Info([
+      ['ADNOC Medical Required',e.adnocMedicalRequired?'Yes':'No'],['ADNOC Medical Type',e.adnocMedicalType],['ADNOC Medical Expiry',e.adnocMedicalExpiry],['H2S Expiry',e.h2sExpiry],['ATA Expiry',e.ataExpiry],['IOLE Expiry',e.ioleExpiry]
+    ])}</div><div class="e360-section"><h3>WQT Information</h3>${wqtItems.length?e360Info(wqtItems):'<div class="e360-empty">No WQT information recorded.</div>'}</div></div>
+
+    <div class="e360-panel" data-panel="cicpa"><div class="e360-section"><h3>CICPA Records</h3>${e360Rows(cicpas,['CICPA Number','Issue Date','Expiry Date','Locations','Status'],[r=>r.number||r.cicpaNumber,r=>r.issueDate,r=>r.expiryDate,r=>r.locations,r=>typeof cicpaPassStatus==='function'?cicpaPassStatus(r):(r.cancelled?'Cancelled':'Active')])}</div></div>
+
+    <div class="e360-panel" data-panel="sites"><div class="e360-section"><h3>Site History</h3>${e360Rows(sites,['Client','Project / Site','Mobilization','Demobilization','Craft','Remarks'],[
+      r=>r.client||r.clientName,r=>r.project||r.projectName||r.siteName||r.location,r=>r.mobilizationDate||r.mobDate||r.date,r=>r.demobilizationDate||r.demobDate,r=>r.craft||r.designation,r=>r.remarks||r.demobReason
+    ])}</div></div>
+
+    <div class="e360-panel" data-panel="leave"><div class="e360-section"><h3>Leave History</h3>${e360Rows(leaves,['Leave Type','Start Date','End / Rejoining','Days','Status','Remarks'],[
+      r=>r.leaveType||r.type,r=>r.startDate,r=>r.rejoiningDate||r.endDate,r=>r.totalDays||r.leaveDays,r=>r.status,r=>r.remarks||r.generalRemarks
+    ])}</div></div>
+
+    <div class="e360-panel" data-panel="salary"><div class="e360-section"><h3>Salary History</h3>${e360Rows(salary,['Effective Date','Amount','Type / Remark','Added By'],['date','amount','type','addedBy'])}
+      <div class="e360-input-row"><input id="e360SalaryDate" type="date" class="input"><input id="e360SalaryAmount" type="number" step="0.01" class="input" placeholder="Amount"><input id="e360SalaryType" class="input" placeholder="Basic salary / increment / remark"><button class="btn primary" onclick="addE360Salary('${id}')">Add</button></div>
+    </div></div>
+
+    <div class="e360-panel" data-panel="remarks"><div class="e360-section"><h3>Employee Remarks</h3>${remarks.length?remarks.slice().reverse().map(r=>`<div class="e360-doc"><div>${esc(r.note)}</div><small>${esc(r.by||'')} · ${esc(r.date||'')}</small></div>`).join(''):'<div class="e360-empty">No remarks added.</div>'}
+      <div style="display:flex;gap:8px;margin-top:10px"><textarea id="e360RemarkText" class="input grow" rows="2" placeholder="Enter employee remark"></textarea><button class="btn primary" onclick="addE360Remark('${id}')">Add Remark</button></div>
+    </div></div>
+
+    <div class="e360-panel" data-panel="attachments"><div class="e360-section"><h3>Attachments</h3>${attachments.length?attachments.map(a=>`<div class="e360-doc"><div><b>${esc(a.name)}</b><small>${esc(a.date||'')} · ${Math.round((a.size||0)/1024)} KB</small></div><div><button class="btn light" onclick="openE360Attachment('${id}','${a.id}')">Open</button> <button class="btn danger" onclick="deleteE360Attachment('${id}','${a.id}')">Delete</button></div></div>`).join(''):'<div class="e360-empty">No attachments uploaded.</div>'}
+      <div style="display:flex;gap:8px;margin-top:10px"><input id="e360AttachmentFile" type="file" class="input grow"><button class="btn primary" onclick="addE360Attachment('${id}')">Upload</button></div><small class="muted">Local mode: keep each attachment below 1.5 MB.</small>
+    </div></div>
+
+    <div class="e360-panel" data-panel="timeline"><div class="e360-section"><h3>Activity Timeline</h3>${timeline.length?`<div class="e360-timeline">${timeline.map(t=>`<div class="e360-event"><b>${esc(t.title)}</b><div>${esc(t.detail||'')}</div><small class="muted">${esc(t.date||'-')}</small></div>`).join('')}</div>`:'<div class="e360-empty">No activity recorded.</div>'}</div></div>
+  </div>`;
   detailModal.classList.add('show');
 }
 function closeModal(id){document.getElementById(id).classList.remove('show')}
@@ -2093,6 +2232,7 @@ document.getElementById('cicpaSearch').addEventListener('input',renderCicpa);doc
 buildForm();
 persist();
 renderDashboard();
+setTimeout(()=>{if(typeof window.rgRenderProfessionalDashboard==='function')window.rgRenderProfessionalDashboard()},0);
 window.addEventListener('beforeunload',persist);
 window.addEventListener('storage',event=>{
   if(event.key===EMPLOYEE_STORAGE_KEY||event.key===NOTIFICATION_STORAGE_KEY){
@@ -2977,16 +3117,17 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   };
 
   window.rgRenderProfessionalDashboard=function(){
-    const emps=arr(window.employees || (typeof employees!=='undefined'?employees:[]));
-    const leaves=arr(window.leaveRecords || (typeof leaveRecords!=='undefined'?leaveRecords:[]));
-    const cicpas=arr(window.cicpaRecords || (typeof cicpaRecords!=='undefined'?cicpaRecords:[]));
+    const emps=arr(typeof window.rgGetEmployees==='function'?window.rgGetEmployees():[]);
+    const leaves=arr(typeof leaveRecords!=='undefined'?leaveRecords:window.leaveRecords);
+    const cicpas=arr(typeof cicpaRecords!=='undefined'?cicpaRecords:window.cicpaRecords);
     const today=new Date();
     setText('rgTodayDate',today.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}));
     setText('rgTodayDay',today.toLocaleDateString('en-US',{weekday:'long'}));
 
-    const onsite=emps.filter(e=>norm(e.siteStatus)==='on site');
-    const onleave=emps.filter(e=>norm(e.siteStatus)==='on leave');
-    const idle=emps.filter(e=>norm(e.siteStatus)==='idle');
+    const employeeStatus=e=>norm(e.siteStatus||e.status||e.currentStatus).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+    const onsite=emps.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e)));
+    const onleave=emps.filter(e=>['on leave','onleave','leave'].includes(employeeStatus(e)));
+    const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e)));
     setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',onsite.length);
     setText('rgOnLeaveEmployees',onleave.length); setText('rgIdleEmployees',idle.length);
     setText('rgOnSiteAlertCount',onsite.length); setText('rgOnLeaveAlertCount',onleave.length); setText('rgIdleAlertCount',idle.length);

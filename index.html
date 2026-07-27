@@ -909,6 +909,9 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
                 <label>Client Code<input id="clientCode" class="input" readonly placeholder="Automatically generated"></label>
                 <label>Client Name *<input id="clientName" class="input" required></label>
                 <label>Company Address *<input id="clientAddress" class="input" required></label>
+                <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
+                <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>
+                <label>VAT Registration Number<input id="clientVatNo" class="input"></label>
                 <div class="full client-contacts-section">
                   <div class="client-contacts-header">
                     <label>Contact Persons</label>
@@ -916,9 +919,6 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
                   <div id="clientContactsContainer"></div>
                   <button type="button" class="btn light client-add-contact-btn" onclick="addClientContactRow()">+ Add More Contact Person</button>
                 </div>
-                <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
-                <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>
-                <label>VAT Registration Number<input id="clientVatNo" class="input"></label>
                 <label>Client Status<select id="clientStatus" class="input"><option>Active</option><option>Inactive</option></select></label>
                 <label class="full">Remarks<textarea id="clientRemarks" class="input" rows="3"></textarea></label>
               </div>

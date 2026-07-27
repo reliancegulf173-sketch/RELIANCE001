@@ -614,6 +614,35 @@ th{background:#edf3f8;color:#294d6a}
 @media(max-width:580px){.rg-summary-grid{grid-template-columns:1fr}.rg-summary-card{min-height:105px}.rg-date-card{flex:1}.rg-quick-btn{flex:1}.rg-notification-titlebar{align-items:flex-start;gap:12px}.rg-notification-titlebar button{font-size:11px}.rg-notification-item{grid-template-columns:48px 1fr 38px;padding:12px}.rg-ni-icon{width:45px;height:45px;font-size:20px}}
 </style>
 
+
+<style id="certificate-checkbox-final-style">
+#certGrid .certificate-required-selector{
+  display:block!important;grid-column:1/-1!important;width:100%!important;
+  margin:10px 0 2px!important;padding:0!important;border:2px solid #c9d8e6!important;
+  border-radius:12px!important;background:#f8fbfe!important;overflow:visible!important;
+}
+#certGrid .certificate-required-selector.selected{border-color:#0b6fb8!important;background:#eaf5ff!important;}
+#certGrid .certificate-checkbox-label{
+  display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;
+  padding:13px 15px!important;margin:0!important;cursor:pointer!important;color:#173a59!important;
+}
+#certGrid input.certificate-visible-checkbox{
+  position:static!important;display:block!important;visibility:visible!important;opacity:1!important;
+  appearance:none!important;-webkit-appearance:none!important;float:none!important;
+  width:24px!important;height:24px!important;min-width:24px!important;max-width:24px!important;
+  margin:0!important;padding:0!important;border:2px solid #52718d!important;border-radius:5px!important;
+  background:#fff!important;box-shadow:none!important;cursor:pointer!important;z-index:10!important;
+}
+#certGrid input.certificate-visible-checkbox:checked{background:#0b6fb8!important;border-color:#0b6fb8!important;}
+#certGrid .certificate-box-mark{
+  display:none!important;position:absolute!important;color:#fff!important;font-size:18px!important;font-weight:900!important;
+  margin-left:4px!important;pointer-events:none!important;line-height:1!important;
+}
+#certGrid input.certificate-visible-checkbox:checked + .certificate-box-mark{display:block!important;}
+#certGrid .certificate-checkbox-text{display:flex!important;flex-direction:column!important;gap:2px!important;}
+#certGrid .certificate-checkbox-text b{font-size:15px!important;}
+#certGrid .certificate-checkbox-text small{font-size:12px!important;color:#64748b!important;font-weight:600!important;}
+</style>
 </head>
 <body>
 
@@ -1817,18 +1846,43 @@ function buildForm(){
       const expiryWrap=certHost.querySelector(`.form-group[data-key="${config.expiryKey}"]`);
       const detailWrap=certHost.querySelector(`.form-group[data-key="${config.detailKey}"]`);
       if(!expiryWrap||!detailWrap)return;
+
       const selector=document.createElement('div');
-      selector.className='form-group certificate-required-selector';
-      selector.style.gridColumn='1 / -1';
-      selector.innerHTML=`<label><input type="checkbox" id="${config.requiredKey}"><span>${config.label} Required</span><span class="certificate-help">Check only when applicable</span></label>`;
+      selector.className='certificate-required-selector';
+      selector.setAttribute('data-certificate',config.requiredKey);
+      selector.innerHTML=`
+        <label class="certificate-checkbox-label" for="${config.requiredKey}">
+          <input class="certificate-visible-checkbox" type="checkbox" id="${config.requiredKey}">
+          <span class="certificate-box-mark" aria-hidden="true">✓</span>
+          <span class="certificate-checkbox-text">
+            <b>${config.label}</b>
+            <small>Required for this employee</small>
+          </span>
+        </label>`;
       certHost.insertBefore(selector,expiryWrap);
+
+      const checkbox=selector.querySelector(`#${config.requiredKey}`);
       const toggle=()=>{
-        const required=document.getElementById(config.requiredKey).checked;
+        const required=checkbox.checked;
+        selector.classList.toggle('selected',required);
         expiryWrap.style.display=required?'block':'none';
         detailWrap.style.display=required?'block':'none';
-        if(!required){document.getElementById(config.expiryKey).value='';document.getElementById(config.detailKey).value='';expiryWrap.classList.remove('missing');detailWrap.classList.remove('missing');}
+        if(!required){
+          const expiry=document.getElementById(config.expiryKey);
+          const detail=document.getElementById(config.detailKey);
+          if(expiry)expiry.value='';
+          if(detail)detail.value='';
+          expiryWrap.classList.remove('missing');
+          detailWrap.classList.remove('missing');
+        }
       };
-      document.getElementById(config.requiredKey).addEventListener('change',toggle);
+      checkbox.addEventListener('change',toggle);
+      selector.addEventListener('click',event=>{
+        if(event.target===checkbox)return;
+        if(event.target.closest('label'))return;
+        checkbox.checked=!checkbox.checked;
+        checkbox.dispatchEvent(new Event('change'));
+      });
       toggle();
     });
   }

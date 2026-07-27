@@ -668,9 +668,15 @@ th{background:#edf3f8;color:#294d6a}
 #certGrid .certificate-checkbox-text small{font-size:12px!important;color:#64748b!important;font-weight:600!important;}
 </style>
 
-<style id="clientMultiContactFix">
-@media(max-width:1100px){.client-contact-row{grid-template-columns:1fr 1fr!important}}
-@media(max-width:650px){.client-contact-row{grid-template-columns:1fr!important}}
+<style id="clientMultipleContactsStyles">
+.client-contacts-section{border:1px solid #d8e2ee;border-radius:14px;padding:14px;background:#f8fbff}
+.client-contacts-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.client-contacts-header>label{font-weight:800;color:#334155}
+.client-contact-row{display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;padding:12px;margin-bottom:10px;border:1px solid #dbe5f0;border-radius:12px;background:#fff}
+.client-contact-row label{margin:0}
+.client-contact-row .remove-contact-btn{height:46px;white-space:nowrap}
+@media(max-width:1100px){.client-contact-row{grid-template-columns:1fr 1fr}.client-contact-row .remove-contact-btn{grid-column:1/-1}}
+@media(max-width:650px){.client-contacts-header{align-items:stretch;flex-direction:column}.client-contact-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -895,20 +901,12 @@ th{background:#edf3f8;color:#294d6a}
                 <label>Client Code<input id="clientCode" class="input" readonly placeholder="Automatically generated"></label>
                 <label>Client Name *<input id="clientName" class="input" required></label>
                 <label>Company Address *<input id="clientAddress" class="input" required></label>
-                <div class="full" style="grid-column:1/-1">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
-                    <label style="margin:0;font-weight:800">Contact Persons *</label>
+                <div class="full client-contacts-section">
+                  <div class="client-contacts-header">
+                    <label>Client Contact Persons *</label>
                     <button type="button" class="btn primary" onclick="addClientContactRow()">+ Add More Contact Person</button>
                   </div>
-                  <div id="clientContactsContainer">
-                    <div class="client-contact-row" style="display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc">
-                      <label>Contact Person Name *<input class="input client-contact-name" required></label>
-                      <label>Mobile Number *<input class="input client-contact-mobile" required></label>
-                      <label>Email Address *<input type="email" class="input client-contact-email" required></label>
-                      <label>Remark<input class="input client-contact-remark" placeholder="Designation / department / notes"></label>
-                      <button type="button" class="btn danger" onclick="removeClientContactRow(this)">Remove</button>
-                    </div>
-                  </div>
+                  <div id="clientContactsContainer"></div>
                 </div>
                 <label>Trade License Number *<input id="clientLicenseNo" class="input" required></label>
                 <label>Trade License Expiry Date *<input id="clientLicenseExpiry" type="date" class="input" required></label>
@@ -1350,6 +1348,8 @@ function queueCloudWrite(){ return; }
 async function startCloudSync(){ cloudReady=true; return true; }
 function refreshAppFromCloud(){ return; }
 window.firebaseBridge={disabled:true,startCloudSync};
+
+if(document.getElementById('clientContactsContainer')&&!clientContactsContainer.children.length)setClientContacts([{}]);
 </script>
 
 <script>
@@ -2740,7 +2740,7 @@ function nextClientCode(){let max=clientRecords.reduce((m,x)=>Math.max(m,parseIn
 function nextProjectCode(){let max=projectRecords.reduce((m,x)=>Math.max(m,parseInt(String(x.code||'').replace(/\D/g,''))||0),0);return 'PRJ-'+String(max+1).padStart(4,'0')}
 function fileNames(id){const el=document.getElementById(id);return el&&el.files?Array.from(el.files).map(f=>f.name):[]}
 function clientDocsText(c){return [c.docs?.license&&'Trade License',c.docs?.vat&&'VAT Certificate',c.docs?.profile&&'Company Profile',...(c.docs?.other||[])].filter(Boolean).join(', ')||'Missing'}
-function clientMissing(c){const contacts=normalizedClientContacts(c);return !c.name||!c.address||!contacts.length||contacts.some(x=>!x.name||!x.mobile||!x.email)||!c.licenseNo||!c.licenseExpiry||!c.docs?.license||!c.docs?.vat}
+function clientMissing(c){return !c.name||!c.address||!c.contact||!c.mobile||!c.email||!c.licenseNo||!c.licenseExpiry||!c.docs?.license||!c.docs?.vat}
 function clientExpiryClass(c){const d=cDays(c.licenseExpiry);return d===null?'client-alert-missing':d<0?'client-alert-expired':d<=30?'client-alert-soon':''}
 function openClientPortal(){showPage('clientPortal');showClientModule('dashboard')}
 function showClientModule(name){
@@ -2761,53 +2761,61 @@ function renderClientDashboard(){
 }
 function filteredClients(){
   let q=(clientSearch?.value||'').toLowerCase(),status=clientStatusFilter?.value||'all',expiry=clientExpiryFilter?.value||'all';
-  return clientRecords.filter(c=>{let d=cDays(c.licenseExpiry),hay=[c.code,c.name,c.address,c.licenseNo,c.vatNo,...normalizedClientContacts(c).flatMap(x=>[x.name,x.mobile,x.email,x.remark])].join(' ').toLowerCase();let okQ=!q||hay.includes(q),okS=status==='all'||c.status===status,okE=expiry==='all'||(expiry==='soon'&&d!==null&&d>=0&&d<=30)||(expiry==='expired'&&d!==null&&d<0)||(expiry==='missing'&&d===null),okQuick=clientQuickFilter==='all'||(clientQuickFilter==='active'&&c.status==='Active')||(clientQuickFilter==='soon'&&d!==null&&d>=0&&d<=30)||(clientQuickFilter==='expired'&&d!==null&&d<0);return okQ&&okS&&okE&&okQuick})
+  return clientRecords.filter(c=>{let d=cDays(c.licenseExpiry),hay=[c.code,c.name,c.address,clientContactsText(c,'name'),clientContactsText(c,'mobile'),clientContactsText(c,'email'),clientContactsText(c,'remark'),c.licenseNo,c.vatNo].join(' ').toLowerCase();let okQ=!q||hay.includes(q),okS=status==='all'||c.status===status,okE=expiry==='all'||(expiry==='soon'&&d!==null&&d>=0&&d<=30)||(expiry==='expired'&&d!==null&&d<0)||(expiry==='missing'&&d===null),okQuick=clientQuickFilter==='all'||(clientQuickFilter==='active'&&c.status==='Active')||(clientQuickFilter==='soon'&&d!==null&&d>=0&&d<=30)||(clientQuickFilter==='expired'&&d!==null&&d<0);return okQ&&okS&&okE&&okQuick})
 }
-function clientContactsHtml(c){const a=normalizedClientContacts(c);return a.length?a.map((x,i)=>`<div style="margin-bottom:${i===a.length-1?'0':'8px'}"><b>${cEsc(x.name||'Unnamed')}</b>${x.mobile?`<br>${cEsc(x.mobile)}`:''}${x.email?`<br>${cEsc(x.email)}`:''}${x.remark?`<br><small>${cEsc(x.remark)}</small>`:''}</div>`).join(''):'—'}
 function renderClientList(){
-  const rows=filteredClients();clientListBody.innerHTML=rows.map(c=>{let docs=clientDocsText(c),pc=projectRecords.filter(p=>p.clientId===c.id).length,miss=clientMissing(c);return `<tr class="${miss?'client-alert-missing':''}"><td>${cEsc(c.code)}</td><td>${cEsc(c.name)}</td><td>${cEsc(c.address)}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.name)).join('<br>')}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.mobile)).join('<br>')}</td><td>${normalizedClientContacts(c).map(x=>cEsc(x.email)+(x.remark?'<br><small>'+cEsc(x.remark)+'</small>':'')).join('<hr>')}</td><td>${cEsc(c.licenseNo)}</td><td class="${clientExpiryClass(c)}">${cEsc(c.licenseExpiry||'Missing')}</td><td>${cEsc(c.vatNo)}</td><td>${cEsc(c.status)}</td><td>${cEsc(docs)}</td><td>${pc}</td><td><button class="mini" onclick="viewClient('${c.id}')">View</button> <button class="mini" onclick="editClient('${c.id}')">Edit</button> <button class="mini danger" onclick="deleteClient('${c.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="13" class="empty">No client records found.</td></tr>';clientQuickFilter='all'
+  const rows=filteredClients();clientListBody.innerHTML=rows.map(c=>{let docs=clientDocsText(c),pc=projectRecords.filter(p=>p.clientId===c.id).length,miss=clientMissing(c);return `<tr class="${miss?'client-alert-missing':''}"><td>${cEsc(c.code)}</td><td>${cEsc(c.name)}</td><td>${cEsc(c.address)}</td><td>${cEsc(clientContactsText(c,'name'))}</td><td>${cEsc(clientContactsText(c,'mobile'))}</td><td>${cEsc(clientContactsText(c,'email'))}</td><td>${cEsc(c.licenseNo)}</td><td class="${clientExpiryClass(c)}">${cEsc(c.licenseExpiry||'Missing')}</td><td>${cEsc(c.vatNo)}</td><td>${cEsc(c.status)}</td><td>${cEsc(docs)}</td><td>${pc}</td><td><button class="mini" onclick="viewClient('${c.id}')">View</button> <button class="mini" onclick="editClient('${c.id}')">Edit</button> <button class="mini danger" onclick="deleteClient('${c.id}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="13" class="empty">No client records found.</td></tr>';clientQuickFilter='all'
 }
-function normalizedClientContacts(c){
-  if(Array.isArray(c?.contacts)&&c.contacts.length)return c.contacts;
-  if(c&&(c.contact||c.mobile||c.email))return [{name:c.contact||'',mobile:c.mobile||'',email:c.email||'',remark:c.contactRemark||''}];
-  return [];
+function clientContactRowHtml(contact={},index=0){
+  const remove=index===0?'':`<button type="button" class="btn danger remove-contact-btn" onclick="removeClientContactRow(this)">Remove</button>`;
+  return `<div class="client-contact-row">
+    <label>Contact Person Name *<input class="input client-contact-name" required value="${cEsc(contact.name||'')}"></label>
+    <label>Mobile Number *<input class="input client-contact-mobile" required value="${cEsc(contact.mobile||'')}"></label>
+    <label>Email Address *<input type="email" class="input client-contact-email" required value="${cEsc(contact.email||'')}"></label>
+    <label>Remark<input class="input client-contact-remark" value="${cEsc(contact.remark||'')}" placeholder="Designation / department / notes"></label>
+    ${remove}
+  </div>`;
 }
-function addClientContactRow(contact={}){
-  const box=document.getElementById('clientContactsContainer');if(!box)return;
-  const row=document.createElement('div');row.className='client-contact-row';
-  row.style.cssText='display:grid;grid-template-columns:1.1fr .9fr 1.1fr 1.1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid #dce5ef;border-radius:12px;background:#f8fafc';
-  row.innerHTML=`<label>Contact Person Name *<input class="input client-contact-name" required value="${cEsc(contact.name||'')}"></label><label>Mobile Number *<input class="input client-contact-mobile" required value="${cEsc(contact.mobile||'')}"></label><label>Email Address *<input type="email" class="input client-contact-email" required value="${cEsc(contact.email||'')}"></label><label>Remark<input class="input client-contact-remark" value="${cEsc(contact.remark||'')}" placeholder="Designation / department / notes"></label><button type="button" class="btn danger" onclick="removeClientContactRow(this)">Remove</button>`;
-  box.appendChild(row);
+function setClientContacts(contacts){
+  const list=(contacts&&contacts.length)?contacts:[{}];
+  clientContactsContainer.innerHTML=list.map((c,i)=>clientContactRowHtml(c,i)).join('');
+}
+function addClientContactRow(){
+  const count=clientContactsContainer.querySelectorAll('.client-contact-row').length;
+  clientContactsContainer.insertAdjacentHTML('beforeend',clientContactRowHtml({},count));
 }
 function removeClientContactRow(btn){
-  const box=document.getElementById('clientContactsContainer');
-  const rows=box?box.querySelectorAll('.client-contact-row'):[];
-  if(rows.length<=1){alert('At least one contact person is required.');return;}
   btn.closest('.client-contact-row')?.remove();
 }
-function collectClientContacts(){
-  return [...document.querySelectorAll('#clientContactsContainer .client-contact-row')].map(row=>({
-    name:row.querySelector('.client-contact-name')?.value.trim()||'',
-    mobile:row.querySelector('.client-contact-mobile')?.value.trim()||'',
-    email:row.querySelector('.client-contact-email')?.value.trim()||'',
-    remark:row.querySelector('.client-contact-remark')?.value.trim()||''
+function getClientContacts(){
+  return [...clientContactsContainer.querySelectorAll('.client-contact-row')].map(row=>({
+    name:row.querySelector('.client-contact-name').value.trim(),
+    mobile:row.querySelector('.client-contact-mobile').value.trim(),
+    email:row.querySelector('.client-contact-email').value.trim(),
+    remark:row.querySelector('.client-contact-remark').value.trim()
   })).filter(c=>c.name||c.mobile||c.email||c.remark);
 }
-function resetClientForm(){clientForm.reset();clientEditId.value='';clientCode.value=nextClientCode();clientFormTitle.textContent='Add New Client';const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';addClientContactRow();}}
+function normalizedClientContacts(c){
+  if(Array.isArray(c.contacts)&&c.contacts.length)return c.contacts;
+  if(c.contact||c.mobile||c.email)return [{name:c.contact||'',mobile:c.mobile||'',email:c.email||'',remark:''}];
+  return [];
+}
+function clientContactsText(c,key){return normalizedClientContacts(c).map(x=>x[key]||'').filter(Boolean).join(' | ')}
+function resetClientForm(){clientForm.reset();clientEditId.value='';clientCode.value=nextClientCode();clientFormTitle.textContent='Add New Client';setClientContacts([{}])}
 function saveClient(e){
   e.preventDefault();let id=clientEditId.value,lic=clientLicenseNo.value.trim(),duplicate=clientRecords.find(c=>c.licenseNo.trim().toLowerCase()===lic.toLowerCase()&&c.id!==id);if(duplicate){alert('A client with the same Trade License Number already exists.');return}
   let old=id?clientRecords.find(c=>c.id===id):null,docs={license:fileNames('clientDocLicense')[0]||old?.docs?.license||'',vat:fileNames('clientDocVat')[0]||old?.docs?.vat||'',profile:fileNames('clientDocProfile')[0]||old?.docs?.profile||'',other:fileNames('clientDocOther').length?fileNames('clientDocOther'):(old?.docs?.other||[])};
-  let contacts=collectClientContacts();if(!contacts.length||contacts.some(x=>!x.name||!x.mobile||!x.email)){alert('Please complete Contact Person Name, Mobile Number and Email Address for every contact person.');return;}let primary=contacts[0];let rec={id:id||String(Date.now()),code:clientCode.value||nextClientCode(),name:clientName.value.trim(),address:clientAddress.value.trim(),contacts,contact:primary.name,mobile:primary.mobile,email:primary.email,contactRemark:primary.remark||'',licenseNo:lic,licenseExpiry:clientLicenseExpiry.value,vatNo:clientVatNo.value.trim(),status:clientStatus.value,remarks:clientRemarks.value.trim(),docs,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  let contacts=getClientContacts();if(!contacts.length){alert('Please add at least one contact person.');return}let primary=contacts[0];let rec={id:id||String(Date.now()),code:clientCode.value||nextClientCode(),name:clientName.value.trim(),address:clientAddress.value.trim(),contacts,contact:primary.name,mobile:primary.mobile,email:primary.email,licenseNo:lic,licenseExpiry:clientLicenseExpiry.value,vatNo:clientVatNo.value.trim(),status:clientStatus.value,remarks:clientRemarks.value.trim(),docs,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(id)clientRecords=clientRecords.map(c=>c.id===id?rec:c);else clientRecords.push(rec);clientLog('client',rec.id,id?'Edited client':'Created client',rec.name);clientPersist();resetClientForm();renderClientDashboard();showClientModule('clients')
 }
-function editClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;clientEditId.value=c.id;clientCode.value=c.code;clientName.value=c.name;clientAddress.value=c.address;const box=document.getElementById('clientContactsContainer');if(box){box.innerHTML='';const contacts=normalizedClientContacts(c);(contacts.length?contacts:[{}]).forEach(addClientContactRow)}clientLicenseNo.value=c.licenseNo;clientLicenseExpiry.value=c.licenseExpiry;clientVatNo.value=c.vatNo||'';clientStatus.value=c.status;clientRemarks.value=c.remarks||'';clientFormTitle.textContent='Edit Client – '+c.name;showClientModule('addClient')}
+function editClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;clientEditId.value=c.id;clientCode.value=c.code;clientName.value=c.name;clientAddress.value=c.address;setClientContacts(normalizedClientContacts(c));clientLicenseNo.value=c.licenseNo;clientLicenseExpiry.value=c.licenseExpiry;clientVatNo.value=c.vatNo||'';clientStatus.value=c.status;clientRemarks.value=c.remarks||'';clientFormTitle.textContent='Edit Client – '+c.name;showClientModule('addClient')}
 function deleteClient(id){let c=clientRecords.find(x=>x.id===id),count=projectRecords.filter(p=>p.clientId===id).length;if(!c)return;if(count){alert('This client has linked projects. Delete or reassign those projects first.');return}if(confirm('Delete client '+c.name+'?')){clientRecords=clientRecords.filter(x=>x.id!==id);clientLog('client',id,'Deleted client',c.name);clientPersist();renderClientList();renderClientDashboard()}}
 function refreshClientOptions(){
   const opts='<option value="">Select Client</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)} (${cEsc(c.code)})</option>`).join('');
   if(projectClientId){let v=projectClientId.value;projectClientId.innerHTML=opts;projectClientId.value=v}
   if(projectClientFilter){let v=projectClientFilter.value;projectClientFilter.innerHTML='<option value="all">All Clients</option>'+clientRecords.map(c=>`<option value="${c.id}">${cEsc(c.name)}</option>`).join('');projectClientFilter.value=v||'all'}
 }
-function updateSelectedClientProjects(){let id=projectClientId.value,c=clientRecords.find(x=>x.id===id),ps=projectRecords.filter(p=>p.clientId===id);if(!c){selectedClientProjects.classList.add('hidden');return}let first=normalizedClientContacts(c)[0]||{};projectContact.value=projectContact.value||first.name||c.contact||'';projectInvoiceEmail.value=projectInvoiceEmail.value||first.email||c.email||'';selectedClientProjects.classList.remove('hidden');selectedClientProjects.innerHTML=`<h4>Existing Projects for ${cEsc(c.name)}</h4>`+(ps.length?ps.map(p=>`<div>${cEsc(p.code)} — ${cEsc(p.name)} — ${cEsc(p.status)}</div>`).join(''):'<div class="muted">No projects currently linked.</div>')}
+function updateSelectedClientProjects(){let id=projectClientId.value,c=clientRecords.find(x=>x.id===id),ps=projectRecords.filter(p=>p.clientId===id);if(!c){selectedClientProjects.classList.add('hidden');return}let primary=normalizedClientContacts(c)[0]||{};projectContact.value=projectContact.value||primary.name||'';projectInvoiceEmail.value=projectInvoiceEmail.value||primary.email||'';selectedClientProjects.classList.remove('hidden');selectedClientProjects.innerHTML=`<h4>Existing Projects for ${cEsc(c.name)}</h4>`+(ps.length?ps.map(p=>`<div>${cEsc(p.code)} — ${cEsc(p.name)} — ${cEsc(p.status)}</div>`).join(''):'<div class="muted">No projects currently linked.</div>')}
 function resetProjectForm(){projectForm.reset();projectEditId.value='';projectCode.value=nextProjectCode();projectFormTitle.textContent='Add New Project';selectedClientProjects.classList.add('hidden');refreshClientOptions()}
 function saveProject(e){
   e.preventDefault();let id=projectEditId.value,old=id?projectRecords.find(p=>p.id===id):null,rec={id:id||String(Date.now()),code:projectCode.value||nextProjectCode(),name:projectName.value.trim(),clientId:projectClientId.value,location:projectLocation.value.trim(),emirate:projectEmirate.value.trim(),start:projectStart.value,completion:projectCompletion.value,contractNo:projectContractNo.value.trim(),poNo:projectPoNo.value.trim(),value:projectValue.value,invoiceEmail:projectInvoiceEmail.value.trim(),contact:projectContact.value.trim(),status:projectStatus.value,scope:projectScope.value.trim(),remarks:projectRemarks.value.trim(),documents:fileNames('projectDocuments').length?fileNames('projectDocuments'):(old?.documents||[]),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
@@ -2823,10 +2831,10 @@ function renderProjectList(){
 function editProject(id){let p=projectRecords.find(x=>x.id===id);if(!p)return;refreshClientOptions();projectEditId.value=p.id;projectCode.value=p.code;projectName.value=p.name;projectClientId.value=p.clientId;projectLocation.value=p.location;projectEmirate.value=p.emirate;projectStart.value=p.start||'';projectCompletion.value=p.completion||'';projectContractNo.value=p.contractNo||'';projectPoNo.value=p.poNo||'';projectValue.value=p.value||'';projectInvoiceEmail.value=p.invoiceEmail||'';projectContact.value=p.contact||'';projectStatus.value=p.status;projectScope.value=p.scope||'';projectRemarks.value=p.remarks||'';projectFormTitle.textContent='Edit Project – '+p.name;showClientModule('addProject');projectClientId.value=p.clientId;updateSelectedClientProjects()}
 function deleteProject(id){let p=projectRecords.find(x=>x.id===id);if(p&&confirm('Delete project '+p.name+'?')){projectRecords=projectRecords.filter(x=>x.id!==id);clientLog('project',id,'Deleted project',p.name);clientPersist();renderProjectList();renderClientDashboard()}}
 function activityHtml(type,id){let a=clientActivities.filter(x=>x.entityType===type&&x.entityId===id);return a.length?a.map(x=>`<div class="client-history-item"><b>${cEsc(x.action)}</b> — ${cEsc(x.user)}<br>${cEsc(x.date)}${x.comments?'<br>'+cEsc(x.comments):''}</div>`).join(''):'<div class="muted">No activity history.</div>'}
-function viewClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;let ps=projectRecords.filter(p=>p.clientId===id);clientViewContent.innerHTML=`<h2>${cEsc(c.name)}</h2><div class="client-detail-grid">${[['Client Code',c.code],['Address',c.address],['Contact Person',c.contact],['Mobile',c.mobile],['Email',c.email],['Trade License',c.licenseNo],['License Expiry',c.licenseExpiry],['VAT Number',c.vatNo],['Status',c.status],['Documents',clientDocsText(c)],['Remarks',c.remarks]].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Linked Projects (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="client-history-item"><b>${cEsc(p.code)} — ${cEsc(p.name)}</b><br>${cEsc(p.location)} | ${cEsc(p.status)} | Value: ${cFmt(p.value)}</div>`).join(''):'<div class="muted">No linked projects.</div>'}<h3>Activity History</h3><div class="client-history">${activityHtml('client',id)}</div>`;clientViewModal.classList.add('show')}
+function viewClient(id){let c=clientRecords.find(x=>x.id===id);if(!c)return;let ps=projectRecords.filter(p=>p.clientId===id);clientViewContent.innerHTML=`<h2>${cEsc(c.name)}</h2><div class="client-detail-grid">${[['Client Code',c.code],['Address',c.address],['Contact Persons',clientContactsText(c,'name')],['Mobile Numbers',clientContactsText(c,'mobile')],['Email Addresses',clientContactsText(c,'email')],['Contact Remarks',clientContactsText(c,'remark')],['Trade License',c.licenseNo],['License Expiry',c.licenseExpiry],['VAT Number',c.vatNo],['Status',c.status],['Documents',clientDocsText(c)],['Remarks',c.remarks]].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Linked Projects (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="client-history-item"><b>${cEsc(p.code)} — ${cEsc(p.name)}</b><br>${cEsc(p.location)} | ${cEsc(p.status)} | Value: ${cFmt(p.value)}</div>`).join(''):'<div class="muted">No linked projects.</div>'}<h3>Activity History</h3><div class="client-history">${activityHtml('client',id)}</div>`;clientViewModal.classList.add('show')}
 function viewProject(id){let p=projectRecords.find(x=>x.id===id),c=clientRecords.find(x=>x.id===p?.clientId);if(!p)return;clientViewContent.innerHTML=`<h2>${cEsc(p.name)}</h2><div class="client-detail-grid">${[['Project Code',p.code],['Client',c?.name],['Location',p.location],['State / Emirate',p.emirate],['Start Date',p.start],['Completion Date',p.completion],['Contract Number',p.contractNo],['PO Number',p.poNo],['Contract Value',cFmt(p.value)],['Invoice / SOA Email',p.invoiceEmail],['Contact Person',p.contact],['Status',p.status],['Scope of Work',p.scope],['Remarks',p.remarks],['Documents',(p.documents||[]).join(', ')||'Missing']].map(x=>`<div class="client-detail-item"><b>${x[0]}</b>${cEsc(x[1])}</div>`).join('')}</div><h3>Activity History</h3><div class="client-history">${activityHtml('project',id)}</div>`;clientViewModal.classList.add('show')}
 function closeClientModal(){clientViewModal.classList.remove('show')}
-function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Persons':normalizedClientContacts(c).map(x=>x.name).join('; '),'Mobile Numbers':normalizedClientContacts(c).map(x=>x.mobile).join('; '),'Email Addresses':normalizedClientContacts(c).map(x=>x.email).join('; '),'Contact Remarks':normalizedClientContacts(c).map(x=>x.remark||'').join('; '),'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
+function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Persons':clientContactsText(c,'name'),'Mobile Numbers':clientContactsText(c,'mobile'),'Email Addresses':clientContactsText(c,'email'),'Contact Remarks':clientContactsText(c,'remark'),'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
 function projectExportRows(){return filteredProjects().map(p=>{let c=clientRecords.find(x=>x.id===p.clientId);return {'Project Code':p.code,'Project Name':p.name,'Client Name':c?.name||'','Client Code':c?.code||'','Site Location':p.location,'Project State / Emirate':p.emirate,'Project Start Date':p.start,'Project Completion Date':p.completion,'Contract Number':p.contractNo,'Purchase Order Number':p.poNo,'Contract Value':p.value,'Email for Invoice and SOA':p.invoiceEmail,'Client Contact Person':p.contact,'Project Status':p.status,'Scope of Work':p.scope,'Remarks':p.remarks,'Project Documents':(p.documents||[]).join('; ')}})}
 function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records available to export.');return}let h=Object.keys(rows[0]),table='<table><thead><tr>'+h.map(x=>`<th>${cEsc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')+'</tbody></table>',html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\\@;vertical-align:top}</style></head><body><h2>${cEsc(title)}</h2>${table}</body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}

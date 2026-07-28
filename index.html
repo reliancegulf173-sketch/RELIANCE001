@@ -1605,7 +1605,7 @@ function loaStatus(l){if(l.cancelled)return 'Cancelled';const d=daysTo(l.expiryD
 function showCicpaHome(){document.getElementById('cicpaHome').style.display='block';document.querySelectorAll('.cicpa-module').forEach(x=>x.classList.remove('active'));renderCicpaHome()}
 function openCicpaModule(type,filter=''){document.getElementById('cicpaHome').style.display='none';document.querySelectorAll('.cicpa-module').forEach(x=>x.classList.remove('active'));if(type==='manpower'){document.getElementById('cicpaManpowerModule').classList.add('active');if(filter)document.getElementById('cicpaStatusFilter').value=filter;renderCicpa()}else{document.getElementById('cicpaLoaModule').classList.add('active');if(filter)document.getElementById('loaStatusFilter').value=filter;renderLoas()}}
 function renderCicpaHome(){const a=allCicpaPasses(),ls=cicpaLoas.map(l=>({...l,status:loaStatus(l)}));cicpaHomeActive.textContent=a.filter(x=>x.status==='Active').length;cicpaHomeSoon.textContent=a.filter(x=>statusMatches(x.status,'Within 30 Days')).length;cicpaHomeExpired.textContent=a.filter(x=>x.status==='Expired').length;cicpaHomeLoaActive.textContent=ls.filter(x=>x.status==='Active').length;cicpaHomeLoaSoon.textContent=ls.filter(x=>x.status==='Within 30 Days').length;cicpaHomeLoaBalance.textContent=ls.reduce((n,x)=>n+Math.max(0,Number(x.total||0)-Number(x.used||0)),0);const alerts=[...a.filter(x=>x.days!==null&&x.days>=0&&x.days<=30).map(x=>`<div class="cicpa-alert"><b>CICPA ${esc(x.pass.number)}</b> — ${esc(x.record.employeeName)} expires in ${x.days} day(s).</div>`),...ls.filter(x=>{let d=daysTo(x.expiryDate);return d!==null&&d>=0&&d<=30}).map(x=>`<div class="cicpa-alert"><b>LOA ${esc(x.number)}</b> expires in ${daysTo(x.expiryDate)} day(s).</div>`)];cicpaAlertList.innerHTML=alerts.join('')||'<div class="muted">No expiry notifications.</div>'}
-function renderCicpa(){const all=allCicpaPasses(),q=(cicpaSearch?.value||'').toLowerCase(),f=cicpaStatusFilter?.value||'';cicpaActive.textContent=all.filter(x=>x.status==='Active').length;cicpaSoon.textContent=all.filter(x=>statusMatches(x.status,'Within 30 Days')).length;cicpa15.textContent=all.filter(x=>statusMatches(x.status,'Within 15 Days')).length;cicpa7.textContent=all.filter(x=>statusMatches(x.status,'Within 7 Days')).length;cicpaExpired.textContent=all.filter(x=>x.status==='Expired').length;cicpaCancelled.textContent=all.filter(x=>x.status==='Cancelled').length;const rows=all.filter(x=>!q||[x.record.employeeId,x.record.employeeName,x.record.company,x.record.designation,x.pass.number,(x.pass.locations||[]).join(' ')].join(' ').toLowerCase().includes(q)).filter(x=>statusMatches(x.status,f));cicpaBody.innerHTML=rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.record.employeeId)}</td><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.company||'-')}</td><td>${esc(x.record.category||'-')}</td><td>${esc(x.record.designation||'-')}</td><td><b>${esc(x.pass.number)}</b></td><td>${esc(x.pass.issueDate||'-')}</td><td>${esc(x.pass.expiryDate||'-')}</td><td>${x.days===null?'-':x.days}</td><td>${esc((x.pass.locations||[]).join(', ')||'-')}</td><td><span class="status-dot status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${esc(x.pass.remarks||x.pass.cancellationRemarks||'-')}</td><td><button class="mini" onclick="viewCicpaRecord('${x.record.id}',${x.index})">View</button> <button class="mini" onclick="editCicpa('${x.record.id}')">Edit</button> ${x.status!=='Cancelled'?`<button class="mini" onclick="cancelCicpaPass('${x.record.id}',${x.index})">Cancel</button>`:''} <button class="mini danger" onclick="deleteCicpaPass('${x.record.id}',${x.index})">Delete</button> <button class="mini" onclick="downloadCicpaRecord('${x.record.id}',${x.index})">Download</button></td></tr>`).join('')||'<tr><td colspan="14" class="muted">No CICPA records found.</td></tr>';renderCicpaLocationManagement();renderCicpaHome()}
+function renderCicpa(){const all=allCicpaPasses(),q=(cicpaSearch?.value||'').toLowerCase(),f=cicpaStatusFilter?.value||'';cicpaActive.textContent=all.filter(x=>x.status==='Active').length;cicpaSoon.textContent=all.filter(x=>statusMatches(x.status,'Within 30 Days')).length;cicpa15.textContent=all.filter(x=>statusMatches(x.status,'Within 15 Days')).length;cicpa7.textContent=all.filter(x=>statusMatches(x.status,'Within 7 Days')).length;cicpaExpired.textContent=all.filter(x=>x.status==='Expired').length;cicpaCancelled.textContent=all.filter(x=>x.status==='Cancelled').length;const rows=all.filter(x=>!q||[x.record.employeeId,x.record.employeeName,x.record.company,x.record.designation,x.pass.number,(x.pass.locations||[]).join(' ')].join(' ').toLowerCase().includes(q)).filter(x=>statusMatches(x.status,f));cicpaBody.innerHTML=rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.record.employeeId)}</td><td>${esc(x.record.employeeName)}</td><td>${esc(x.record.company||'-')}</td><td>${esc(x.record.category||'-')}</td><td>${esc(x.record.designation||'-')}</td><td><b>${esc(x.pass.number)}</b></td><td>${esc(x.pass.issueDate||'-')}</td><td>${esc(x.pass.expiryDate||'-')}</td><td>${x.days===null?'-':x.days}</td><td>${esc((x.pass.locations||[]).join(', ')||'-')}</td><td><span class="status-dot status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td><td>${esc(x.pass.remarks||x.pass.cancellationRemarks||'-')}</td><td><button class="mini" onclick="viewCicpaRecord('${x.record.id}',${x.index})">View</button> <button class="mini" onclick="editCicpa('${x.record.id}')">Edit</button> ${x.status!=='Cancelled'?`<button class="mini" onclick="cancelCicpaPass('${x.record.id}',${x.index})">Cancel</button>`:''} <button class="mini danger" onclick="deleteCicpaPass('${x.record.id}',${x.index},this)">Delete</button> <button class="mini" onclick="downloadCicpaRecord('${x.record.id}',${x.index})">Download</button></td></tr>`).join('')||'<tr><td colspan="14" class="muted">No CICPA records found.</td></tr>';renderCicpaLocationManagement();renderCicpaHome()}
 function setCicpaStatusFilter(v){cicpaStatusFilter.value=v;renderCicpa()}function clearCicpaFilters(){cicpaSearch.value='';cicpaStatusFilter.value='';renderCicpa()}
 function employeeSources(){
   const arr=[];
@@ -1719,7 +1719,52 @@ function saveCicpaForm(e){
 }
 function editCicpa(id){const r=cicpaRecords.find(x=>x.id===id);if(!r)return;openCicpaForm();cicpaEl('cicpaEmployeeSearch').value=r.employeeId;findCicpaEmployee();cicpaEl('cicpaEditId').value=r.id;cicpaEl('cicpaFormTitle').textContent='Edit Employee CICPA'}
 function cancelCicpaPass(id,i){const r=cicpaRecords.find(x=>x.id===id),p=r?.passes?.[i];if(!p)return;const date=prompt('Cancellation Date (YYYY-MM-DD):',new Date().toISOString().slice(0,10));if(!date)return;const remarks=prompt('Cancellation Remarks:','')||'';p.cancelled=true;p.cancellationDate=date;p.cancellationRemarks=remarks;persistCicpa();renderCicpa()}
-function deleteCicpaPass(id,i){if(!confirm('Delete this CICPA record?'))return;const r=cicpaRecords.find(x=>x.id===id);r.passes.splice(i,1);if(!r.passes.length)cicpaRecords=cicpaRecords.filter(x=>x.id!==id);persistCicpa();renderCicpa()}
+function showCicpaDeleteMessage(message,type='success'){
+  let toast=document.getElementById('cicpaDeleteToast');
+  if(!toast){
+    toast=document.createElement('div');
+    toast.id='cicpaDeleteToast';
+    toast.style.cssText='position:fixed;right:22px;top:96px;z-index:100000;max-width:420px;padding:13px 17px;border-radius:11px;color:#fff;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.22);opacity:0;transform:translateY(-8px);transition:.2s ease';
+    document.body.appendChild(toast);
+  }
+  toast.textContent=message;
+  toast.style.background=type==='success'?'#1e8e5a':'#cc3b3b';
+  toast.style.opacity='1';
+  toast.style.transform='translateY(0)';
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(-8px)'},3500);
+}
+async function deleteCicpaPass(id,i,button){
+  if(!confirm('Are you sure you want to permanently delete this CICPA record?'))return;
+  const originalText=button?.textContent||'Delete';
+  if(button){button.disabled=true;button.textContent='Deleting…';button.style.cursor='not-allowed';button.style.opacity='.7'}
+  const snapshot=JSON.stringify(cicpaRecords);
+  try{
+    await new Promise(resolve=>setTimeout(resolve,60));
+    const recordIndex=cicpaRecords.findIndex(x=>x.id===id);
+    if(recordIndex<0)throw new Error('Selected CICPA record was not found.');
+    const record=cicpaRecords[recordIndex];
+    if(!Array.isArray(record.passes)||i<0||i>=record.passes.length)throw new Error('Selected CICPA pass was not found.');
+
+    // Delete only the selected CICPA pass. The related employee master record is never touched.
+    record.passes.splice(i,1);
+    if(record.passes.length===0)cicpaRecords.splice(recordIndex,1);
+    persistCicpa();
+
+    const savedJson=localStorage.getItem(CICPA_STORAGE_KEY);
+    if(savedJson!==JSON.stringify(cicpaRecords))throw new Error('The CICPA record could not be removed from storage.');
+
+    renderCicpa();
+    showCicpaDeleteMessage('CICPA record deleted successfully.','success');
+  }catch(error){
+    cicpaRecords=JSON.parse(snapshot);
+    try{localStorage.setItem(CICPA_STORAGE_KEY,snapshot)}catch(_restoreError){}
+    renderCicpa();
+    showCicpaDeleteMessage(error?.message||'Failed to delete CICPA record. Please try again.','error');
+  }finally{
+    if(button&&document.body.contains(button)){button.disabled=false;button.textContent=originalText;button.style.cursor='';button.style.opacity=''}
+  }
+}
 function viewCicpaRecord(id,i){downloadCicpaRecord(id,i,true)}function downloadCicpaRecord(id,i,preview=false){const r=cicpaRecords.find(x=>x.id===id),p=r?.passes?.[i];if(!p)return;const html=`<h2>CICPA Record</h2><p><b>Employee:</b> ${esc(r.employeeName)} (${esc(r.employeeId)})</p><p><b>Company:</b> ${esc(r.company)} | <b>Category:</b> ${esc(r.category)} | <b>Craft:</b> ${esc(r.designation)}</p><p><b>CICPA Number:</b> ${esc(p.number)}<br><b>Issue:</b> ${esc(p.issueDate)}<br><b>Expiry:</b> ${esc(p.expiryDate)}<br><b>Locations:</b> ${esc((p.locations||[]).join(', '))}<br><b>Status:</b> ${esc(cicpaPassStatus(p))}</p>`;if(preview){const w=open();w.document.write(html);w.document.close()}else downloadBlob(new Blob([html],{type:'text/html'}),`CICPA_${p.number}.html`)}
 function addManagedCicpaLocation(){const name=prompt('Location Name:');if(!name)return;const number=prompt('Location Number:','')||'';const type=prompt('Location Type (Onshore / Offshore):','Onshore')||'Onshore';managedCicpaLocations.push({id:String(Date.now()),name:name.trim(),number:number.trim(),type:type.trim(),active:true,remarks:''});persistCicpa();renderCicpaLocationManagement()}
 function renderCicpaLocationManagement(){if(!cicpaLocationList)return;cicpaLocationList.innerHTML=managedCicpaLocations.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.number)}</td><td>${esc(x.type)}</td><td>${x.active?'Active':'Inactive'}</td><td>${esc(x.remarks||'-')}</td><td><button class="mini" onclick="editManagedCicpaLocation(${i})">Edit</button> <button class="mini" onclick="toggleManagedCicpaLocation(${i})">${x.active?'Deactivate':'Activate'}</button> <button class="mini danger" onclick="deleteManagedCicpaLocation(${i})">Delete</button></td></tr>`).join('')||'<tr><td colspan="6">No locations.</td></tr>'}

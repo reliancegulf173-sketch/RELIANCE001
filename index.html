@@ -1593,8 +1593,15 @@ function resolveManagerReviewNotification(employeeId,actionId,newStatus){
 
 
 const CICPA_STORAGE_KEY='rg_cicpa_records_v3',CICPA_LOCATION_STORAGE_KEY='rg_cicpa_locations_v2',CICPA_LOA_STORAGE_KEY='rg_cicpa_loa_v1';
+const CICPA_LEGACY_STORAGE_KEY='rg_cicpa_records_v2';
+const cicpaV3Exists=localStorage.getItem(CICPA_STORAGE_KEY)!==null;
 let cicpaRecords=readStoredArray(CICPA_STORAGE_KEY),managedCicpaLocations=readStoredArray(CICPA_LOCATION_STORAGE_KEY),cicpaLoas=readStoredArray(CICPA_LOA_STORAGE_KEY);
-if(!cicpaRecords.length){const old=readStoredArray('rg_cicpa_records_v2');cicpaRecords=old.map(r=>({...r,company:r.company||'',designation:r.designation||'',category:r.category||'Company Employee'}))}
+// Import legacy CICPA data only once. An intentionally empty v3 list must remain empty after refresh.
+if(!cicpaV3Exists){
+  const old=readStoredArray(CICPA_LEGACY_STORAGE_KEY);
+  cicpaRecords=old.map(r=>({...r,company:r.company||'',designation:r.designation||'',category:r.category||'Company Employee'}));
+  localStorage.setItem(CICPA_STORAGE_KEY,JSON.stringify(cicpaRecords));
+}
 if(!managedCicpaLocations.length)managedCicpaLocations=['Habshan','Ruwais','Mussafah'].map((name,i)=>({id:String(Date.now()+i),name,number:String(i+1),type:'Onshore',active:true,remarks:''}));
 function persistCicpa(){localStorage.setItem(CICPA_STORAGE_KEY,JSON.stringify(cicpaRecords));localStorage.setItem(CICPA_LOCATION_STORAGE_KEY,JSON.stringify(managedCicpaLocations));localStorage.setItem(CICPA_LOA_STORAGE_KEY,JSON.stringify(cicpaLoas))}
 function daysTo(d){if(!d)return null;const a=new Date();a.setHours(0,0,0,0);return Math.ceil((new Date(d+'T00:00:00')-a)/86400000)}

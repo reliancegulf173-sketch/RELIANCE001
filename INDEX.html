@@ -3248,19 +3248,41 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
 
     const employeeStatus=e=>norm(e.siteStatus||e.status||e.currentStatus).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
 
-    // Manpower On Site must use active Site Management mobilization records.
-    // This includes both Company Employees and Subcontractor Employees.
+    // Manpower On Site combines BOTH sources:
+    // 1) active Site Management mobilization records, and
+    // 2) On Site status saved directly in Employee / Subcontractor Employee portals.
     const activeSiteRecords=arr(typeof siteRecords!=='undefined'?siteRecords:window.siteRecords).filter(r=>{
-      const isActive=!r.demobilizationDate && !r.lastWorkingDate;
       const status=norm(r.siteStatus||r.status||'on site').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
-      return isActive && !['demobilized','idle','inactive','cancelled'].includes(status);
+      return !r.demobilizationDate && !['demobilized','idle','inactive','cancelled'].includes(status);
     });
-    const uniqueActiveSiteRecords=[...new Map(activeSiteRecords.map(r=>[
-      String(r.employeeKey||`${r.employeeType||''}|${r.employeeCode||''}|${r.employeeName||''}`),r
-    ])).values()];
-    const onsite=uniqueActiveSiteRecords.filter(r=>r.employeeType==='Company Employee');
-    const subcontractorOnsite=uniqueActiveSiteRecords.filter(r=>r.employeeType==='Subcontractor Employee');
-    const totalOnsite=uniqueActiveSiteRecords.length;
+
+    const ownPortalOnsite=emps.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e))).map(e=>({
+      employeeKey:'EMP:'+(e.id||e.employeeId||e.code||e.nameEnglish||e.name||''),
+      employeeCode:e.employeeId||e.code||'',employeeName:e.nameEnglish||e.name||'',employeeType:'Company Employee'
+    }));
+
+    const subcontractorPool=arr(typeof scEmployees!=='undefined'?scEmployees:window.scEmployees);
+    const subcontractorPortalOnsite=subcontractorPool.filter(e=>{
+      const st=norm(e.siteStatus||e.status||e.currentStatus).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+      return ['on site','onsite','mobilized'].includes(st);
+    }).map(e=>({
+      employeeKey:'SUB:'+(e.id||e.employeeId||e.code||e.name||''),
+      employeeCode:e.code||e.employeeId||'',employeeName:e.name||e.nameEnglish||'',employeeType:'Subcontractor Employee'
+    }));
+
+    const combinedActiveRecords=[...activeSiteRecords,...ownPortalOnsite,...subcontractorPortalOnsite];
+    const recordKey=r=>{
+      const rawType=norm(r.employeeType||r.type||r.category);
+      const type=rawType.includes('sub')?'SUB':'EMP';
+      const code=norm(r.employeeCode||r.code||r.employeeId);
+      const name=norm(r.employeeName||r.name||r.nameEnglish);
+      return String(r.employeeKey||`${type}:${code||name}`);
+    };
+    const uniqueActiveSiteRecords=[...new Map(combinedActiveRecords.map(r=>[recordKey(r),r])).values()];
+    const isSubcontractor=r=>norm(r.employeeType||r.type||r.category).includes('sub');
+    const subcontractorOnsite=uniqueActiveSiteRecords.filter(isSubcontractor);
+    const onsite=uniqueActiveSiteRecords.filter(r=>!isSubcontractor(r));
+    const totalOnsite=onsite.length+subcontractorOnsite.length;
     const onleave=emps.filter(e=>['on leave','onleave','leave'].includes(employeeStatus(e)));
     const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e)));
     setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',totalOnsite);

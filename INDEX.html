@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="description" content="Reliance Gulf ERP Employee Portal">
-<title>Reliance Gulf ERP — SITE MANAGEMENT COUNT FIXED</title>
+<title>Reliance Gulf ERP — SITE COUNT VERIFIED</title>
 <!-- Embedded base64 images were moved to the assets folder for GitHub compatibility. -->
 <link rel="icon" type="image/png" href="assets/logo-small.png">
 <style>
@@ -3285,38 +3285,40 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
       return !r.demobilizationDate && !r.lastWorkingDate && !['demobilized','idle','inactive','cancelled'].includes(status);
     });
 
-    // Identify subcontractor records ONLY from Site Management active mobilization data.
-    // Subcontractor Employee Portal records are intentionally not used for dashboard counting.
-    const isSubcontractorRecord=r=>{
+    // Company employees: counted from Employee Management Portal status.
+    const ownPortalOnsite=emps.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e))).map(e=>({
+      employeeKey:'EMP:'+(e.id||e.employeeId||e.code||e.nameEnglish||e.name||''),
+      employeeCode:e.employeeId||e.code||'',
+      employeeName:e.nameEnglish||e.name||'',
+      employeeType:'Company Employee'
+    }));
+
+    // Subcontractor employees: counted ONLY from active Site Management mobilizations.
+    // Subcontractor Employee Portal status is intentionally not used here.
+    const isSubcontractorSiteRecord=r=>{
       const key=norm(r.employeeKey||r.key);
-      const type=norm(r.employeeType||r.type||r.category||r.source).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+      const type=norm(r.employeeType||r.type);
       return key.startsWith('sub:') ||
              type==='subcontractor employee' ||
-             type.includes('subcontractor') ||
-             type.includes('sub contractor') ||
+             type==='sub contractor employee' ||
              !!norm(r.subcontractorCompany||r.subcontractor);
     };
 
-    const uniqueKey=r=>{
+    const uniqueSiteEmployeeKey=r=>{
       const key=norm(r.employeeKey||r.key);
       if(key) return key;
       const code=norm(r.employeeCode||r.code||r.employeeId);
+      if(code) return 'sub-code:'+code;
       const name=norm(r.employeeName||r.name||r.nameEnglish);
-      return (isSubcontractorRecord(r)?'sub:':'emp:')+(code||name||norm(r.id));
+      return 'sub-name:'+name;
     };
 
-    // Company manpower: Employee Portal On Site + active company Site Management records.
-    const ownPortalOnsite=emps.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e))).map(e=>({
-      employeeKey:'EMP:'+(e.id||e.employeeId||e.code||e.nameEnglish||e.name||''),
-      employeeCode:e.employeeId||e.code||'',employeeName:e.nameEnglish||e.name||'',employeeType:'Company Employee'
-    }));
-    const companyCombined=[...activeSiteRecords.filter(r=>!isSubcontractorRecord(r)),...ownPortalOnsite];
-    const onsite=[...new Map(companyCombined.map(r=>[uniqueKey(r),r])).values()];
-
-    // Subcontractor manpower: count ONLY currently active subcontractor mobilizations
-    // saved in the Site Management Portal.
-    const activeSubSiteRecords=activeSiteRecords.filter(isSubcontractorRecord);
-    const subcontractorOnsite=[...new Map(activeSubSiteRecords.map(r=>[uniqueKey(r),r])).values()];
+    const onsite=[...new Map(ownPortalOnsite.map(r=>[norm(r.employeeKey),r])).values()];
+    const subcontractorOnsite=[...new Map(
+      activeSiteRecords
+        .filter(isSubcontractorSiteRecord)
+        .map(r=>[uniqueSiteEmployeeKey(r),r])
+    ).values()];
     const totalOnsite=onsite.length+subcontractorOnsite.length;
     const onleave=emps.filter(e=>['on leave','onleave','leave'].includes(employeeStatus(e)));
     const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e)));

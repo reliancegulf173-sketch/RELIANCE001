@@ -2948,14 +2948,40 @@ function employeeAutomaticStatus(employee){
   return{siteStatus:'Idle',currentSiteName:'',leaveRejoiningDate:'',statusSource:'Automatic'};
 }
 function syncAllEmployeeSiteStatuses(triggerSource='Automatic Scheduler'){
-  let changed=false;
+  let changed=false,subChanged=false;
   (employees||[]).forEach(e=>{
     const next=employeeAutomaticStatus(e);
     const different=['siteStatus','currentSiteName','leaveRejoiningDate','statusSource'].some(k=>String(e[k]||'')!==String(next[k]||''));
     if(different){Object.assign(e,next);e.statusUpdatedAt=new Date().toLocaleString();e.statusTrigger=triggerSource;changed=true}
   });
+
+  // Keep Subcontractor Employee records synchronized with Site Management as well.
+  // This allows dashboard totals to include subcontractor manpower even when the
+  // dashboard reads the employee portal status directly.
+  if(typeof scEmployees!=='undefined' && Array.isArray(scEmployees)){
+    const today=statusToday();
+    scEmployees.forEach(e=>{
+      const code=String(e.code||e.employeeId||'').trim();
+      const key='SUB:'+String(e.id||'').trim();
+      const activeSite=(siteRecords||[]).filter(r=>{
+        const sameEmployee=String(r.employeeKey||'').trim()===key || (code && String(r.employeeCode||'').trim()===code);
+        const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);
+        return sameEmployee && mob && today>=mob && (!demob||today<demob);
+      }).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
+      const next=activeSite?{
+        siteStatus:'On Site',
+        currentSiteName:[activeSite.clientName,activeSite.projectName,activeSite.siteLocation].filter(Boolean).join(' / '),
+        statusSource:'Site Management'
+      }:{siteStatus:'Idle',currentSiteName:'',statusSource:'Automatic'};
+      const different=['siteStatus','currentSiteName','statusSource'].some(k=>String(e[k]||'')!==String(next[k]||''));
+      if(different){Object.assign(e,next);e.statusUpdatedAt=new Date().toLocaleString();e.statusTrigger=triggerSource;subChanged=true}
+    });
+  }
+
   if(changed&&typeof persist==='function')persist();
-  return changed;
+  if(subChanged&&typeof scePersist==='function')scePersist();
+  if((changed||subChanged)&&typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+  return changed||subChanged;
 }
 function startAutomaticEmployeeStatusScheduler(){
   syncAllEmployeeSiteStatuses('Automatic Date Check');
@@ -3271,15 +3297,40 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     }));
 
     const combinedActiveRecords=[...activeSiteRecords,...ownPortalOnsite,...subcontractorPortalOnsite];
+
+    // Robust employee classification for old and new records.
+    // Some older Site Management records may not contain employeeType, so we also
+    // identify subcontractor employees from their employee key, code, ID and company.
+    const subcontractorIds=new Set(subcontractorPool.map(e=>norm(e.id)).filter(Boolean));
+    const subcontractorCodes=new Set(subcontractorPool.map(e=>norm(e.code||e.employeeId)).filter(Boolean));
+    const ownIds=new Set(emps.map(e=>norm(e.id)).filter(Boolean));
+    const ownCodes=new Set(emps.map(e=>norm(e.employeeId||e.code)).filter(Boolean));
+
+    const isSubcontractor=r=>{
+      const rawType=norm(r.employeeType||r.type||r.category||r.source);
+      const key=norm(r.employeeKey||r.key);
+      const id=norm(r.employeeId||r.id||String(key).replace(/^sub:/,''));
+      const code=norm(r.employeeCode||r.code);
+      if(rawType.includes('sub')) return true;
+      if(key.startsWith('sub:')) return true;
+      if(norm(r.subcontractorCompany||r.subcontractor||r.companyName)) return true;
+      if(code && subcontractorCodes.has(code) && !ownCodes.has(code)) return true;
+      if(id && subcontractorIds.has(id) && !ownIds.has(id)) return true;
+      return false;
+    };
+
     const recordKey=r=>{
-      const rawType=norm(r.employeeType||r.type||r.category);
-      const type=rawType.includes('sub')?'SUB':'EMP';
+      const type=isSubcontractor(r)?'SUB':'EMP';
       const code=norm(r.employeeCode||r.code||r.employeeId);
       const name=norm(r.employeeName||r.name||r.nameEnglish);
-      return String(r.employeeKey||`${type}:${code||name}`);
+      const rawKey=norm(r.employeeKey||r.key);
+      // Normalize all records to the same key format so Site records and portal
+      // status records for the same employee are counted only once.
+      if(rawKey.startsWith('sub:')) return 'SUB:'+rawKey.slice(4);
+      if(rawKey.startsWith('emp:')) return 'EMP:'+rawKey.slice(4);
+      return `${type}:${code||name||rawKey}`;
     };
     const uniqueActiveSiteRecords=[...new Map(combinedActiveRecords.map(r=>[recordKey(r),r])).values()];
-    const isSubcontractor=r=>norm(r.employeeType||r.type||r.category).includes('sub');
     const subcontractorOnsite=uniqueActiveSiteRecords.filter(isSubcontractor);
     const onsite=uniqueActiveSiteRecords.filter(r=>!isSubcontractor(r));
     const totalOnsite=onsite.length+subcontractorOnsite.length;

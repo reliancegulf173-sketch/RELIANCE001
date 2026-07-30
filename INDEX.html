@@ -356,6 +356,9 @@ td.expiry-date-soon,
 .sce-modal-card{width:min(1180px,96vw);max-height:92vh;overflow:auto}
 @media(max-width:900px){.sce-form-grid{grid-template-columns:1fr 1fr}.sce-certificate-row{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.sce-form-grid,.sce-certificate-row{grid-template-columns:1fr}}
+.sce-site-status-auto{padding:10px;border:2px solid #22c55e;border-radius:12px;background:#f0fdf4}
+.sce-site-status-auto label{color:#166534!important}
+.sce-site-status-auto input[readonly]{background:#dcfce7!important;color:#166534!important;font-weight:900!important;border-color:#86efac!important;cursor:not-allowed}
 
 
 /* Leave Management Portal */
@@ -1157,7 +1160,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
               <div class="form-group"><label>Emirates ID Number *</label><input id="sceEid" class="input" required></div>
               <div class="form-group"><label>Emirates ID Expiry Date *</label><input id="sceEidExpiry" type="date" class="input" required></div>
               <div class="form-group"><label>Working Status *</label><select id="sceWorkingStatus" class="input"><option>Active</option><option>Inactive</option></select></div>
-              <div class="form-group"><label>Site Status (Automatic)</label><select id="sceSiteStatus" class="input" disabled title="Automatically controlled by Site Management Portal"><option>Idle</option><option>On Site</option><option>On Leave</option></select><small class="muted">Updated automatically from Site Management.</small></div>
+              <div class="form-group sce-site-status-auto"><label>Site Status (Automatic) *</label><input id="sceSiteStatus" class="input" value="Idle" readonly title="Automatically controlled by Site Management Portal"><small class="muted">Default: Idle | Mobilization: On Site | Demobilization: Idle</small></div>
               <div class="form-group"><label>TWP Status *</label><select id="sceTwpStatus" class="input" onchange="toggleSceTwpFields()"><option>Documents Pending</option><option>TWP Typed</option><option>Documents Uploaded</option><option>TWP Insurance</option><option>Approved</option><option>Rejected</option></select></div>
               <div id="sceTwpCardGroup" class="form-group hidden"><label>TWP Card Number *</label><input id="sceTwpCard" class="input"></div>
               <div id="sceTwpExpiryGroup" class="form-group hidden"><label>TWP Card Expiry Date *</label><input id="sceTwpExpiry" type="date" class="input"></div>

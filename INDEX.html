@@ -3247,10 +3247,20 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     setText('rgTodayDay',today.toLocaleDateString('en-US',{weekday:'long'}));
 
     const employeeStatus=e=>norm(e.siteStatus||e.status||e.currentStatus).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
-    const onsite=emps.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e)));
-    const subcontractorEmployees=arr(typeof scEmployees!=='undefined'?scEmployees:window.scEmployees);
-    const subcontractorOnsite=subcontractorEmployees.filter(e=>['on site','onsite','mobilized'].includes(employeeStatus(e)));
-    const totalOnsite=onsite.length+subcontractorOnsite.length;
+
+    // Manpower On Site must use active Site Management mobilization records.
+    // This includes both Company Employees and Subcontractor Employees.
+    const activeSiteRecords=arr(typeof siteRecords!=='undefined'?siteRecords:window.siteRecords).filter(r=>{
+      const isActive=!r.demobilizationDate && !r.lastWorkingDate;
+      const status=norm(r.siteStatus||r.status||'on site').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+      return isActive && !['demobilized','idle','inactive','cancelled'].includes(status);
+    });
+    const uniqueActiveSiteRecords=[...new Map(activeSiteRecords.map(r=>[
+      String(r.employeeKey||`${r.employeeType||''}|${r.employeeCode||''}|${r.employeeName||''}`),r
+    ])).values()];
+    const onsite=uniqueActiveSiteRecords.filter(r=>r.employeeType==='Company Employee');
+    const subcontractorOnsite=uniqueActiveSiteRecords.filter(r=>r.employeeType==='Subcontractor Employee');
+    const totalOnsite=uniqueActiveSiteRecords.length;
     const onleave=emps.filter(e=>['on leave','onleave','leave'].includes(employeeStatus(e)));
     const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e)));
     setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',totalOnsite);

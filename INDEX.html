@@ -2590,7 +2590,7 @@ function exportSubcontractorsPDF(){
 const SC_EMP_STORAGE_KEY='relianceGulfSubcontractorEmployeesV1';
 let scEmployees=[];let sceEditingId=null;
 try{scEmployees=JSON.parse(localStorage.getItem(SC_EMP_STORAGE_KEY)||'[]');if(!Array.isArray(scEmployees))scEmployees=[];}catch(e){scEmployees=[];}
-function scePersist(){localStorage.setItem(SC_EMP_STORAGE_KEY,JSON.stringify(scEmployees));}
+function scePersist(){localStorage.setItem(SC_EMP_STORAGE_KEY,JSON.stringify(scEmployees));if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);}
 function sceNorm(v){return String(v||'').trim().toLowerCase();}
 function sceCompanyName(id){const r=subcontractors.find(x=>x.id===id);return r?`${r.name} (${r.code})`:'Unknown Subcontractor';}
 function refreshSceCompanyOptions(){
@@ -3277,7 +3277,13 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     // Manpower On Site combines BOTH sources:
     // 1) active Site Management mobilization records, and
     // 2) On Site status saved directly in Employee / Subcontractor Employee portals.
-    const activeSiteRecords=arr(typeof siteRecords!=='undefined'?siteRecords:window.siteRecords).filter(r=>{
+    // Read live Site Management data directly from memory and Local Storage.
+    // This avoids dashboard timing/scope issues when records are saved in another module.
+    let storedSiteRecords=[];
+    try{storedSiteRecords=JSON.parse(localStorage.getItem('rg_site_mobilizations_v1')||'[]');}catch(_e){storedSiteRecords=[];}
+    const siteRecordPool=arr(typeof siteRecords!=='undefined'?siteRecords:window.siteRecords);
+    const allSiteRecords=siteRecordPool.length?siteRecordPool:arr(storedSiteRecords);
+    const activeSiteRecords=allSiteRecords.filter(r=>{
       const status=norm(r.siteStatus||r.status||'on site').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
       return !r.demobilizationDate && !['demobilized','idle','inactive','cancelled'].includes(status);
     });
@@ -3287,7 +3293,11 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
       employeeCode:e.employeeId||e.code||'',employeeName:e.nameEnglish||e.name||'',employeeType:'Company Employee'
     }));
 
-    const subcontractorPool=arr(typeof scEmployees!=='undefined'?scEmployees:window.scEmployees);
+    // Read Subcontractor Employees directly from Local Storage as a reliable fallback.
+    let storedScEmployees=[];
+    try{storedScEmployees=JSON.parse(localStorage.getItem('relianceGulfSubcontractorEmployeesV1')||'[]');}catch(_e){storedScEmployees=[];}
+    const memoryScEmployees=arr(typeof scEmployees!=='undefined'?scEmployees:window.scEmployees);
+    const subcontractorPool=memoryScEmployees.length?memoryScEmployees:arr(storedScEmployees);
     const subcontractorPortalOnsite=subcontractorPool.filter(e=>{
       const st=norm(e.siteStatus||e.status||e.currentStatus).replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
       return ['on site','onsite','mobilized'].includes(st);
@@ -3312,6 +3322,7 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
       const id=norm(r.employeeId||r.id||String(key).replace(/^sub:/,''));
       const code=norm(r.employeeCode||r.code);
       if(rawType.includes('sub')) return true;
+      if(['subcontractor employee','sub contractor employee','subcontractor','sub contractor'].includes(rawType)) return true;
       if(key.startsWith('sub:')) return true;
       if(norm(r.subcontractorCompany||r.subcontractor||r.companyName)) return true;
       if(code && subcontractorCodes.has(code) && !ownCodes.has(code)) return true;
@@ -3381,7 +3392,8 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   });
   const oldPersist=window.persist;
   if(typeof oldPersist==='function') window.persist=function(){const r=oldPersist.apply(this,arguments);setTimeout(window.rgRenderProfessionalDashboard,0);return r};
-  setInterval(()=>{const page=byId('dashboard'); if(page&&page.classList.contains('active')) window.rgRenderProfessionalDashboard()},5000);
+  window.addEventListener('storage',e=>{if(['rg_site_mobilizations_v1','relianceGulfSubcontractorEmployeesV1'].includes(e.key))setTimeout(window.rgRenderProfessionalDashboard,0)});
+  setInterval(()=>{const page=byId('dashboard'); if(page&&page.classList.contains('active')) window.rgRenderProfessionalDashboard()},2000);
 })();
 
 </script>

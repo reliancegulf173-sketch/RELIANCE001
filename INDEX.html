@@ -1096,6 +1096,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
             <input id="sceSearch" class="input grow" placeholder="Search employee, code, company, passport, unified number, Emirates ID..." oninput="renderScEmployees()">
             <select id="sceCompanyFilter" class="input" onchange="renderScEmployees()"><option value="all">All Subcontractors</option></select>
             <select id="sceStatusFilter" class="input" onchange="renderScEmployees()"><option value="all">All Working Status</option><option>Active</option><option>Inactive</option></select>
+            <select id="sceSiteStatusFilter" class="input" onchange="renderScEmployees()"><option value="all">All Site Status</option><option>On Site</option><option>On Leave</option><option>Idle</option></select>
             <select id="sceTwpFilter" class="input" onchange="renderScEmployees()"><option value="all">All TWP Status</option><option>Documents Pending</option><option>TWP Typed</option><option>Documents Uploaded</option><option>TWP Insurance</option><option>Approved</option><option>Rejected</option></select>
             <select id="sceExpiryFilter" class="input" onchange="renderScEmployees()"><option value="all">All Document Status</option><option value="soon">Expiring Within 30 Days</option><option value="expired">Expired</option><option value="missing">Missing Information</option></select>
             <button class="btn success" onclick="exportScEmployeesExcel()">Export Excel</button>
@@ -1160,7 +1161,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
               <div class="form-group"><label>Emirates ID Number *</label><input id="sceEid" class="input" required></div>
               <div class="form-group"><label>Emirates ID Expiry Date *</label><input id="sceEidExpiry" type="date" class="input" required></div>
               <div class="form-group"><label>Working Status *</label><select id="sceWorkingStatus" class="input"><option>Active</option><option>Inactive</option></select></div>
-              <div class="form-group sce-site-status-auto"><label>Site Status (Automatic) *</label><input id="sceSiteStatus" class="input" value="Idle" readonly title="Automatically controlled by Site Management Portal"><small class="muted">Default: Idle | Mobilization: On Site | Demobilization: Idle</small></div>
+              <div class="form-group sce-site-status-auto"><label>Site Status (Automatic) *</label><input id="sceSiteStatus" class="input" value="Idle" readonly title="Automatically controlled by Site Management Portal"><small class="muted">Default: Idle | Mobilization: On Site | Leave: On Leave | Demobilization/Rejoining: Idle</small></div>
               <div class="form-group"><label>TWP Status *</label><select id="sceTwpStatus" class="input" onchange="toggleSceTwpFields()"><option>Documents Pending</option><option>TWP Typed</option><option>Documents Uploaded</option><option>TWP Insurance</option><option>Approved</option><option>Rejected</option></select></div>
               <div id="sceTwpCardGroup" class="form-group hidden"><label>TWP Card Number *</label><input id="sceTwpCard" class="input"></div>
               <div id="sceTwpExpiryGroup" class="form-group hidden"><label>TWP Card Expiry Date *</label><input id="sceTwpExpiry" type="date" class="input"></div>
@@ -2620,7 +2621,7 @@ function sceMissingFields(r){const m=[];[['name','Employee Name'],['code','Emplo
 function sceAllDates(r){const a=[['Passport',r.passport,r.passportExpiry],['Emirates ID',r.eid,r.eidExpiry]];if(r.twpStatus==='Approved')a.push(['TWP Card',r.twpCard,r.twpExpiry]);(r.certificates||[]).forEach(c=>a.push([c.name==='Other'?(c.otherName||'Other Certificate'):c.name,c.number,c.expiryDate]));return a.filter(x=>x[2]);}
 function sceOverallExpiry(r){const states=sceAllDates(r).map(x=>scExpiryState(x[2]));return states.includes('expired')?'expired':states.includes('soon')?'soon':'valid';}
 function sceDateHtml(date){if(!date)return '<span class="sce-missing">Missing</span>';const s=scExpiryState(date),d=scDays(date),label=s==='expired'?`Expired ${Math.abs(d)}d`:s==='soon'?`${d}d left`:'Valid';return `<span class="sce-${s}">${scEscape(date)}<br><small>${label}</small></span>`;}
-function filterScEmployees(kind){document.getElementById('sceStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';document.getElementById('sceExpiryFilter').value=['soon','expired','missing'].includes(kind)?kind:'all';renderScEmployees();document.getElementById('sceTableBody').scrollIntoView({behavior:'smooth'});}
+function filterScEmployees(kind){document.getElementById('sceStatusFilter').value=kind==='active'?'Active':kind==='inactive'?'Inactive':'all';const siteFilter=document.getElementById('sceSiteStatusFilter');if(siteFilter)siteFilter.value=['onsite','onleave','idle'].includes(kind)?(kind==='onsite'?'On Site':kind==='onleave'?'On Leave':'Idle'):'all';document.getElementById('sceExpiryFilter').value=['soon','expired','missing'].includes(kind)?kind:'all';renderScEmployees();document.getElementById('sceTableBody').scrollIntoView({behavior:'smooth'});}
 function deleteScEmployee(id){const r=scEmployees.find(x=>x.id===id);if(r&&confirm(`Delete employee ${r.name}?`)){scEmployees=scEmployees.filter(x=>x.id!==id);scePersist();renderScEmployees();}}
 function sceCertificateCell(c={}){
   if(!c || !(c.name||c.number||c.issueDate||c.expiryDate||c.fileName)) return '';
@@ -2650,6 +2651,7 @@ function renderScEmployees(){
   const q=sceNorm(document.getElementById('sceSearch')?.value);
   const cf=document.getElementById('sceCompanyFilter')?.value||'all';
   const sf=document.getElementById('sceStatusFilter')?.value||'all';
+  const ssf=document.getElementById('sceSiteStatusFilter')?.value||'all';
   const tf=document.getElementById('sceTwpFilter')?.value||'all';
   const ef=document.getElementById('sceExpiryFilter')?.value||'all';
   document.getElementById('sceTotal').textContent=scEmployees.length;
@@ -2661,7 +2663,7 @@ function renderScEmployees(){
 
   const employees=scEmployees.filter(x=>{
     const hay=sceNorm([x.name,x.nameArabic,x.code,sceCompanyName(x.companyId),x.tradeEnglish,x.tradeArabic,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));
-    return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
+    return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(ssf==='all'||(x.siteStatus||'Idle')===ssf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
   });
 
   const maxCertificates=Math.max(1,...employees.map(x=>(x.certificates||[]).length));
@@ -2692,11 +2694,12 @@ function getFilteredScEmployees(){
   const q=sceNorm(document.getElementById('sceSearch')?.value);
   const cf=document.getElementById('sceCompanyFilter')?.value||'all';
   const sf=document.getElementById('sceStatusFilter')?.value||'all';
+  const ssf=document.getElementById('sceSiteStatusFilter')?.value||'all';
   const tf=document.getElementById('sceTwpFilter')?.value||'all';
   const ef=document.getElementById('sceExpiryFilter')?.value||'all';
   return scEmployees.filter(x=>{
     const hay=sceNorm([x.name,x.nameArabic,x.code,sceCompanyName(x.companyId),x.tradeEnglish,x.tradeArabic,x.nationality,x.mobile,x.passport,x.unified,x.eid,x.twpStatus,(x.certificates||[]).map(c=>c.name+' '+c.otherName+' '+c.number).join(' ')].join(' '));
-    return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
+    return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(ssf==='all'||(x.siteStatus||'Idle')===ssf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
   });
 }
 function scEmployeeExportRows(){

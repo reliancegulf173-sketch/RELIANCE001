@@ -3196,6 +3196,49 @@ function exportExcel(){
 </style>
 
 </head><body><h2>Reliance Gulf Employee List</h2>${table}
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
+
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
@@ -3482,6 +3525,49 @@ function exportSubcontractorsPDF(){
 
 </head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script>
 
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
+
 </body></html>`);
   w.document.close();
 }
@@ -3625,6 +3711,49 @@ function exportScEmployeesExcel(){
 
 </head><body><h2>Subcontractor Employee List</h2>${table}
 
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
+
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Subcontractor_Employee_List.xls');
 }
@@ -3643,6 +3772,49 @@ function exportScEmployeesPDF(){
 </style>
 
 </head><body><h2>Subcontractor Employee List</h2>${table}<script>window.onload=()=>{window.print();}<\/script>
+
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
 
 </body></html>`);
   w.document.close();
@@ -3711,6 +3883,49 @@ function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w
 </style>
 
 </head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table>
+
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
 
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 // Extend existing page controller without changing existing portal logic.
@@ -3845,6 +4060,49 @@ function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records ava
 
 </head><body><h2>${cEsc(title)}</h2>${table}
 
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
+
 </body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
 function exportProjectsExcel(){exportHtmlExcel(projectExportRows(),'Project List','Project_List.xls')}
@@ -3856,6 +4114,49 @@ function printRows(rows,title){if(!rows.length){alert('No records available.');r
 </style>
 
 </head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table>
+
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
 
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 function printClients(){printRows(clientExportRows(),'Client List Report')}
@@ -4105,7 +4406,50 @@ function printMobilizationLetter(id){
   <tr><td>Working Hours per Day</td><td>${esc(r.hoursPerDay)}</td></tr><tr><td>Accommodation</td><td>${esc(r.accommodation)}</td></tr>
   <tr><td>Food</td><td>${esc(r.food)}</td></tr><tr><td>Remarks</td><td>${esc(r.remarks||'-')}</td></tr>
   </table><div class="sign"><div class="line">Employee Signature</div><div class="line">Authorized Signature</div></div>
-  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  <script>window.onload=()=>window.print()<\/script>
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
+
+</body></html>`);
   w.document.close();
 }
 
@@ -4780,6 +5124,49 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   });
 })();
 </script>
+
+
+<!-- EMPLOYEE PROFILE CARD MODAL -->
+<div id="employeeProfileModal" class="modal" style="display:none">
+<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
+<h2>Employee Profile</h2>
+<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
+<div style="text-align:center">
+<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
+<h3 id="epName">Employee Name</h3>
+<p id="epCode">Employee Code</p>
+<p id="epPhone"></p>
+<p id="epEmail"></p>
+</div>
+<div>
+<h3>Personal Information</h3>
+<table style="width:100%">
+<tr><td>Nationality</td><td id="epNationality"></td></tr>
+<tr><td>Designation</td><td id="epDesignation"></td></tr>
+<tr><td>Department</td><td id="epDepartment"></td></tr>
+<tr><td>Company</td><td id="epCompany"></td></tr>
+<tr><td>Current Site</td><td id="epSite"></td></tr>
+<tr><td>Status</td><td id="epStatus"></td></tr>
+<tr><td>Joining Date</td><td id="epJoin"></td></tr>
+</table>
+</div>
+<div>
+<h3>Certificates & Skills</h3>
+<div id="epCertificates">No certificates available</div>
+<h3 style="margin-top:16px">Employment Summary</h3>
+<div id="epSummary"></div>
+</div>
+</div>
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+<button>Update Details</button>
+<button>Mobilization History</button>
+<button>Leave History</button>
+<button>Transfer Employee</button>
+<button>Print Profile</button>
+<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
+</div>
+</div>
+</div>
 
 </body>
 </html>

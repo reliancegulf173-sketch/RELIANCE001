@@ -1143,6 +1143,250 @@ tr:hover td{
 }
 </style>
 
+
+<style id="site-mobilization-modal-redesign">
+/* Site Mobilization form — high-contrast professional redesign */
+#siteMobilizeModal{
+  align-items:flex-start!important;
+  overflow-y:auto!important;
+  padding:24px!important;
+  background:rgba(3,18,33,.68)!important;
+  backdrop-filter:blur(4px);
+}
+
+#siteMobilizeModal .modal-box{
+  width:min(1120px,96vw)!important;
+  max-height:calc(100vh - 48px)!important;
+  overflow:auto!important;
+  margin:auto!important;
+  padding:0!important;
+  border-radius:20px!important;
+  background:#f5f8fc!important;
+  border:1px solid rgba(255,255,255,.42)!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.38)!important;
+}
+
+#siteMobilizeModal .modal-close{
+  position:absolute!important;
+  top:18px!important;
+  right:18px!important;
+  z-index:20!important;
+  width:40px!important;
+  height:40px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(255,255,255,.36)!important;
+  background:rgba(255,255,255,.15)!important;
+  color:#fff!important;
+  font-size:24px!important;
+  line-height:1!important;
+  backdrop-filter:blur(6px);
+}
+
+#siteMobilizeModal .modal-close:hover{
+  background:#fff!important;
+  color:#0a315a!important;
+}
+
+#siteMobilizeModal .modal-box>h2{
+  margin:0!important;
+  padding:28px 76px 10px 30px!important;
+  color:#fff!important;
+  font-size:29px!important;
+  font-weight:800!important;
+  background:linear-gradient(135deg,#073b68,#0a6ed1)!important;
+  border-radius:20px 20px 0 0!important;
+}
+
+#siteMobilizeModal .modal-box>h2::after{
+  content:"Employee Mobilization";
+  display:block;
+  margin-top:7px;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  font-weight:500;
+}
+
+#siteMobilizeModal .toolbar{
+  margin:0!important;
+  padding:20px 28px!important;
+  border:0!important;
+  border-bottom:1px solid #d9e4ef!important;
+  border-radius:0!important;
+  background:#eef5fb!important;
+  box-shadow:none!important;
+}
+
+#siteMobilizeModal .toolbar .input{
+  min-height:52px!important;
+  border:1px solid #b9c9d9!important;
+  background:#fff!important;
+  color:#142b44!important;
+  font-size:16px!important;
+}
+
+#siteMobilizeModal .toolbar .btn{
+  min-height:52px!important;
+  padding:0 22px!important;
+  border-radius:10px!important;
+  font-size:15px!important;
+}
+
+#siteMobilizeModal #siteEmployeeInfo{
+  margin:18px 28px 0!important;
+  border-radius:12px!important;
+}
+
+#siteMobilizeModal form{
+  padding:22px 28px 26px!important;
+}
+
+#siteMobilizeModal .form-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:18px!important;
+}
+
+#siteMobilizeModal .form-group{
+  min-width:0!important;
+}
+
+#siteMobilizeModal .form-group.full{
+  grid-column:span 2!important;
+}
+
+#siteMobilizeModal .form-group label{
+  display:block!important;
+  margin:0 0 8px!important;
+  color:#19324d!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  letter-spacing:.15px!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+#siteMobilizeModal .form-group label::first-letter{
+  color:inherit!important;
+}
+
+#siteMobilizeModal .form-group .input,
+#siteMobilizeModal .form-group input,
+#siteMobilizeModal .form-group select,
+#siteMobilizeModal .form-group textarea{
+  width:100%!important;
+  min-height:48px!important;
+  border:1px solid #c7d4e2!important;
+  border-radius:10px!important;
+  padding:12px 14px!important;
+  background:#fff!important;
+  color:#142b44!important;
+  font-size:15px!important;
+  box-shadow:0 1px 2px rgba(16,42,67,.03)!important;
+}
+
+#siteMobilizeModal .form-group textarea{
+  min-height:108px!important;
+  resize:vertical!important;
+}
+
+#siteMobilizeModal .form-group .input:focus,
+#siteMobilizeModal .form-group input:focus,
+#siteMobilizeModal .form-group select:focus,
+#siteMobilizeModal .form-group textarea:focus{
+  outline:none!important;
+  border-color:#0a6ed1!important;
+  box-shadow:0 0 0 3px rgba(10,110,209,.13)!important;
+}
+
+#siteMobilizeModal .form-actions{
+  position:sticky!important;
+  bottom:-26px!important;
+  margin:24px -28px -26px!important;
+  padding:16px 28px!important;
+  border-top:1px solid #d8e2ec!important;
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(8px);
+  justify-content:flex-end!important;
+  gap:12px!important;
+  z-index:5!important;
+}
+
+#siteMobilizeModal .form-actions .btn{
+  min-width:145px!important;
+  min-height:48px!important;
+  border-radius:10px!important;
+  font-size:14px!important;
+}
+
+#siteMobilizeModal .form-actions .btn.success{
+  background:linear-gradient(135deg,#16884e,#0f9f5c)!important;
+  box-shadow:0 8px 18px rgba(15,159,92,.22)!important;
+}
+
+@media(max-width:980px){
+  #siteMobilizeModal .form-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #siteMobilizeModal .form-group.full{
+    grid-column:1/-1!important;
+  }
+}
+
+@media(max-width:620px){
+  #siteMobilizeModal{
+    padding:8px!important;
+  }
+  #siteMobilizeModal .modal-box{
+    width:100%!important;
+    max-height:calc(100vh - 16px)!important;
+    border-radius:14px!important;
+  }
+  #siteMobilizeModal .modal-box>h2{
+    padding:22px 62px 10px 18px!important;
+    font-size:23px!important;
+    border-radius:14px 14px 0 0!important;
+  }
+  #siteMobilizeModal .toolbar{
+    padding:14px!important;
+    flex-direction:column!important;
+  }
+  #siteMobilizeModal .toolbar .btn{
+    width:100%!important;
+  }
+  #siteMobilizeModal form{
+    padding:16px 14px 20px!important;
+  }
+  #siteMobilizeModal .form-grid{
+    grid-template-columns:1fr!important;
+  }
+  #siteMobilizeModal .form-group.full{
+    grid-column:auto!important;
+  }
+  #siteMobilizeModal .form-actions{
+    margin:20px -14px -20px!important;
+    padding:14px!important;
+    flex-direction:column-reverse!important;
+  }
+  #siteMobilizeModal .form-actions .btn{
+    width:100%!important;
+  }
+}
+</style>
+
+
+<style id="site-edit-history-enhancement">
+.site-action-buttons{display:flex;gap:6px;flex-wrap:nowrap;align-items:center}
+.site-action-buttons .btn{padding:7px 10px!important;font-size:11px!important;white-space:nowrap}
+.site-history-modal-box{width:min(980px,96vw)!important;max-height:90vh!important;overflow:auto!important}
+.site-history-modal-box>h2{margin:0 0 16px;color:#073b68}
+.site-audit-details{white-space:normal!important;min-width:360px;line-height:1.45}
+#siteEmployeeCodeSearch:disabled{background:#e9eef5!important;color:#52667a!important;cursor:not-allowed}
+@media(max-width:900px){
+  .site-action-buttons{flex-wrap:wrap}
+  .site-audit-details{min-width:240px}
+}
+</style>
+
 </head>
 <body>
 
@@ -1725,8 +1969,26 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
         <div id="siteNotificationsModule" class="site-module hidden"><div class="card"><h3>Site Management Notifications</h3><div id="siteNotificationList"></div></div></div>
       </section>
 
-      <div id="siteMobilizeModal" class="modal"><div class="modal-box site-modal"><button class="modal-close" onclick="closeModal('siteMobilizeModal')">×</button><h2>Employee Mobilization</h2><div class="toolbar"><input id="siteEmployeeCodeSearch" class="input grow" placeholder="Enter Employee Code"><button class="btn primary" onclick="siteFindEmployee()">Search Employee</button></div><div id="siteEmployeeInfo" class="notice blue hidden"></div><form id="siteMobilizeForm" onsubmit="saveSiteMobilization(event)"><input type="hidden" id="siteSelectedEmployeeKey"><div class="form-grid"><div class="form-group"><label>Client Name *</label><select id="siteMobClient" class="input" required onchange="siteMobClientChanged()"></select></div><div class="form-group"><label>Project Name *</label><select id="siteMobProject" class="input" required onchange="siteMobProjectChanged()"></select></div><div class="form-group"><label>Site Location *</label><select id="siteMobLocation" class="input" required></select></div><div class="form-group"><label>Site Craft / Designation *</label><input id="siteMobCraft" class="input" required></div><div class="form-group"><label>Mobilization Date *</label><input id="siteMobDate" type="date" class="input" required></div><div class="form-group"><label>Subcontractor Rate</label><input id="siteMobRate" type="number" min="0" step="0.01" class="input"></div><div class="form-group"><label>Working Hours per Day</label><input id="siteMobHours" type="number" min="1" max="24" step="0.5" value="10" class="input"></div><div class="form-group"><label>Accommodation Provided By</label><select id="siteMobAccommodation" class="input"><option>Client</option><option>Reliance Gulf (RG)</option><option>Subcontractor</option></select></div><div class="form-group"><label>Food Provided By</label><select id="siteMobFood" class="input"><option>Client</option><option>Reliance Gulf (RG)</option><option>Subcontractor</option></select></div><div class="form-group full"><label>Remarks</label><textarea id="siteMobRemarks" class="input" rows="3"></textarea></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('siteMobilizeModal')">Cancel</button><button class="btn success" type="submit">Save Mobilization</button></div></form></div></div>
-      <div id="siteDemobModal" class="modal"><div class="modal-box"><button class="modal-close" onclick="closeModal('siteDemobModal')">×</button><h2>Employee Demobilization</h2><input type="hidden" id="siteDemobId"><div id="siteDemobInfo" class="notice blue"></div><form onsubmit="saveSiteDemobilization(event)"><div class="form-grid"><div class="form-group"><label>Demobilization Date *</label><input id="siteDemobDate" type="date" class="input" required></div><div class="form-group"><label>Last Working Date *</label><input id="siteLastWorkingDate" type="date" class="input" required></div><div class="form-group"><label>Reason *</label><select id="siteDemobReason" class="input" required onchange="siteToggleOtherReason()"><option value="">Select Reason</option><option>Project Finished</option><option>On Leave</option><option>Misconduct</option><option>Resigned</option><option>Terminated</option><option>Other</option></select></div><div id="siteOtherReasonWrap" class="form-group hidden"><label>Other Reason Remarks *</label><textarea id="siteOtherReason" class="input"></textarea></div><div class="form-group full"><label>Final Remarks</label><textarea id="siteDemobRemarks" class="input" rows="3"></textarea></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('siteDemobModal')">Cancel</button><button type="submit" class="btn danger">Confirm Demobilization</button></div></form></div></div>
+      <div id="siteMobilizeModal" class="modal"><div class="modal-box site-modal"><button class="modal-close" onclick="closeModal('siteMobilizeModal')">×</button><h2 id="siteMobilizeTitle">Employee Mobilization</h2><div class="toolbar"><input id="siteEmployeeCodeSearch" class="input grow" placeholder="Enter Employee Code"><button class="btn primary" onclick="siteFindEmployee()">Search Employee</button></div><div id="siteEmployeeInfo" class="notice blue hidden"></div><form id="siteMobilizeForm" onsubmit="saveSiteMobilization(event)"><input type="hidden" id="siteEditingMobilizationId"><input type="hidden" id="siteSelectedEmployeeKey"><div class="form-grid"><div class="form-group"><label>Client Name *</label><select id="siteMobClient" class="input" required onchange="siteMobClientChanged()"></select></div><div class="form-group"><label>Project Name *</label><select id="siteMobProject" class="input" required onchange="siteMobProjectChanged()"></select></div><div class="form-group"><label>Site Location *</label><select id="siteMobLocation" class="input" required></select></div><div class="form-group"><label>Site Craft / Designation *</label><input id="siteMobCraft" class="input" required></div><div class="form-group"><label>Mobilization Date *</label><input id="siteMobDate" type="date" class="input" required></div><div class="form-group"><label>Subcontractor Rate</label><input id="siteMobRate" type="number" min="0" step="0.01" class="input"></div><div class="form-group"><label>Working Hours per Day</label><input id="siteMobHours" type="number" min="1" max="24" step="0.5" value="10" class="input"></div><div class="form-group"><label>Accommodation Provided By</label><select id="siteMobAccommodation" class="input"><option>Client</option><option>Reliance Gulf (RG)</option><option>Subcontractor</option></select></div><div class="form-group"><label>Food Provided By</label><select id="siteMobFood" class="input"><option>Client</option><option>Reliance Gulf (RG)</option><option>Subcontractor</option></select></div><div class="form-group full"><label>Remarks</label><textarea id="siteMobRemarks" class="input" rows="3"></textarea></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('siteMobilizeModal')">Cancel</button><button id="siteMobilizeSaveBtn" class="btn success" type="submit">Save Mobilization</button></div></form></div></div>
+      
+<div id="siteHistoryModal" class="modal">
+  <div class="modal-box site-history-modal-box">
+    <button class="modal-close" onclick="closeModal('siteHistoryModal')">×</button>
+    <h2>Mobilization Record & Audit History</h2>
+    <div id="siteHistorySummary" class="notice blue"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date & Time</th><th>Action</th><th>Changed By</th><th>Details</th></tr></thead>
+        <tbody id="siteHistoryAuditBody"></tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn light" onclick="closeModal('siteHistoryModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="siteDemobModal" class="modal"><div class="modal-box"><button class="modal-close" onclick="closeModal('siteDemobModal')">×</button><h2>Employee Demobilization</h2><input type="hidden" id="siteDemobId"><div id="siteDemobInfo" class="notice blue"></div><form onsubmit="saveSiteDemobilization(event)"><div class="form-grid"><div class="form-group"><label>Demobilization Date *</label><input id="siteDemobDate" type="date" class="input" required></div><div class="form-group"><label>Last Working Date *</label><input id="siteLastWorkingDate" type="date" class="input" required></div><div class="form-group"><label>Reason *</label><select id="siteDemobReason" class="input" required onchange="siteToggleOtherReason()"><option value="">Select Reason</option><option>Project Finished</option><option>On Leave</option><option>Misconduct</option><option>Resigned</option><option>Terminated</option><option>Other</option></select></div><div id="siteOtherReasonWrap" class="form-group hidden"><label>Other Reason Remarks *</label><textarea id="siteOtherReason" class="input"></textarea></div><div class="form-group full"><label>Final Remarks</label><textarea id="siteDemobRemarks" class="input" rows="3"></textarea></div></div><div class="form-actions"><button type="button" class="btn light" onclick="closeModal('siteDemobModal')">Cancel</button><button type="submit" class="btn danger">Confirm Demobilization</button></div></form></div></div>
 
       <section id="cicpaPortal" class="page">
         <div class="back-home"><button class="btn light" onclick="returnPortalHome()">← Back to Portal Home</button></div>
@@ -2417,7 +2679,9 @@ function showPage(id){
     }
   }
 }
-document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>b.dataset.page==='form'?openNew():showPage(b.dataset.page));
+document.querySelectorAll('.nav-btn[data-page]').forEach(b=>{
+  b.onclick=()=>b.dataset.page==='form'?openNew():showPage(b.dataset.page);
+});
 
 
 function openEmployeePortal(){
@@ -2811,30 +3075,6 @@ function exportExcel(){
 </head><body><h2>Reliance Gulf Employee List</h2>${table}
 
 
-<script id="sidebar-count-sync">
-(function(){
-  function syncSidebarCounts(){
-    var targets=[
-      document.getElementById('rgCicpaExpiring'),
-      document.getElementById('cicpaExpiringCount'),
-      document.getElementById('unreadBadge')
-    ];
-    var value='0';
-    for(var i=0;i<targets.length;i++){
-      if(targets[i] && String(targets[i].textContent).trim()!==''){
-        value=String(targets[i].textContent).trim();
-        break;
-      }
-    }
-    var badge=document.getElementById('sidebarCicpaCount');
-    if(badge) badge.textContent=value;
-  }
-  document.addEventListener('DOMContentLoaded',function(){
-    syncSidebarCounts();
-    setInterval(syncSidebarCounts,1500);
-  });
-})();
-</script>
 
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
@@ -3592,16 +3832,183 @@ function startAutomaticEmployeeStatusScheduler(){
 function showSiteModule(name){document.querySelectorAll('.site-module').forEach(x=>x.classList.add('hidden'));document.getElementById('site'+name[0].toUpperCase()+name.slice(1)+'Module')?.classList.remove('hidden');document.querySelectorAll('.site-tab').forEach(x=>{const a=x.dataset.siteModule===name;x.classList.toggle('active',a);x.classList.toggle('light',!a)});if(name==='dashboard')renderSiteDashboard();if(name==='mobilized')renderSiteActive();if(name==='history')renderSiteHistory();if(name==='monthly')renderSiteMonthly();if(name==='daily')renderSiteDaily();if(name==='notifications')renderSiteNotifications()}
 function siteRefreshDropdowns(){const cf=document.getElementById('siteClientFilter'),mc=document.getElementById('siteMobClient');const clients=Array.isArray(clientRecords)?clientRecords:[],opts=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cf){const v=cf.value;cf.innerHTML='<option value="all">All Clients</option>'+opts;cf.value=[...cf.options].some(o=>o.value===v)?v:'all'}if(mc){const v=mc.value;mc.innerHTML='<option value="">Select Client</option>'+opts;mc.value=[...mc.options].some(o=>o.value===v)?v:''}siteClientChanged();if(mc&&!mc.value){if(siteMobProject)siteMobProject.innerHTML='<option value="">Select Project</option>';if(siteMobLocation)siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}}
 function siteClientChanged(){const c=document.getElementById('siteClientFilter')?.value||'all',p=document.getElementById('siteProjectFilter');if(!p)return;const v=p.value;p.innerHTML='<option value="all">All Projects</option>'+projectRecords.filter(x=>c==='all'||String(x.clientId)===String(c)).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');p.value=[...p.options].some(o=>o.value===v)?v:'all'}
-function openSiteMobilization(){siteSelectedEmployee=null;document.getElementById('siteMobilizeForm').reset();siteMobHours.value=10;siteSelectedEmployeeKey.value='';siteEmployeeInfo.classList.add('hidden');siteEmployeeCodeSearch.value='';siteRefreshDropdowns();siteMobDate.value=siteToday();document.getElementById('siteMobilizeModal').classList.add('show')}
-function siteFindEmployee(){const code=siteEmployeeCodeSearch.value.trim().toLowerCase(),e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}const active=siteActiveRecords().find(r=>r.employeeKey===e.key);if(active){alert(`Employee is already mobilized.\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nDemobilize the employee before assigning another site.`);return}siteSelectedEmployee=e;siteSelectedEmployeeKey.value=e.key;siteMobCraft.value=e.trade;siteEmployeeInfo.innerHTML=`<div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.name)}<b>${esc(e.name)} (${esc(e.code)})</b></div>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;siteEmployeeInfo.classList.remove('hidden')}
+function openSiteMobilization(){
+  siteSelectedEmployee=null;
+  document.getElementById('siteMobilizeForm').reset();
+  siteEditingMobilizationId.value='';
+  siteMobHours.value=10;
+  siteSelectedEmployeeKey.value='';
+  siteEmployeeInfo.classList.add('hidden');
+  siteEmployeeCodeSearch.value='';
+  siteEmployeeCodeSearch.disabled=false;
+  siteMobilizeTitle.textContent='Employee Mobilization';
+  siteMobilizeSaveBtn.textContent='Save Mobilization';
+  siteRefreshDropdowns();
+  siteMobDate.value=siteToday();
+  document.getElementById('siteMobilizeModal').classList.add('show');
+}
+function siteFindEmployee(){
+  const code=siteEmployeeCodeSearch.value.trim().toLowerCase();
+  const e=siteAllEmployees().find(x=>String(x.code).toLowerCase()===code);
+  if(!e){alert('Employee Code not found in Employee or Subcontractor Portal.');return}
+  const active=siteActiveRecords().find(r=>r.employeeKey===e.key);
+  if(active){
+    const editNow=confirm(`Employee is already mobilized.\n\nClient: ${active.clientName}\nProject: ${active.projectName}\nSite: ${active.siteLocation}\nMobilization Date: ${active.mobilizationDate}\n\nPress OK to edit this mobilization record, or Cancel to close.`);
+    if(editNow) openSiteEditMobilization(active.id);
+    return;
+  }
+  siteSelectedEmployee=e;
+  siteSelectedEmployeeKey.value=e.key;
+  siteMobCraft.value=e.trade;
+  siteEmployeeInfo.innerHTML=`<div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.name)}<b>${esc(e.name)} (${esc(e.code)})</b></div>${esc(e.type)}${e.subcontractor?' · '+esc(e.subcontractor):''} · ${esc(e.trade)} · ${esc(e.nationality)}<br>Working Status: ${esc(e.workingStatus||'-')} · Site Status: ${esc(e.siteStatus||'-')}`;
+  siteEmployeeInfo.classList.remove('hidden');
+}
 function siteMobClientChanged(){const cid=siteMobClient.value;siteMobProject.innerHTML='<option value="">Select Project</option>'+projectRecords.filter(p=>String(p.clientId)===String(cid)).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');siteMobLocation.innerHTML='<option value="">Select Site Location</option>'}
 function siteMobProjectChanged(){const p=siteProject(siteMobProject.value);siteMobLocation.innerHTML='<option value="">Select Site Location</option>'+(p?.location?`<option value="${esc(p.location)}">${esc(p.location)}</option>`:'');if(p?.location)siteMobLocation.value=p.location}
-function saveSiteMobilization(e){e.preventDefault();const emp=siteEmployeeByKey(siteSelectedEmployeeKey.value);if(!emp){alert('Search and select an employee first.');return}if(siteActiveRecords().some(r=>r.employeeKey===emp.key)){alert('This employee is already active at another site. Demobilize first.');return}const p=siteProject(siteMobProject.value),c=clientRecords.find(x=>String(x.id)===String(siteMobClient.value));if(!c||!p||!siteMobLocation.value||!siteMobDate.value){alert('Client, Project, Site Location and Mobilization Date are mandatory.');return}if(String(p.clientId)!==String(c.id)){alert('Selected project does not belong to selected client.');return}const duplicate=siteRecords.some(r=>r.employeeKey===emp.key&&r.clientId===c.id&&r.projectId===p.id&&r.siteLocation===siteMobLocation.value&&r.mobilizationDate===siteMobDate.value);if(duplicate){alert('Duplicate mobilization record cannot be saved.');return}siteRecords.unshift({id:String(Date.now()),employeeKey:emp.key,employeeCode:emp.code,employeeName:emp.name,employeeType:emp.type,subcontractorCompany:emp.subcontractor,trade:siteMobCraft.value.trim(),nationality:emp.nationality,clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:siteMobLocation.value,mobilizationDate:siteMobDate.value,demobilizationDate:'',lastWorkingDate:'',demobilizationReason:'',rate:Number(siteMobRate.value||0),hoursPerDay:Number(siteMobHours.value||0),accommodation:siteMobAccommodation.value,food:siteMobFood.value,remarks:siteMobRemarks.value.trim(),workingStatus:'Active',siteStatus:'On Site',createdAt:new Date().toISOString()});sitePersist();syncAllEmployeeSiteStatuses('Site Management');closeModal('siteMobilizeModal');renderSiteDashboard();showSiteModule('mobilized')}
+function siteAuditUser(){return currentUser?.name||currentUser?.username||'User'}
+function siteAddAudit(r,action,details){
+  r.auditHistory=Array.isArray(r.auditHistory)?r.auditHistory:[];
+  r.auditHistory.unshift({date:new Date().toLocaleString(),iso:new Date().toISOString(),action,by:siteAuditUser(),details});
+}
+function siteRecordSnapshot(r){
+  return {
+    clientName:r.clientName||'',projectName:r.projectName||'',siteLocation:r.siteLocation||'',
+    trade:r.trade||'',mobilizationDate:r.mobilizationDate||'',rate:Number(r.rate||0),
+    hoursPerDay:Number(r.hoursPerDay||0),accommodation:r.accommodation||'',food:r.food||'',
+    remarks:r.remarks||''
+  };
+}
+function siteMobilizationChanges(oldData,newData){
+  const labels={clientName:'Client',projectName:'Project',siteLocation:'Site Location',trade:'Craft / Designation',mobilizationDate:'Mobilization Date',rate:'Rate',hoursPerDay:'Working Hours',accommodation:'Accommodation',food:'Food',remarks:'Remarks'};
+  return Object.keys(labels).filter(k=>String(oldData[k]??'')!==String(newData[k]??'')).map(k=>`${labels[k]}: ${oldData[k]||'-'} → ${newData[k]||'-'}`);
+}
+function openSiteEditMobilization(id){
+  const r=siteRecords.find(x=>x.id===id);
+  if(!r)return;
+  const emp=siteEmployeeByKey(r.employeeKey)||{key:r.employeeKey,code:r.employeeCode,name:r.employeeName,type:r.employeeType,subcontractor:r.subcontractorCompany,trade:r.trade,nationality:r.nationality};
+  siteSelectedEmployee=emp;
+  document.getElementById('siteMobilizeForm').reset();
+  siteEditingMobilizationId.value=r.id;
+  siteSelectedEmployeeKey.value=r.employeeKey;
+  siteEmployeeCodeSearch.value=r.employeeCode;
+  siteEmployeeCodeSearch.disabled=true;
+  siteMobilizeTitle.textContent='Edit Employee Mobilization';
+  siteMobilizeSaveBtn.textContent='Update Mobilization';
+  siteRefreshDropdowns();
+  siteMobClient.value=String(r.clientId||'');
+  siteMobClientChanged();
+  siteMobProject.value=String(r.projectId||'');
+  siteMobProjectChanged();
+  if(![...siteMobLocation.options].some(o=>o.value===r.siteLocation)){
+    siteMobLocation.insertAdjacentHTML('beforeend',`<option value="${esc(r.siteLocation)}">${esc(r.siteLocation)}</option>`);
+  }
+  siteMobLocation.value=r.siteLocation||'';
+  siteMobCraft.value=r.trade||'';
+  siteMobDate.value=r.mobilizationDate||'';
+  siteMobRate.value=Number(r.rate||0);
+  siteMobHours.value=Number(r.hoursPerDay||10);
+  siteMobAccommodation.value=r.accommodation||'Client';
+  siteMobFood.value=r.food||'Client';
+  siteMobRemarks.value=r.remarks||'';
+  siteEmployeeInfo.innerHTML=`<div class="employee-name-with-photo">${employeePhotoHtml(emp.photo,emp.name)}<b>${esc(r.employeeName)} (${esc(r.employeeCode)})</b></div><b>Editing active mobilization</b><br>${esc(r.employeeType||'')}${r.subcontractorCompany?' · '+esc(r.subcontractorCompany):''} · ${esc(r.trade||'')}<br>Current Site: ${esc(r.clientName)} / ${esc(r.projectName)} / ${esc(r.siteLocation)}`;
+  siteEmployeeInfo.classList.remove('hidden');
+  document.getElementById('siteMobilizeModal').classList.add('show');
+}
+function saveSiteMobilization(e){
+  e.preventDefault();
+  const emp=siteEmployeeByKey(siteSelectedEmployeeKey.value);
+  if(!emp){alert('Search and select an employee first.');return}
+  const editingId=siteEditingMobilizationId.value;
+  if(!editingId&&siteActiveRecords().some(r=>r.employeeKey===emp.key)){alert('This employee is already active at another site. Use Edit Mobilization instead.');return}
+  const p=siteProject(siteMobProject.value),c=clientRecords.find(x=>String(x.id)===String(siteMobClient.value));
+  if(!c||!p||!siteMobLocation.value||!siteMobDate.value){alert('Client, Project, Site Location and Mobilization Date are mandatory.');return}
+  if(String(p.clientId)!==String(c.id)){alert('Selected project does not belong to selected client.');return}
+  const duplicate=siteRecords.some(r=>r.id!==editingId&&r.employeeKey===emp.key&&r.clientId===c.id&&r.projectId===p.id&&r.siteLocation===siteMobLocation.value&&r.mobilizationDate===siteMobDate.value);
+  if(duplicate){alert('Duplicate mobilization record cannot be saved.');return}
+  const newData={clientName:c.name,projectName:p.name,siteLocation:siteMobLocation.value,trade:siteMobCraft.value.trim(),mobilizationDate:siteMobDate.value,rate:Number(siteMobRate.value||0),hoursPerDay:Number(siteMobHours.value||0),accommodation:siteMobAccommodation.value,food:siteMobFood.value,remarks:siteMobRemarks.value.trim()};
+  if(editingId){
+    const r=siteRecords.find(x=>x.id===editingId);
+    if(!r)return;
+    const oldData=siteRecordSnapshot(r);
+    const changes=siteMobilizationChanges(oldData,newData);
+    Object.assign(r,{clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:newData.siteLocation,trade:newData.trade,mobilizationDate:newData.mobilizationDate,rate:newData.rate,hoursPerDay:newData.hoursPerDay,accommodation:newData.accommodation,food:newData.food,remarks:newData.remarks,updatedAt:new Date().toISOString(),updatedBy:siteAuditUser()});
+    siteAddAudit(r,'Mobilization Updated',changes.length?changes.join('<br>'):'Record saved without field changes');
+  }else{
+    const r={id:String(Date.now()),employeeKey:emp.key,employeeCode:emp.code,employeeName:emp.name,employeeType:emp.type,subcontractorCompany:emp.subcontractor,trade:newData.trade,nationality:emp.nationality,clientId:c.id,clientName:c.name,projectId:p.id,projectName:p.name,siteLocation:newData.siteLocation,mobilizationDate:newData.mobilizationDate,demobilizationDate:'',lastWorkingDate:'',demobilizationReason:'',rate:newData.rate,hoursPerDay:newData.hoursPerDay,accommodation:newData.accommodation,food:newData.food,remarks:newData.remarks,workingStatus:'Active',siteStatus:'On Site',createdAt:new Date().toISOString(),createdBy:siteAuditUser(),auditHistory:[]};
+    siteAddAudit(r,'Mobilization Created',`Mobilized to ${c.name} / ${p.name} / ${newData.siteLocation} from ${newData.mobilizationDate}`);
+    siteRecords.unshift(r);
+  }
+  sitePersist();
+  syncAllEmployeeSiteStatuses('Site Management');
+  closeModal('siteMobilizeModal');
+  renderSiteDashboard();
+  showSiteModule('mobilized');
+}
 function openSiteDemobilization(id){const r=siteRecords.find(x=>x.id===id);if(!r)return;siteDemobId.value=id;siteDemobInfo.innerHTML=`<b>${esc(r.employeeName)} (${esc(r.employeeCode)})</b><br>Final Client: ${esc(r.clientName)} · Project: ${esc(r.projectName)} · Site: ${esc(r.siteLocation)}`;siteDemobDate.value=siteToday();siteLastWorkingDate.value=siteToday();siteDemobReason.value='';siteDemobRemarks.value='';siteOtherReason.value='';siteToggleOtherReason();document.getElementById('siteDemobModal').classList.add('show')}
 function siteToggleOtherReason(){const other=siteDemobReason.value==='Other';siteOtherReasonWrap.classList.toggle('hidden',!other);siteOtherReason.required=other}
-function saveSiteDemobilization(e){e.preventDefault();const r=siteRecords.find(x=>x.id===siteDemobId.value);if(!r)return;const dd=siteDemobDate.value,lw=siteLastWorkingDate.value;if(dd<r.mobilizationDate||lw<r.mobilizationDate||lw>dd){alert('Demobilization and Last Working dates must not be earlier than Mobilization Date. Last Working Date cannot be after Demobilization Date.');return}if(siteDemobReason.value==='Other'&&!siteOtherReason.value.trim()){alert('Remarks are mandatory when Other is selected.');return}r.demobilizationDate=dd;r.lastWorkingDate=lw;r.demobilizationReason=siteDemobReason.value==='Other'?'Other: '+siteOtherReason.value.trim():siteDemobReason.value;r.remarks=[r.remarks,siteDemobRemarks.value.trim()].filter(Boolean).join(' | ');r.workingStatus=['Resigned','Terminated','Misconduct'].includes(siteDemobReason.value)?'Inactive':'Active';r.siteStatus=siteDemobReason.value==='On Leave'?'On Leave':'Idle';r.updatedAt=new Date().toISOString();sitePersist();syncAllEmployeeSiteStatuses('Site Management');closeModal('siteDemobModal');renderSiteDashboard();showSiteModule('history')}
+function saveSiteDemobilization(e){e.preventDefault();const r=siteRecords.find(x=>x.id===siteDemobId.value);if(!r)return;const dd=siteDemobDate.value,lw=siteLastWorkingDate.value;if(dd<r.mobilizationDate||lw<r.mobilizationDate||lw>dd){alert('Demobilization and Last Working dates must not be earlier than Mobilization Date. Last Working Date cannot be after Demobilization Date.');return}if(siteDemobReason.value==='Other'&&!siteOtherReason.value.trim()){alert('Remarks are mandatory when Other is selected.');return}r.demobilizationDate=dd;r.lastWorkingDate=lw;r.demobilizationReason=siteDemobReason.value==='Other'?'Other: '+siteOtherReason.value.trim():siteDemobReason.value;r.remarks=[r.remarks,siteDemobRemarks.value.trim()].filter(Boolean).join(' | ');r.workingStatus=['Resigned','Terminated','Misconduct'].includes(siteDemobReason.value)?'Inactive':'Active';r.siteStatus=siteDemobReason.value==='On Leave'?'On Leave':'Idle';r.updatedAt=new Date().toISOString();r.updatedBy=siteAuditUser();siteAddAudit(r,'Employee Demobilized',`Demobilization Date: ${dd}<br>Last Working Date: ${lw}<br>Reason: ${r.demobilizationReason}`);sitePersist();syncAllEmployeeSiteStatuses('Site Management');closeModal('siteDemobModal');renderSiteDashboard();showSiteModule('history')}
+
+function openSiteRecordView(id){
+  const r=siteRecords.find(x=>x.id===id);if(!r)return;
+  alert(
+    `Employee: ${r.employeeName} (${r.employeeCode})\n`+
+    `Type: ${r.employeeType||'-'}\nClient: ${r.clientName||'-'}\nProject: ${r.projectName||'-'}\n`+
+    `Site: ${r.siteLocation||'-'}\nCraft: ${r.trade||'-'}\nMobilization Date: ${r.mobilizationDate||'-'}\n`+
+    `Rate: AED ${Number(r.rate||0).toFixed(2)}\nHours/Day: ${r.hoursPerDay||'-'}\n`+
+    `Accommodation: ${r.accommodation||'-'}\nFood: ${r.food||'-'}\nRemarks: ${r.remarks||'-'}`
+  );
+}
+function openSiteAuditHistory(id){
+  const r=siteRecords.find(x=>x.id===id);if(!r)return;
+  siteHistorySummary.innerHTML=`<b>${esc(r.employeeName)} (${esc(r.employeeCode)})</b><br>${esc(r.clientName)} / ${esc(r.projectName)} / ${esc(r.siteLocation)}<br>Mobilization Date: <b>${esc(r.mobilizationDate)}</b> · Status: <b>${esc(r.demobilizationDate?r.siteStatus:'On Site')}</b>`;
+  const history=Array.isArray(r.auditHistory)?r.auditHistory:[];
+  const fallback=[];
+  if(r.createdAt)fallback.push({date:new Date(r.createdAt).toLocaleString(),action:'Mobilization Created',by:r.createdBy||'System',details:`Initial mobilization date: ${r.mobilizationDate}`});
+  const rows=history.length?history:fallback;
+  siteHistoryAuditBody.innerHTML=rows.map(h=>`<tr><td>${esc(h.date||h.iso||'-')}</td><td><b>${esc(h.action||'-')}</b></td><td>${esc(h.by||'-')}</td><td class="site-audit-details">${h.details||'-'}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No audit history available.</td></tr>';
+  document.getElementById('siteHistoryModal').classList.add('show');
+}
+function printMobilizationLetter(id){
+  const r=siteRecords.find(x=>x.id===id);if(!r)return;
+  const w=window.open('','_blank','width=900,height=700');
+  if(!w){alert('Please allow pop-ups to print the mobilization letter.');return}
+  w.document.write(`<!doctype html><html><head><title>Mobilization Letter - ${esc(r.employeeCode)}</title><style>
+  body{font-family:Arial,sans-serif;color:#172b4d;padding:36px}h1{color:#073b68;margin-bottom:4px}.sub{color:#64748b;margin-bottom:28px}
+  table{width:100%;border-collapse:collapse;margin-top:20px}td{border:1px solid #d8e2ec;padding:11px}td:first-child{width:32%;font-weight:700;background:#f3f7fb}
+  .sign{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:70px}.line{border-top:1px solid #172b4d;padding-top:8px;text-align:center}
+  </style></head><body><h1>Reliance Gulf General Contracting LLC</h1><div class="sub">Employee Mobilization Record</div>
+  <table>
+  <tr><td>Employee Code</td><td>${esc(r.employeeCode)}</td></tr><tr><td>Employee Name</td><td>${esc(r.employeeName)}</td></tr>
+  <tr><td>Employee Type</td><td>${esc(r.employeeType||'-')}</td></tr><tr><td>Client</td><td>${esc(r.clientName)}</td></tr>
+  <tr><td>Project</td><td>${esc(r.projectName)}</td></tr><tr><td>Site Location</td><td>${esc(r.siteLocation)}</td></tr>
+  <tr><td>Craft / Designation</td><td>${esc(r.trade)}</td></tr><tr><td>Mobilization Date</td><td>${esc(r.mobilizationDate)}</td></tr>
+  <tr><td>Working Hours per Day</td><td>${esc(r.hoursPerDay)}</td></tr><tr><td>Accommodation</td><td>${esc(r.accommodation)}</td></tr>
+  <tr><td>Food</td><td>${esc(r.food)}</td></tr><tr><td>Remarks</td><td>${esc(r.remarks||'-')}</td></tr>
+  </table><div class="sign"><div class="line">Employee Signature</div><div class="line">Authorized Signature</div></div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
 function siteActiveFiltered(){const q=(siteSearch?.value||'').toLowerCase(),cid=siteClientFilter?.value||'all',pid=siteProjectFilter?.value||'all',type=siteTypeFilter?.value||'all',m=siteToday().slice(0,7);return siteActiveRecords().filter(r=>{const hay=[r.employeeCode,r.employeeName,r.clientName,r.projectName,r.siteLocation,r.subcontractorCompany,r.trade].join(' ').toLowerCase();const quick=siteQuickFilter==='all'||(siteQuickFilter==='company'&&r.employeeType==='Company Employee')||(siteQuickFilter==='subcontractor'&&r.employeeType==='Subcontractor Employee')||(siteQuickFilter==='onsite'&&r.siteStatus==='On Site')||(siteQuickFilter==='mobilizedMonth'&&siteMonth(r.mobilizationDate)===m);return quick&&(!q||hay.includes(q))&&(cid==='all'||String(r.clientId)===String(cid))&&(pid==='all'||String(r.projectId)===String(pid))&&(type==='all'||r.employeeType===type)})}
-function renderSiteActive(){siteRefreshDropdowns();const rows=siteActiveFiltered();siteActiveBody.innerHTML=rows.map(r=>`<tr><td><b>${esc(r.employeeName)}</b></td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeType)}</td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.trade)}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.mobilizationDate)}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${esc(r.hoursPerDay)}</td><td>${esc(r.accommodation)}</td><td>${esc(r.food)}</td><td><span class="pill approved">On Site</span></td><td><button class="btn danger" onclick="openSiteDemobilization('${r.id}')">Demobilize</button></td></tr>`).join('')||'<tr><td colspan="15" class="muted">No active mobilization records found.</td></tr>';siteQuickFilter='all'}
+function renderSiteActive(){
+  siteRefreshDropdowns();
+  const rows=siteActiveFiltered();
+  siteActiveBody.innerHTML=rows.map(r=>`<tr>
+    <td><b>${esc(r.employeeName)}</b></td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeType)}</td>
+    <td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.trade)}</td><td>${esc(r.clientName)}</td>
+    <td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.mobilizationDate)}</td>
+    <td>${Number(r.rate||0).toFixed(2)}</td><td>${esc(r.hoursPerDay)}</td><td>${esc(r.accommodation)}</td>
+    <td>${esc(r.food)}</td><td><span class="pill approved">On Site</span></td>
+    <td><div class="site-action-buttons">
+      <button class="btn light" onclick="openSiteRecordView('${r.id}')">View</button>
+      <button class="btn primary" onclick="openSiteEditMobilization('${r.id}')">Edit</button>
+      <button class="btn light" onclick="printMobilizationLetter('${r.id}')">Print</button>
+      <button class="btn light" onclick="openSiteAuditHistory('${r.id}')">History</button>
+      <button class="btn danger" onclick="openSiteDemobilization('${r.id}')">Demobilize</button>
+    </div></td>
+  </tr>`).join('')||'<tr><td colspan="15" class="muted">No active mobilization records found.</td></tr>';
+  siteQuickFilter='all';
+}
 function siteHistoryFiltered(){const q=(siteHistorySearch?.value||'').toLowerCase(),m=siteToday().slice(0,7);return siteRecords.filter(r=>{const hay=Object.values(r).join(' ').toLowerCase();return(!q||hay.includes(q))&&(siteQuickFilter!=='demobilizedMonth'||siteMonth(r.demobilizationDate)===m)})}
 function renderSiteHistory(){const rows=siteHistoryFiltered();siteHistoryBody.innerHTML=rows.map(r=>`<tr><td>${esc(r.employeeCode)}</td><td><b>${esc(r.employeeName)}</b></td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.trade)}</td><td>${esc(r.mobilizationDate)}</td><td>${esc(r.demobilizationDate||'-')}</td><td>${siteDays(r.mobilizationDate,r.lastWorkingDate||r.demobilizationDate)}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${esc(r.demobilizationDate?r.siteStatus:'On Site')}</td><td>${esc(r.demobilizationReason||'-')}</td><td>${esc(r.remarks||'-')}</td></tr>`).join('')||'<tr><td colspan="14" class="muted">No site history available.</td></tr>';siteQuickFilter='all'}
 function siteOverlapDays(r,month){if(!month)return 0;const first=month+'-01',last=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).toISOString().slice(0,10),start=r.mobilizationDate>first?r.mobilizationDate:first,end=(r.lastWorkingDate||r.demobilizationDate||last)<last?(r.lastWorkingDate||r.demobilizationDate):last;return end&&start<=end?siteDays(start,end):0}
@@ -3957,5 +4364,31 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   setTimeout(ensureSubcontractorSiteStatus,300);
 })();
 </script>
+
+<script id="sidebar-count-sync">
+(function(){
+  function syncSidebarCounts(){
+    var targets=[
+      document.getElementById('rgCicpaExpiring'),
+      document.getElementById('cicpaExpiringCount'),
+      document.getElementById('unreadBadge')
+    ];
+    var value='0';
+    for(var i=0;i<targets.length;i++){
+      if(targets[i] && String(targets[i].textContent).trim()!==''){
+        value=String(targets[i].textContent).trim();
+        break;
+      }
+    }
+    var badge=document.getElementById('sidebarCicpaCount');
+    if(badge) badge.textContent=value;
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    syncSidebarCounts();
+    setInterval(syncSidebarCounts,1500);
+  });
+})();
+</script>
+
 </body>
 </html>

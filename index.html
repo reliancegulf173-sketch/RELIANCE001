@@ -1479,6 +1479,109 @@ tr:hover td{
 }
 </style>
 
+
+<style id="employee-profile-enterprise-ui">
+/* Company Employee 360 */
+#detailModal .modal-card{width:min(1180px,97vw)!important;padding:0!important;overflow:hidden!important}
+.employee360{max-width:none!important;background:#f5f8fc}
+.e360-hero{
+  grid-template-columns:auto 1fr auto!important;
+  padding:24px 26px!important;
+  background:linear-gradient(135deg,#073b68,#0a6ed1)!important;
+  border:0!important;border-radius:0!important;color:#fff!important;
+}
+.e360-hero .employee-photo.large{width:112px!important;height:112px!important;border-radius:50%!important;border:4px solid rgba(255,255,255,.75)!important}
+.e360-name h2{color:#fff!important;font-size:28px!important}
+.e360-name>div{color:#dbeeff}
+.e360-meta .pill{border:1px solid rgba(255,255,255,.35)}
+.e360-actions{max-width:430px}
+.e360-actions .btn{background:#fff!important;color:#17324d!important;border:1px solid rgba(255,255,255,.6)!important}
+.e360-actions .btn.primary{background:#f2b52b!important;color:#10243e!important}
+.e360-tabs{top:0!important;padding:12px 20px!important;background:#fff!important;border-bottom:1px solid #dce5ef}
+.e360-panel{padding:4px 22px 22px}
+.e360-section{border-radius:13px!important;border-color:#dce5ef!important;box-shadow:0 6px 18px rgba(23,50,77,.05)}
+.e360-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.e360-item{background:#f8fbff!important}
+.e360-item b{color:#60758a!important}
+
+/* Subcontractor profile */
+.sce-profile-link{cursor:pointer}
+.sce-profile-link:hover b{color:#0a6ed1;text-decoration:underline}
+.sce-profile-actions{display:flex;gap:6px;flex-wrap:wrap}
+.sce-profile-card{background:#f5f8fc;color:#17324d}
+.sce-profile-topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:22px 26px;background:linear-gradient(135deg,#073b68,#0a6ed1);color:#fff
+}
+.sce-profile-topbar small{font-weight:900;letter-spacing:1.3px;color:#bfe2ff}
+.sce-profile-topbar h2{margin:5px 0 0;color:#fff;font-size:27px}
+.sce-profile-layout{display:grid;grid-template-columns:255px minmax(0,1fr);min-height:520px}
+.sce-profile-sidebar{
+  padding:28px 22px;text-align:center;background:linear-gradient(180deg,#eef5fb,#e6eff8);
+  border-right:1px solid #d5e0eb
+}
+.sce-profile-sidebar .employee-photo.large{
+  width:132px!important;height:132px!important;border-radius:50%!important;
+  border:5px solid #fff!important;box-shadow:0 10px 24px rgba(23,50,77,.16)
+}
+.sce-profile-sidebar h3{margin:16px 0 4px;font-size:21px}
+.sce-profile-sidebar>p{margin:0 0 20px;color:#60758a;font-weight:800}
+.sce-profile-contact{padding:11px 0;border-top:1px solid #cfdae5;text-align:left}
+.sce-profile-contact b{display:block;font-size:10px;text-transform:uppercase;color:#71869b;margin-bottom:4px}
+.sce-profile-contact span{font-size:13px;font-weight:700;word-break:break-word}
+.sce-profile-main{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
+.sce-profile-section{
+  background:#fff;border:1px solid #d9e4ef;border-radius:13px;padding:17px;
+  box-shadow:0 6px 18px rgba(23,50,77,.05)
+}
+.sce-profile-section:nth-child(3),.sce-profile-section:nth-child(4){grid-column:1/-1}
+.sce-profile-section h3{margin:0 0 14px;color:#073b68;font-size:16px}
+.sce-profile-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.sce-profile-info-item{padding:9px 10px;border:1px solid #e0e8f0;border-radius:9px;background:#f9fbfd}
+.sce-profile-info-item b{display:block;font-size:10px;color:#6b7f91;text-transform:uppercase;margin-bottom:4px}
+.sce-profile-info-item span{font-size:13px;font-weight:700;word-break:break-word}
+.sce-profile-cert-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sce-profile-cert{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid #dce5ef;border-radius:10px;background:#fbfdff}
+.sce-cert-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#e7f2ff;color:#0a6ed1;font-size:18px}
+.sce-profile-cert b,.sce-profile-cert small{display:block}.sce-profile-cert small{margin-top:3px;color:#6b7f91}
+.sce-cert-status{padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900}
+.sce-cert-status.valid{background:#dcfce7;color:#166534}.sce-cert-status.soon{background:#ffedd5;color:#9a3412}.sce-cert-status.expired{background:#fee2e2;color:#991b1b}.sce-cert-status.neutral{background:#e8eef5;color:#52667a}
+.sce-profile-empty{padding:18px;text-align:center;color:#718397;background:#f7f9fb;border-radius:9px}
+.sce-profile-footer{display:flex;justify-content:flex-end;gap:10px;padding:15px 22px;background:#fff;border-top:1px solid #d9e4ef}
+@media(max-width:900px){
+  .e360-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .sce-profile-layout{grid-template-columns:1fr}
+  .sce-profile-sidebar{border-right:0;border-bottom:1px solid #d5e0eb}
+  .sce-profile-main{grid-template-columns:1fr}
+  .sce-profile-section:nth-child(3),.sce-profile-section:nth-child(4){grid-column:auto}
+}
+@media(max-width:600px){
+  .e360-hero{grid-template-columns:1fr!important;text-align:center}
+  .e360-actions{justify-content:center!important}
+  .e360-grid,.sce-profile-info-grid,.sce-profile-cert-list{grid-template-columns:1fr!important}
+  .sce-profile-footer{flex-direction:column}
+  .sce-profile-footer .btn{width:100%}
+}
+</style>
+
+
+<style id="employee-profile-search-ui-fix">
+.employee-profile-link,.sce-profile-link{cursor:pointer!important}
+.employee-profile-link:hover b,.sce-profile-link:hover b{
+  color:#0a6ed1!important;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+#employees .toolbar,#subcontractorEmployeesModule .toolbar{
+  align-items:center!important;
+}
+#employees .toolbar .btn.primary,
+#subcontractorEmployeesModule .toolbar .btn.primary{
+  min-height:42px;
+  white-space:nowrap;
+}
+</style>
+
 </head>
 <body>
 
@@ -1919,7 +2022,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
             <div class="kpi sce-kpi" onclick="filterScEmployees('missing')"><div class="label">Missing Information</div><div class="value" id="sceMissing">0</div><div class="note">Incomplete mandatory fields</div></div>
           </div>
           <div class="toolbar">
-            <input id="sceSearch" class="input grow" placeholder="Search employee, code, company, passport, unified number, Emirates ID..." oninput="renderScEmployees()">
+            <input id="sceSearch" class="input grow" placeholder="Search employee, code, company, passport, unified number, Emirates ID..." oninput="renderScEmployees()"><button type="button" class="btn primary" onclick="openSubcontractorProfileFromSearch()">Open Profile</button>
             <select id="sceCompanyFilter" class="input" onchange="renderScEmployees()"><option value="all">All Subcontractors</option></select>
             <select id="sceStatusFilter" class="input" onchange="renderScEmployees()"><option value="all">All Working Status</option><option>Active</option><option>Inactive</option></select>
             <select id="sceSiteStatusFilter" class="input" onchange="renderScEmployees()"><option value="all">All Site Status</option><option>On Site</option><option>On Leave</option><option>Idle</option></select>
@@ -2157,7 +2260,7 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
       <section id="employees" class="page">
         <div id="employeeNotices"></div>
         <div class="toolbar">
-          <input class="input grow" id="search" placeholder="Search employee name, ID, company or designation">
+          <input class="input grow" id="search" placeholder="Search employee name, ID, company or designation"><button type="button" class="btn primary" onclick="openCompanyProfileFromSearch()">Open Profile</button>
           <select class="input" id="filterCompany"><option value="">All Companies</option><option>RELIANCE GULF</option><option>RELIANCE INTERNATIONAL</option></select>
           <select class="input" id="filterWorkingStatus"><option value="">All Working Status</option><option>Active</option><option>Inactive</option></select>
           <select class="input" id="filterSiteStatus"><option value="">All Site Status</option><option>On Site</option><option>On Leave</option><option>Idle</option></select>
@@ -2909,7 +3012,7 @@ function renderEmployees(){
       let raw=key==='missingFields'?missingNames.join(', '):key==='additionalCertificates'?(e.additionalCertificates||[]).map(c=>[c.name,c.number,c.expiryDate,c.remark].filter(Boolean).join(' | ')).join('; '):(e[key]??'');
       let v=String(raw).trim();
 
-      if(key==='nameEnglish'){return `<td><div class="employee-name-with-photo">${employeePhotoHtml(e.photo,e.nameEnglish)}<b>${esc(v||'Not Filled')}</b></div></td>`;}
+      if(key==='nameEnglish'){return `<td><div class="employee-name-with-photo employee-profile-link" onclick="viewEmployee('${e.id}')">${employeePhotoHtml(e.photo,e.nameEnglish)}<b>${esc(v||'Not Filled')}</b></div></td>`;}
 
       if(key==='employeeId'){
         return `<td class="${v?'':'empty-cell'}"><span class="eid" onclick="viewEmployee('${e.id}')">${esc(v||'Not Filled')}</span></td>`;
@@ -3031,14 +3134,19 @@ function viewEmployee(id){
     ...additional.map(c=>[c.name||'Certificate',c.number,c.expiryDate])
   ];
   const wqtItems=Object.keys(e).filter(k=>k.toLowerCase().includes('wqt')).map(k=>[k.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()),e[k]]);
-  const tabs=[['overview','Overview'],['documents','Documents'],['medical','Medical / WQT'],['cicpa','CICPA'],['sites','Site History'],['leave','Leave History'],['salary','Salary History'],['remarks','Remarks'],['attachments','Attachments'],['timeline','Timeline']];
+  const tabs=[['overview','Overview'],['medical','Medical / WQT'],['cicpa','CICPA'],['sites','Site History'],['leave','Leave History'],['salary','Salary History'],['remarks','Remarks'],['timeline','Timeline']];
   detailContent.innerHTML=`<div class="employee360">
     <div class="e360-hero">
       ${employeePhotoHtml(e.photo,e.nameEnglish,true)}
       <div class="e360-name"><h2>${esc(e.nameEnglish||'Not Filled')}</h2><div>${esc(e.employeeId||'-')} · ${esc(e.actualDesignation||e.designation||'-')} · ${esc(e.company||'-')}</div>
         <div class="e360-meta"><span class="pill ${(e.workingStatus||'').toLowerCase()}">${esc(e.workingStatus||'Not Set')}</span><span class="pill ${(e.siteStatus||'idle').toLowerCase().replaceAll(' ','')}">${esc(e.siteStatus||'Idle')}</span><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus||'Under Review')}</span></div>
       </div>
-      <div class="e360-actions"><button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Edit Employee</button><button class="btn light" onclick="window.print()">Print Profile</button></div>
+      <div class="e360-actions">
+      <button class="btn primary" onclick="closeModal('detailModal');editEmployee('${id}')">Update Details</button>
+      <button class="btn light" onclick="showE360Tab('sites')">Site History</button>
+      <button class="btn light" onclick="showE360Tab('leave')">Leave History</button>
+      <button class="btn light" onclick="window.print()">Print Profile</button>
+    </div>
     </div>
     <div class="e360-tabs">${tabs.map((t,i)=>`<button class="e360-tab ${i===0?'active':''}" data-tab="${t[0]}" onclick="showE360Tab('${t[0]}')">${t[1]}</button>`).join('')}</div>
 
@@ -3052,10 +3160,6 @@ function viewEmployee(id){
         ['Labour Card',e.labourCardNumber||e.labourCardNo],['Labour Expiry',e.labourExpiry],['Approval Status',e.approvalStatus],['Updated By',e.updatedBy],['Updated At',e.updatedAt],['Status Source',e.statusSource]
       ])}</div>
     </div>
-
-    <div class="e360-panel" data-panel="documents"><div class="e360-section"><h3>Documents & Certificates</h3>
-      ${documents.length?documents.map(d=>`<div class="e360-doc"><div><b>${esc(d[0])}</b><div>Number: ${esc(e360Value(d[1]))}</div></div><div>Expiry: ${esc(e360Date(d[2]))}</div></div>`).join(''):'<div class="e360-empty">No documents recorded.</div>'}
-    </div></div>
 
     <div class="e360-panel" data-panel="medical"><div class="e360-section"><h3>Medical Information</h3>${e360Info([
       ['ADNOC Medical Required',e.adnocMedicalRequired?'Yes':'No'],['ADNOC Medical Type',e.adnocMedicalType],['ADNOC Medical Expiry',e.adnocMedicalExpiry],['H2S Expiry',e.h2sExpiry],['ATA Expiry',e.ataExpiry],['IOLE Expiry',e.ioleExpiry]
@@ -3077,10 +3181,6 @@ function viewEmployee(id){
 
     <div class="e360-panel" data-panel="remarks"><div class="e360-section"><h3>Employee Remarks</h3>${remarks.length?remarks.slice().reverse().map(r=>`<div class="e360-doc"><div>${esc(r.note)}</div><small>${esc(r.by||'')} · ${esc(r.date||'')}</small></div>`).join(''):'<div class="e360-empty">No remarks added.</div>'}
       <div style="display:flex;gap:8px;margin-top:10px"><textarea id="e360RemarkText" class="input grow" rows="2" placeholder="Enter employee remark"></textarea><button class="btn primary" onclick="addE360Remark('${id}')">Add Remark</button></div>
-    </div></div>
-
-    <div class="e360-panel" data-panel="attachments"><div class="e360-section"><h3>Attachments</h3>${attachments.length?attachments.map(a=>`<div class="e360-doc"><div><b>${esc(a.name)}</b><small>${esc(a.date||'')} · ${Math.round((a.size||0)/1024)} KB</small></div><div><button class="btn light" onclick="openE360Attachment('${id}','${a.id}')">Open</button> <button class="btn danger" onclick="deleteE360Attachment('${id}','${a.id}')">Delete</button></div></div>`).join(''):'<div class="e360-empty">No attachments uploaded.</div>'}
-      <div style="display:flex;gap:8px;margin-top:10px"><input id="e360AttachmentFile" type="file" class="input grow"><button class="btn primary" onclick="addE360Attachment('${id}')">Upload</button></div><small class="muted">Local mode: keep each attachment below 1.5 MB.</small>
     </div></div>
 
     <div class="e360-panel" data-panel="timeline"><div class="e360-section"><h3>Activity Timeline</h3>${timeline.length?`<div class="e360-timeline">${timeline.map(t=>`<div class="e360-event"><b>${esc(t.title)}</b><div>${esc(t.detail||'')}</div><small class="muted">${esc(t.date||'-')}</small></div>`).join('')}</div>`:'<div class="e360-empty">No activity recorded.</div>'}</div></div>
@@ -3196,49 +3296,6 @@ function exportExcel(){
 </style>
 
 </head><body><h2>Reliance Gulf Employee List</h2>${table}
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
-
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
@@ -3525,49 +3582,6 @@ function exportSubcontractorsPDF(){
 
 </head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script>
 
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
-
 </body></html>`);
   w.document.close();
 }
@@ -3653,7 +3667,7 @@ function renderScEmployees(){
   const rows=employees.map(x=>{
     const certCells=Array.from({length:maxCertificates},(_,i)=>`<td>${sceCertificateCell((x.certificates||[])[i]||{})}</td>`).join('');
     return `<tr>
-      <td><div class="employee-name-with-photo">${employeePhotoHtml(x.photo,x.name)}<b>${scEscape(x.name||'')}</b></div></td>
+      <td><div class="employee-name-with-photo sce-profile-link" onclick="viewSubcontractorEmployeeProfile('${x.id}')">${employeePhotoHtml(x.photo,x.name)}<b>${scEscape(x.name||'')}</b></div></td>
       <td dir="rtl">${scEscape(x.nameArabic||'')}</td><td><b>${scEscape(x.code||'')}</b></td><td>${scEscape(sceCompanyName(x.companyId)||'')}</td>
       <td dir="rtl">${scEscape(x.tradeArabic||'')}</td><td>${scEscape(x.tradeEnglish||x.trade||'')}</td><td>${scEscape(x.dob||'')}</td><td>${scEscape(x.bloodType||'')}</td><td>${scEscape(x.nationality||'')}</td>
       <td>${scEscape(x.mobile||'')}</td><td>${scEscape(x.passport||'')}</td><td>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.visa||'')}</td><td>${scEscape(x.unified||'')}</td>
@@ -3662,7 +3676,13 @@ function renderScEmployees(){
       <td>${scEscape(x.twpStatus||'')}</td><td>${scEscape(x.twpCard||'')}</td><td>${sceDateHtml(x.twpExpiry)}</td><td>${scEscape(x.twpFileName||'')}</td>
       ${certCells}
       <td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td>
-      <td>${scEscape(x.updatedAt||'')}</td><td><button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button> <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button></td>
+      <td>${scEscape(x.updatedAt||'')}</td><td>
+        <div class="sce-profile-actions">
+          <button class="btn light" onclick="viewSubcontractorEmployeeProfile('${x.id}')">View Profile</button>
+          <button class="btn primary" onclick="openScEmployeeForm('${x.id}')">Edit</button>
+          <button class="btn danger" onclick="deleteScEmployee('${x.id}')">Delete</button>
+        </div>
+      </td>
     </tr>`;
   });
   const totalColumns=baseHeaders.length+maxCertificates+endHeaders.length;
@@ -3680,6 +3700,102 @@ function getFilteredScEmployees(){
     return(!q||hay.includes(q))&&(cf==='all'||x.companyId===cf)&&(sf==='all'||x.workingStatus===sf)&&(ssf==='all'||(x.siteStatus||'Idle')===ssf)&&(tf==='all'||x.twpStatus===tf)&&(ef==='all'||(ef==='missing'?sceMissingFields(x).length>0:sceOverallExpiry(x)===ef));
   });
 }
+
+function sceProfileInfo(items){
+  return `<div class="sce-profile-info-grid">${items.map(([label,value])=>`
+    <div class="sce-profile-info-item"><b>${scEscape(label)}</b><span>${scEscape(value||'-')}</span></div>
+  `).join('')}</div>`;
+}
+function sceProfileCertificateStatus(date){
+  if(!date)return {label:'No Expiry',cls:'neutral'};
+  const today=new Date();today.setHours(0,0,0,0);
+  const d=new Date(date+'T00:00:00');
+  const days=Math.ceil((d-today)/86400000);
+  if(days<0)return {label:'Expired',cls:'expired'};
+  if(days<=30)return {label:`${days} days left`,cls:'soon'};
+  return {label:'Valid',cls:'valid'};
+}
+function viewSubcontractorEmployeeProfile(id){
+  const e=scEmployees.find(x=>x.id===id);if(!e)return;
+  const company=sceCompanyName(e.companyId)||'-';
+  let siteRows=[];
+  try{
+    siteRows=(typeof siteRecords==='undefined'?[]:siteRecords).filter(r=>r.employeeKey===`SUB:${e.id}`||r.employeeCode===e.code);
+  }catch(err){}
+  const activeSite=siteRows.find(r=>!r.demobilizationDate);
+  const certificates=Array.isArray(e.certificates)?e.certificates:[];
+  const certHtml=certificates.length?certificates.map((c,i)=>{
+    const status=sceProfileCertificateStatus(c.expiryDate);
+    return `<div class="sce-profile-cert">
+      <div class="sce-cert-icon">${i%2?'✓':'✦'}</div>
+      <div><b>${scEscape(c.name||c.otherName||`Certificate ${i+1}`)}</b>
+      <small>No.: ${scEscape(c.number||'-')} · Expiry: ${scEscape(c.expiryDate||'Not Set')}</small></div>
+      <span class="sce-cert-status ${status.cls}">${scEscape(status.label)}</span>
+    </div>`;
+  }).join(''):'<div class="sce-profile-empty">No certifications or skills recorded.</div>';
+
+  detailContent.innerHTML=`<div class="sce-profile-card">
+    <div class="sce-profile-topbar">
+      <div><small>SUBCONTRACTOR EMPLOYEE PROFILE</small><h2>${scEscape(e.name||'Employee')}</h2></div>
+      <span class="pill ${(e.siteStatus||'Idle')==='On Site'?'onsite':(e.siteStatus||'Idle')==='On Leave'?'leave':'idle'}">${scEscape(e.siteStatus||'Idle')}</span>
+    </div>
+
+    <div class="sce-profile-layout">
+      <aside class="sce-profile-sidebar">
+        ${employeePhotoHtml(e.photo,e.name,true)}
+        <h3>${scEscape(e.name||'-')}</h3>
+        <p>${scEscape(e.code||'-')}</p>
+        <div class="sce-profile-contact"><b>Mobile</b><span>${scEscape(e.mobile||'-')}</span></div>
+        <div class="sce-profile-contact"><b>Company</b><span>${scEscape(company)}</span></div>
+        <div class="sce-profile-contact"><b>Trade</b><span>${scEscape(e.tradeEnglish||e.trade||'-')}</span></div>
+      </aside>
+
+      <main class="sce-profile-main">
+        <section class="sce-profile-section">
+          <h3>Personal & Employment Information</h3>
+          ${sceProfileInfo([
+            ['Employee Code',e.code],['Name in Arabic',e.nameArabic],['Nationality',e.nationality],
+            ['Date of Birth',e.dob],['Blood Type',e.bloodType],['Mobile Number',e.mobile],
+            ['Subcontractor Company',company],['Trade / Designation',e.tradeEnglish||e.trade],
+            ['Working Status',e.workingStatus],['Site Status',e.siteStatus||'Idle'],
+            ['Current Client',activeSite?.clientName],['Current Project / Site',[activeSite?.projectName,activeSite?.siteLocation].filter(Boolean).join(' / ')]
+          ])}
+        </section>
+
+        <section class="sce-profile-section">
+          <h3>Identity & Permit Summary</h3>
+          ${sceProfileInfo([
+            ['Passport Number',e.passport],['Passport Expiry',e.passportExpiry],
+            ['Visa Number',e.visa],['Unified Number',e.unified],
+            ['Emirates ID',e.eid],['Emirates ID Expiry',e.eidExpiry],
+            ['TWP Status',e.twpStatus],['TWP Card Number',e.twpCard],
+            ['TWP Expiry',e.twpExpiry],['Last Updated',e.updatedAt]
+          ])}
+        </section>
+
+        <section class="sce-profile-section">
+          <h3>Certifications & Skills</h3>
+          <div class="sce-profile-cert-list">${certHtml}</div>
+        </section>
+
+        <section class="sce-profile-section">
+          <h3>Site Mobilization History</h3>
+          ${siteRows.length?`<div class="table-wrap"><table><thead><tr><th>Client</th><th>Project</th><th>Site</th><th>Mobilization</th><th>Demobilization</th><th>Status</th></tr></thead><tbody>
+          ${siteRows.map(r=>`<tr><td>${scEscape(r.clientName||'-')}</td><td>${scEscape(r.projectName||'-')}</td><td>${scEscape(r.siteLocation||'-')}</td><td>${scEscape(r.mobilizationDate||'-')}</td><td>${scEscape(r.demobilizationDate||'-')}</td><td>${scEscape(r.demobilizationDate?r.siteStatus:'On Site')}</td></tr>`).join('')}
+          </tbody></table></div>`:'<div class="sce-profile-empty">No site mobilization history recorded.</div>'}
+        </section>
+      </main>
+    </div>
+
+    <div class="sce-profile-footer">
+      <button class="btn primary" onclick="closeModal('detailModal');openScEmployeeForm('${e.id}')">Update Details</button>
+      <button class="btn light" onclick="window.print()">Print Profile</button>
+      <button class="btn light" onclick="closeModal('detailModal')">Close</button>
+    </div>
+  </div>`;
+  detailModal.classList.add('show');
+}
+
 function scEmployeeExportRows(){
   const employees=getFilteredScEmployees();
   const maxCertificates=Math.max(1,...employees.map(x=>(x.certificates||[]).length));
@@ -3711,49 +3827,6 @@ function exportScEmployeesExcel(){
 
 </head><body><h2>Subcontractor Employee List</h2>${table}
 
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
-
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Subcontractor_Employee_List.xls');
 }
@@ -3772,49 +3845,6 @@ function exportScEmployeesPDF(){
 </style>
 
 </head><body><h2>Subcontractor Employee List</h2>${table}<script>window.onload=()=>{window.print();}<\/script>
-
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
 
 </body></html>`);
   w.document.close();
@@ -3883,49 +3913,6 @@ function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w
 </style>
 
 </head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table>
-
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
 
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 // Extend existing page controller without changing existing portal logic.
@@ -4060,49 +4047,6 @@ function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records ava
 
 </head><body><h2>${cEsc(title)}</h2>${table}
 
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
-
 </body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
 function exportProjectsExcel(){exportHtmlExcel(projectExportRows(),'Project List','Project_List.xls')}
@@ -4114,49 +4058,6 @@ function printRows(rows,title){if(!rows.length){alert('No records available.');r
 </style>
 
 </head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table>
-
-
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
 
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 function printClients(){printRows(clientExportRows(),'Client List Report')}
@@ -4406,50 +4307,7 @@ function printMobilizationLetter(id){
   <tr><td>Working Hours per Day</td><td>${esc(r.hoursPerDay)}</td></tr><tr><td>Accommodation</td><td>${esc(r.accommodation)}</td></tr>
   <tr><td>Food</td><td>${esc(r.food)}</td></tr><tr><td>Remarks</td><td>${esc(r.remarks||'-')}</td></tr>
   </table><div class="sign"><div class="line">Employee Signature</div><div class="line">Authorized Signature</div></div>
-  <script>window.onload=()=>window.print()<\/script>
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
-
-</body></html>`);
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
   w.document.close();
 }
 
@@ -5126,47 +4984,83 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
 </script>
 
 
-<!-- EMPLOYEE PROFILE CARD MODAL -->
-<div id="employeeProfileModal" class="modal" style="display:none">
-<div class="modal-content" style="max-width:1100px;border-radius:16px;padding:24px">
-<h2>Employee Profile</h2>
-<div style="display:grid;grid-template-columns:260px 1fr 320px;gap:20px">
-<div style="text-align:center">
-<img id="epPhoto" src="" style="width:140px;height:140px;border-radius:50%;object-fit:cover;background:#eee">
-<h3 id="epName">Employee Name</h3>
-<p id="epCode">Employee Code</p>
-<p id="epPhone"></p>
-<p id="epEmail"></p>
-</div>
-<div>
-<h3>Personal Information</h3>
-<table style="width:100%">
-<tr><td>Nationality</td><td id="epNationality"></td></tr>
-<tr><td>Designation</td><td id="epDesignation"></td></tr>
-<tr><td>Department</td><td id="epDepartment"></td></tr>
-<tr><td>Company</td><td id="epCompany"></td></tr>
-<tr><td>Current Site</td><td id="epSite"></td></tr>
-<tr><td>Status</td><td id="epStatus"></td></tr>
-<tr><td>Joining Date</td><td id="epJoin"></td></tr>
-</table>
-</div>
-<div>
-<h3>Certificates & Skills</h3>
-<div id="epCertificates">No certificates available</div>
-<h3 style="margin-top:16px">Employment Summary</h3>
-<div id="epSummary"></div>
-</div>
-</div>
-<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-<button>Update Details</button>
-<button>Mobilization History</button>
-<button>Leave History</button>
-<button>Transfer Employee</button>
-<button>Print Profile</button>
-<button onclick="document.getElementById('employeeProfileModal').style.display='none'">Close</button>
-</div>
-</div>
-</div>
+<script id="employee-profile-search-fix">
+(function(){
+  function norm(v){return String(v||'').trim().toLowerCase()}
+
+  window.openCompanyProfileFromSearch=function(){
+    const input=document.getElementById('search');
+    const q=norm(input?.value);
+    if(!q){alert('Please enter Employee Name or Employee Code.');return}
+
+    const list=(typeof employees!=='undefined'&&Array.isArray(employees)?employees:[]);
+    const exact=list.find(e=>
+      norm(e.employeeId)===q ||
+      norm(e.nameEnglish)===q
+    );
+    const matches=list.filter(e=>
+      [e.employeeId,e.nameEnglish,e.company,e.actualDesignation,e.designation]
+        .some(v=>norm(v).includes(q))
+    );
+    const employee=exact||(matches.length===1?matches[0]:null);
+
+    if(employee){
+      if(typeof viewEmployee==='function') viewEmployee(employee.id);
+      return;
+    }
+    if(matches.length>1){
+      alert(`More than one employee found (${matches.length}). Please enter the full Employee Code or select View from the list.`);
+      return;
+    }
+    alert('Employee not found.');
+  };
+
+  window.openSubcontractorProfileFromSearch=function(){
+    const input=document.getElementById('sceSearch');
+    const q=norm(input?.value);
+    if(!q){alert('Please enter Employee Name or Employee Code.');return}
+
+    const list=(typeof scEmployees!=='undefined'&&Array.isArray(scEmployees)?scEmployees:[]);
+    const exact=list.find(e=>norm(e.code)===q||norm(e.name)===q);
+    const matches=list.filter(e=>
+      [e.code,e.name,e.nameArabic,e.mobile,e.passport,e.unified,e.eid]
+        .some(v=>norm(v).includes(q))
+    );
+    const employee=exact||(matches.length===1?matches[0]:null);
+
+    if(employee){
+      if(typeof viewSubcontractorEmployeeProfile==='function'){
+        viewSubcontractorEmployeeProfile(employee.id);
+      }
+      return;
+    }
+    if(matches.length>1){
+      alert(`More than one employee found (${matches.length}). Please enter the full Employee Code or select View Profile from the list.`);
+      return;
+    }
+    alert('Employee not found.');
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    const companySearch=document.getElementById('search');
+    const subcontractorSearch=document.getElementById('sceSearch');
+
+    companySearch?.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){
+        e.preventDefault();
+        window.openCompanyProfileFromSearch();
+      }
+    });
+
+    subcontractorSearch?.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){
+        e.preventDefault();
+        window.openSubcontractorProfileFromSearch();
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>

@@ -1387,6 +1387,98 @@ tr:hover td{
 }
 </style>
 
+
+<style id="site-monthly-multi-filter-design">
+.site-monthly-filter-card{padding:22px!important}
+.site-monthly-filter-grid{display:grid;grid-template-columns:180px repeat(3,minmax(190px,1fr));gap:14px;align-items:end}
+.site-filter-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.site-filter-field>span{color:#19324d;font-size:12px;font-weight:800;letter-spacing:.2px}
+.site-filter-field .input{width:100%;min-height:46px;background:#fff!important;color:#142b44!important}
+.site-filter-search{grid-column:1/4}
+.site-monthly-filter-actions{display:flex;gap:9px;justify-content:flex-end;align-items:center}
+.site-monthly-filter-actions .btn{min-height:46px;white-space:nowrap}
+.site-active-filter-strip{min-height:39px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:16px 0 4px;padding:8px 11px;border:1px dashed #bdd1e5;border-radius:10px;background:#f8fbff;color:#60758a;font-size:12px}
+.site-active-filter-strip>span{font-weight:800;color:#29445f}
+.site-active-filter-strip em{padding:5px 9px;border-radius:999px;background:#e7f2ff;color:#174f82;font-style:normal}
+.site-monthly-filter-card #siteMonthlyTotals{margin-top:12px!important}
+@media(max-width:1180px){
+  .site-monthly-filter-grid{grid-template-columns:repeat(2,minmax(220px,1fr))}
+  .site-filter-search{grid-column:auto}
+  .site-monthly-filter-actions{grid-column:1/-1}
+}
+@media(max-width:650px){
+  .site-monthly-filter-card{padding:14px!important}
+  .site-monthly-filter-grid{grid-template-columns:1fr}
+  .site-monthly-filter-actions{grid-column:auto;flex-direction:column}
+  .site-monthly-filter-actions .btn{width:100%}
+}
+</style>
+
+
+<style id="global-autocomplete-ui">
+.erp-autocomplete-wrap{
+  position:relative!important;
+}
+.erp-autocomplete-menu{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 5px);
+  z-index:999999;
+  max-height:280px;
+  overflow:auto;
+  background:#fff;
+  border:1px solid #bfd0e2;
+  border-radius:10px;
+  box-shadow:0 16px 38px rgba(15,42,68,.18);
+  display:none;
+}
+.erp-autocomplete-menu.show{display:block}
+.erp-autocomplete-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-bottom:1px solid #edf2f7;
+  cursor:pointer;
+  color:#17324d;
+  background:#fff;
+}
+.erp-autocomplete-item:last-child{border-bottom:0}
+.erp-autocomplete-item:hover,
+.erp-autocomplete-item.active{
+  background:#eaf4ff;
+}
+.erp-autocomplete-item b{
+  display:block;
+  font-size:13px;
+  line-height:1.3;
+}
+.erp-autocomplete-item small{
+  display:block;
+  margin-top:3px;
+  color:#6b7f91;
+  font-size:11px;
+  line-height:1.3;
+}
+.erp-autocomplete-badge{
+  padding:4px 7px;
+  border-radius:999px;
+  background:#eef5fb;
+  color:#0a5aa8;
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.erp-autocomplete-empty{
+  padding:12px;
+  color:#708399;
+  font-size:12px;
+  text-align:center;
+}
+</style>
+
 </head>
 <body>
 
@@ -1960,7 +2052,38 @@ MULTIPLE CLIENT CONTACTS ENABLED — V53
           <div class="table-wrap"><table><thead><tr><th>Code</th><th>Employee</th><th>Subcontractor</th><th>Client</th><th>Project</th><th>Site</th><th>Craft</th><th>Mobilized</th><th>Demobilized</th><th>Total Days</th><th>Rate</th><th>Status</th><th>Reason</th><th>Remarks</th></tr></thead><tbody id="siteHistoryBody"></tbody></table></div>
         </div>
         <div id="siteMonthlyModule" class="site-module hidden">
-          <div class="card"><div class="toolbar"><label>Reporting Month <input id="siteReportMonth" class="input" type="month" onchange="renderSiteMonthly()"></label><input id="siteMonthlySearch" class="input grow" placeholder="Filter monthly report" oninput="renderSiteMonthly()"><button class="btn success" onclick="exportSiteExcel('monthly')">Excel</button><button class="btn danger" onclick="printSiteReport('monthly')">PDF / Print</button></div><div id="siteMonthlyTotals" class="notice blue"></div></div>
+          <div class="card site-monthly-filter-card">
+  <div class="site-monthly-filter-grid">
+    <label class="site-filter-field"><span>Reporting Month</span>
+      <input id="siteReportMonth" class="input" type="month" onchange="renderSiteMonthly()">
+    </label>
+    <label class="site-filter-field"><span>Client</span>
+      <select id="siteMonthlyClientFilter" class="input" onchange="siteMonthlyFilterChanged('client')">
+        <option value="">All Clients</option>
+      </select>
+    </label>
+    <label class="site-filter-field"><span>Project</span>
+      <select id="siteMonthlyProjectFilter" class="input" onchange="siteMonthlyFilterChanged('project')">
+        <option value="">All Projects</option>
+      </select>
+    </label>
+    <label class="site-filter-field"><span>Site Location</span>
+      <select id="siteMonthlySiteFilter" class="input" onchange="renderSiteMonthly(true)">
+        <option value="">All Sites</option>
+      </select>
+    </label>
+    <label class="site-filter-field site-filter-search"><span>Search</span>
+      <input id="siteMonthlySearch" class="input" placeholder="Search employee, code, craft or subcontractor" oninput="renderSiteMonthly(true)">
+    </label>
+    <div class="site-monthly-filter-actions">
+      <button type="button" class="btn light" onclick="clearSiteMonthlyFilters()">Clear Filters</button>
+      <button type="button" class="btn success" onclick="exportSiteExcel('monthly')">Excel</button>
+      <button type="button" class="btn danger" onclick="printSiteReport('monthly')">PDF / Print</button>
+    </div>
+  </div>
+  <div id="siteMonthlyActiveFilters" class="site-active-filter-strip"></div>
+  <div id="siteMonthlyTotals" class="notice blue"></div>
+</div>
           <div class="table-wrap"><table><thead><tr><th>Month</th><th>Client</th><th>Project</th><th>Site</th><th>Code</th><th>Employee</th><th>Subcontractor</th><th>Craft</th><th>Mobilized</th><th>Demobilized</th><th>Working Days</th><th>Rate</th><th>Estimated Cost</th><th>Status</th></tr></thead><tbody id="siteMonthlyBody"></tbody></table></div>
         </div>
         <div id="siteDailyModule" class="site-module hidden">
@@ -3076,6 +3199,255 @@ function exportExcel(){
 
 
 
+
+<script id="global-smart-autocomplete">
+(function(){
+  const MAX_RESULTS=15;
+
+  function safeArray(v){return Array.isArray(v)?v:[]}
+  function text(v){return String(v??'').trim()}
+  function lower(v){return text(v).toLowerCase()}
+  function uniqueBy(items,keyFn){
+    const seen=new Set(),out=[];
+    items.forEach(x=>{
+      const k=keyFn(x);
+      if(k&&!seen.has(k)){seen.add(k);out.push(x)}
+    });
+    return out;
+  }
+
+  function collectFromSelects(){
+    const out=[];
+    document.querySelectorAll('select option').forEach(o=>{
+      const value=text(o.value),label=text(o.textContent);
+      if(value&&label&&!/^select\b|^all\b/i.test(label)){
+        out.push({value,label,meta:'Dropdown option',type:'Option'});
+      }
+    });
+    return out;
+  }
+
+  function collectEmployees(){
+    const pools=[];
+    try{
+      if(typeof employees!=='undefined') pools.push(...safeArray(employees));
+      if(typeof employeeRecords!=='undefined') pools.push(...safeArray(employeeRecords));
+      if(typeof subcontractorEmployees!=='undefined') pools.push(...safeArray(subcontractorEmployees));
+      if(typeof sceEmployees!=='undefined') pools.push(...safeArray(sceEmployees));
+      if(typeof siteAllEmployees==='function') pools.push(...safeArray(siteAllEmployees()));
+    }catch(e){}
+    return pools.map(e=>{
+      const code=text(e.code||e.employeeCode||e.empCode||e.id);
+      const name=text(e.name||e.employeeName||e.fullName);
+      const trade=text(e.trade||e.craft||e.designation||e.actualDesignation);
+      const company=text(e.subcontractor||e.subcontractorCompany||e.company||e.employeeType||e.type);
+      return {
+        value:code||name,
+        label:[code,name].filter(Boolean).join(' — ')||name||code,
+        meta:[trade,company].filter(Boolean).join(' · '),
+        type:'Employee',
+        code,name,trade,company
+      };
+    }).filter(x=>x.value);
+  }
+
+  function collectClients(){
+    const pools=[];
+    try{
+      if(typeof clientRecords!=='undefined') pools.push(...safeArray(clientRecords));
+      if(typeof clients!=='undefined') pools.push(...safeArray(clients));
+    }catch(e){}
+    return pools.map(c=>{
+      const name=text(c.name||c.clientName||c.companyName);
+      const code=text(c.code||c.clientCode||c.id);
+      return {value:name||code,label:name||code,meta:code&&name?`Code: ${code}`:'',type:'Client'};
+    }).filter(x=>x.value);
+  }
+
+  function collectProjectsSites(){
+    const out=[];
+    try{
+      safeArray(typeof siteProjects!=='undefined'?siteProjects:[]).forEach(p=>{
+        const name=text(p.name||p.projectName);
+        const client=text(p.clientName||p.client);
+        if(name)out.push({value:name,label:name,meta:client?`Client: ${client}`:'',type:'Project'});
+        safeArray(p.locations||p.sites||p.siteLocations).forEach(s=>{
+          const site=text(typeof s==='string'?s:(s.name||s.siteLocation||s.location));
+          if(site)out.push({value:site,label:site,meta:name?`Project: ${name}`:'',type:'Site'});
+        });
+      });
+      safeArray(typeof siteRecords!=='undefined'?siteRecords:[]).forEach(r=>{
+        const project=text(r.projectName),site=text(r.siteLocation),client=text(r.clientName);
+        if(project)out.push({value:project,label:project,meta:client?`Client: ${client}`:'',type:'Project'});
+        if(site)out.push({value:site,label:site,meta:[client,project].filter(Boolean).join(' · '),type:'Site'});
+      });
+    }catch(e){}
+    return out;
+  }
+
+  function collectSubcontractors(){
+    const pools=[];
+    try{
+      if(typeof subcontractorRecords!=='undefined')pools.push(...safeArray(subcontractorRecords));
+      if(typeof subcontractors!=='undefined')pools.push(...safeArray(subcontractors));
+    }catch(e){}
+    return pools.map(s=>{
+      const name=text(s.name||s.companyName||s.subcontractorName);
+      const code=text(s.code||s.id);
+      return {value:name||code,label:name||code,meta:code&&name?`Code: ${code}`:'',type:'Subcontractor'};
+    }).filter(x=>x.value);
+  }
+
+  function allSuggestions(){
+    return uniqueBy(
+      [
+        ...collectEmployees(),
+        ...collectClients(),
+        ...collectProjectsSites(),
+        ...collectSubcontractors(),
+        ...collectFromSelects()
+      ],
+      x=>`${lower(x.type)}|${lower(x.value)}|${lower(x.label)}`
+    );
+  }
+
+  function fieldCategory(input){
+    const s=lower([input.id,input.name,input.placeholder,input.className].join(' '));
+    if(/employee|empcode|employee code|staff/.test(s))return 'Employee';
+    if(/client/.test(s))return 'Client';
+    if(/project/.test(s))return 'Project';
+    if(/site|location/.test(s))return 'Site';
+    if(/subcontract/.test(s))return 'Subcontractor';
+    return '';
+  }
+
+  function isEligible(input){
+    if(!input||input.tagName!=='INPUT')return false;
+    const type=lower(input.type);
+    if(['password','date','month','number','checkbox','radio','file','hidden'].includes(type))return false;
+    if(input.disabled||input.readOnly)return false;
+    const s=lower([input.id,input.name,input.placeholder,input.className].join(' '));
+    return /search|filter|employee|emp code|employee code|client|project|site|location|subcontractor|craft|designation/.test(s);
+  }
+
+  function ensureWrap(input){
+    if(input.dataset.erpAutocompleteReady==='1')return;
+    input.dataset.erpAutocompleteReady='1';
+
+    let wrap=input.parentElement;
+    if(!wrap||!wrap.classList.contains('erp-autocomplete-wrap')){
+      wrap=document.createElement('div');
+      wrap.className='erp-autocomplete-wrap';
+      input.parentNode.insertBefore(wrap,input);
+      wrap.appendChild(input);
+    }
+
+    const menu=document.createElement('div');
+    menu.className='erp-autocomplete-menu';
+    wrap.appendChild(menu);
+
+    let activeIndex=-1;
+    let current=[];
+
+    function choose(item){
+      const id=lower(input.id+' '+input.name+' '+input.placeholder);
+      if(item.type==='Employee'&&/code/.test(id)&&item.code){
+        input.value=item.code;
+      }else{
+        input.value=item.value;
+      }
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      menu.classList.remove('show');
+      activeIndex=-1;
+    }
+
+    function render(){
+      const q=lower(input.value);
+      if(q.length<1){
+        menu.classList.remove('show');
+        return;
+      }
+
+      const category=fieldCategory(input);
+      const source=allSuggestions();
+      current=source.filter(item=>{
+        if(category&&item.type!==category&&item.type!=='Option')return false;
+        return lower([item.value,item.label,item.meta,item.type].join(' ')).includes(q);
+      }).slice(0,MAX_RESULTS);
+
+      if(!current.length){
+        menu.innerHTML='<div class="erp-autocomplete-empty">No matching option found</div>';
+        menu.classList.add('show');
+        return;
+      }
+
+      menu.innerHTML=current.map((item,i)=>`
+        <div class="erp-autocomplete-item" data-index="${i}">
+          <div>
+            <b>${escapeHtml(item.label||item.value)}</b>
+            ${item.meta?`<small>${escapeHtml(item.meta)}</small>`:''}
+          </div>
+          <span class="erp-autocomplete-badge">${escapeHtml(item.type||'Option')}</span>
+        </div>
+      `).join('');
+      menu.classList.add('show');
+      activeIndex=-1;
+
+      menu.querySelectorAll('.erp-autocomplete-item').forEach(el=>{
+        el.addEventListener('mousedown',e=>{
+          e.preventDefault();
+          choose(current[Number(el.dataset.index)]);
+        });
+      });
+    }
+
+    input.addEventListener('input',render);
+    input.addEventListener('focus',()=>{if(text(input.value).length)render()});
+    input.addEventListener('keydown',e=>{
+      const items=[...menu.querySelectorAll('.erp-autocomplete-item')];
+      if(!menu.classList.contains('show')||!items.length)return;
+      if(e.key==='ArrowDown'){
+        e.preventDefault();
+        activeIndex=(activeIndex+1)%items.length;
+      }else if(e.key==='ArrowUp'){
+        e.preventDefault();
+        activeIndex=(activeIndex-1+items.length)%items.length;
+      }else if(e.key==='Enter'&&activeIndex>=0){
+        e.preventDefault();
+        choose(current[activeIndex]);
+        return;
+      }else if(e.key==='Escape'){
+        menu.classList.remove('show');
+        return;
+      }else return;
+      items.forEach((el,i)=>el.classList.toggle('active',i===activeIndex));
+      items[activeIndex]?.scrollIntoView({block:'nearest'});
+    });
+
+    document.addEventListener('mousedown',e=>{
+      if(!wrap.contains(e.target))menu.classList.remove('show');
+    });
+  }
+
+  function escapeHtml(v){
+    return text(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  function initialize(){
+    document.querySelectorAll('input').forEach(input=>{
+      if(isEligible(input))ensureWrap(input);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    initialize();
+    const observer=new MutationObserver(()=>initialize());
+    observer.observe(document.body,{childList:true,subtree:true});
+  });
+})();
+</script>
+
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
@@ -4012,8 +4384,80 @@ function renderSiteActive(){
 function siteHistoryFiltered(){const q=(siteHistorySearch?.value||'').toLowerCase(),m=siteToday().slice(0,7);return siteRecords.filter(r=>{const hay=Object.values(r).join(' ').toLowerCase();return(!q||hay.includes(q))&&(siteQuickFilter!=='demobilizedMonth'||siteMonth(r.demobilizationDate)===m)})}
 function renderSiteHistory(){const rows=siteHistoryFiltered();siteHistoryBody.innerHTML=rows.map(r=>`<tr><td>${esc(r.employeeCode)}</td><td><b>${esc(r.employeeName)}</b></td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.trade)}</td><td>${esc(r.mobilizationDate)}</td><td>${esc(r.demobilizationDate||'-')}</td><td>${siteDays(r.mobilizationDate,r.lastWorkingDate||r.demobilizationDate)}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${esc(r.demobilizationDate?r.siteStatus:'On Site')}</td><td>${esc(r.demobilizationReason||'-')}</td><td>${esc(r.remarks||'-')}</td></tr>`).join('')||'<tr><td colspan="14" class="muted">No site history available.</td></tr>';siteQuickFilter='all'}
 function siteOverlapDays(r,month){if(!month)return 0;const first=month+'-01',last=new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).toISOString().slice(0,10),start=r.mobilizationDate>first?r.mobilizationDate:first,end=(r.lastWorkingDate||r.demobilizationDate||last)<last?(r.lastWorkingDate||r.demobilizationDate):last;return end&&start<=end?siteDays(start,end):0}
-function siteMonthlyRows(){const month=siteReportMonth.value||siteToday().slice(0,7),q=(siteMonthlySearch?.value||'').toLowerCase();return siteRecords.map(r=>({...r,month,workingDays:siteOverlapDays(r,month)})).filter(r=>r.workingDays>0&&(!q||[r.clientName,r.projectName,r.siteLocation,r.employeeCode,r.employeeName,r.subcontractorCompany,r.trade].join(' ').toLowerCase().includes(q)))}
-function renderSiteMonthly(){if(!siteReportMonth.value)siteReportMonth.value=siteToday().slice(0,7);const rows=siteMonthlyRows(),cost=rows.reduce((n,r)=>n+r.workingDays*Number(r.rate||0),0);siteMonthlyTotals.innerHTML=`<b>Total Workers: ${rows.length}</b> · Clients: ${new Set(rows.map(r=>r.clientName)).size} · Projects: ${new Set(rows.map(r=>r.projectName)).size} · Sites: ${new Set(rows.map(r=>r.siteLocation)).size} · Estimated Monthly Manpower Cost: AED ${cost.toFixed(2)}`;siteMonthlyBody.innerHTML=rows.map(r=>`<tr><td>${esc(r.month)}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeName)}</td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.trade)}</td><td>${esc(r.mobilizationDate)}</td><td>${esc(r.demobilizationDate||'-')}</td><td>${r.workingDays}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${(r.workingDays*Number(r.rate||0)).toFixed(2)}</td><td>${esc(r.demobilizationDate?r.siteStatus:'On Site')}</td></tr>`).join('')||'<tr><td colspan="14" class="muted">No manpower utilization in selected month.</td></tr>'}
+function siteMonthlyFilterElements(){
+  return {
+    client:document.getElementById('siteMonthlyClientFilter'),
+    project:document.getElementById('siteMonthlyProjectFilter'),
+    site:document.getElementById('siteMonthlySiteFilter'),
+    active:document.getElementById('siteMonthlyActiveFilters')
+  };
+}
+function siteMonthlyRecordPool(){
+  const month=siteReportMonth.value||siteToday().slice(0,7);
+  return siteRecords.map(r=>({...r,month,workingDays:siteOverlapDays(r,month)})).filter(r=>r.workingDays>0);
+}
+function siteSetSelectOptions(select,items,allLabel,selected){
+  if(!select)return;
+  const unique=[...new Set(items.filter(Boolean).map(String))].sort((a,b)=>a.localeCompare(b));
+  select.innerHTML=`<option value="">${allLabel}</option>`+unique.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  select.value=unique.includes(String(selected||''))?String(selected):'';
+}
+function siteRefreshMonthlyFilters(changed){
+  const f=siteMonthlyFilterElements();
+  if(!f.client||!f.project||!f.site)return;
+  const oldClient=f.client.value,oldProject=f.project.value,oldSite=f.site.value;
+  const pool=siteMonthlyRecordPool();
+
+  siteSetSelectOptions(f.client,pool.map(r=>r.clientName),'All Clients',oldClient);
+  const client=f.client.value;
+  const projectPool=pool.filter(r=>!client||r.clientName===client);
+  siteSetSelectOptions(f.project,projectPool.map(r=>r.projectName),'All Projects',changed==='client'?'':oldProject);
+
+  const project=f.project.value;
+  const sitePool=projectPool.filter(r=>!project||r.projectName===project);
+  siteSetSelectOptions(f.site,sitePool.map(r=>r.siteLocation),'All Sites',(changed==='client'||changed==='project')?'':oldSite);
+}
+function siteMonthlyFilterChanged(changed){
+  siteRefreshMonthlyFilters(changed);
+  renderSiteMonthly(true);
+}
+function clearSiteMonthlyFilters(){
+  const f=siteMonthlyFilterElements();
+  if(f.client)f.client.value='';
+  if(f.project)f.project.value='';
+  if(f.site)f.site.value='';
+  if(siteMonthlySearch)siteMonthlySearch.value='';
+  siteRefreshMonthlyFilters('client');
+  renderSiteMonthly(true);
+}
+function siteMonthlyRows(){
+  const month=siteReportMonth.value||siteToday().slice(0,7);
+  const q=(siteMonthlySearch?.value||'').trim().toLowerCase();
+  const f=siteMonthlyFilterElements();
+  const client=f.client?.value||'',project=f.project?.value||'',site=f.site?.value||'';
+
+  return siteRecords.map(r=>({...r,month,workingDays:siteOverlapDays(r,month)})).filter(r=>
+    r.workingDays>0 &&
+    (!client||r.clientName===client) &&
+    (!project||r.projectName===project) &&
+    (!site||r.siteLocation===site) &&
+    (!q||[r.clientName,r.projectName,r.siteLocation,r.employeeCode,r.employeeName,r.subcontractorCompany,r.trade].join(' ').toLowerCase().includes(q))
+  );
+}
+function renderSiteMonthly(skipRefresh){
+  if(!siteReportMonth.value)siteReportMonth.value=siteToday().slice(0,7);
+  if(!skipRefresh)siteRefreshMonthlyFilters('');
+  const rows=siteMonthlyRows(),cost=rows.reduce((n,r)=>n+r.workingDays*Number(r.rate||0),0);
+  const f=siteMonthlyFilterElements(),labels=[];
+  if(f.client?.value)labels.push(`Client: <b>${esc(f.client.value)}</b>`);
+  if(f.project?.value)labels.push(`Project: <b>${esc(f.project.value)}</b>`);
+  if(f.site?.value)labels.push(`Site: <b>${esc(f.site.value)}</b>`);
+  if((siteMonthlySearch?.value||'').trim())labels.push(`Search: <b>${esc(siteMonthlySearch.value.trim())}</b>`);
+  if(f.active)f.active.innerHTML=labels.length?`<span>Active Filters</span>${labels.map(x=>`<em>${x}</em>`).join('')}`:'<span>No additional filters applied</span>';
+
+  siteMonthlyTotals.innerHTML=`<b>Total Workers: ${rows.length}</b> · Clients: ${new Set(rows.map(r=>r.clientName)).size} · Projects: ${new Set(rows.map(r=>r.projectName)).size} · Sites: ${new Set(rows.map(r=>r.siteLocation)).size} · Estimated Monthly Manpower Cost: AED ${cost.toFixed(2)}`;
+  siteMonthlyBody.innerHTML=rows.map(r=>`<tr><td>${esc(r.month)}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeName)}</td><td>${esc(r.subcontractorCompany||'-')}</td><td>${esc(r.trade)}</td><td>${esc(r.mobilizationDate)}</td><td>${esc(r.demobilizationDate||'-')}</td><td>${r.workingDays}</td><td>${Number(r.rate||0).toFixed(2)}</td><td>${(r.workingDays*Number(r.rate||0)).toFixed(2)}</td><td>${esc(r.demobilizationDate?r.siteStatus:'On Site')}</td></tr>`).join('')||'<tr><td colspan="14" class="muted">No manpower utilization matches the selected filters.</td></tr>';
+}
 function siteApplyDatePreset(){const t=new Date(),fmt=d=>d.toISOString().slice(0,10),v=siteDatePreset.value;let a=new Date(t),b=new Date(t);if(v==='week'){a.setDate(t.getDate()-t.getDay())}if(v==='month')a=new Date(t.getFullYear(),t.getMonth(),1);if(v!=='custom'){siteDateFrom.value=fmt(a);siteDateTo.value=fmt(b)}renderSiteDaily()}
 function siteDailyRows(){const a=siteDateFrom.value||siteToday(),b=siteDateTo.value||a,rows=[];siteRecords.forEach(r=>{if(r.mobilizationDate>=a&&r.mobilizationDate<=b)rows.push({...r,category:'Newly Mobilized',eventDate:r.mobilizationDate});if(r.demobilizationDate&&r.demobilizationDate>=a&&r.demobilizationDate<=b)rows.push({...r,category:'Demobilized',eventDate:r.demobilizationDate});if(r.mobilizationDate<=b&&(!r.demobilizationDate||r.demobilizationDate>=a))rows.push({...r,category:r.siteStatus==='On Leave'?'On Leave':'Present on Site',eventDate:a})});return rows}
 function renderSiteDaily(){if(!siteDateFrom.value)siteApplyDatePreset();const rows=siteDailyRows();siteDailyPresent.textContent=rows.filter(r=>r.category==='Present on Site').length;siteDailyLeave.textContent=rows.filter(r=>r.category==='On Leave').length;siteDailyNew.textContent=rows.filter(r=>r.category==='Newly Mobilized').length;siteDailyDemob.textContent=rows.filter(r=>r.category==='Demobilized').length;siteDailyBody.innerHTML=rows.map(r=>`<tr><td>${esc(r.category)}</td><td>${esc(r.eventDate)}</td><td>${esc(r.employeeCode)}</td><td>${esc(r.employeeName)}</td><td>${esc(r.clientName)}</td><td>${esc(r.projectName)}</td><td>${esc(r.siteLocation)}</td><td>${esc(r.trade)}</td><td>${esc(r.siteStatus)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">No records for selected date range.</td></tr>'}

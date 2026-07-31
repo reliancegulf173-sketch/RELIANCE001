@@ -1582,6 +1582,74 @@ tr:hover td{
 }
 </style>
 
+
+<style id="employee-profile-scrollbar-fix">
+/* Employee profile modal scrolling */
+#detailModal{
+  align-items:flex-start!important;
+  overflow-y:auto!important;
+  padding:18px!important;
+}
+
+#detailModal .modal-card{
+  width:min(1180px,97vw)!important;
+  max-height:calc(100vh - 36px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  margin:auto!important;
+  scrollbar-width:thin;
+  scrollbar-color:#0a6ed1 #e8eef5;
+}
+
+#detailModal .modal-card::-webkit-scrollbar{
+  width:11px;
+}
+
+#detailModal .modal-card::-webkit-scrollbar-track{
+  background:#e8eef5;
+  border-radius:10px;
+}
+
+#detailModal .modal-card::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,#0a6ed1,#0854a0);
+  border-radius:10px;
+  border:2px solid #e8eef5;
+}
+
+#detailModal .modal-card::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,#0878e4,#073b68);
+}
+
+#detailModal .close{
+  position:sticky!important;
+  top:10px!important;
+  float:right!important;
+  z-index:50!important;
+  margin:10px 10px -46px 0!important;
+  background:#fff!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.18)!important;
+}
+
+/* Keep profile tabs visible while scrolling */
+#detailModal .e360-tabs{
+  position:sticky!important;
+  top:0!important;
+  z-index:20!important;
+  background:#fff!important;
+}
+
+/* Mobile */
+@media(max-width:700px){
+  #detailModal{
+    padding:6px!important;
+  }
+  #detailModal .modal-card{
+    width:100%!important;
+    max-height:calc(100vh - 12px)!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -3128,9 +3196,9 @@ function viewEmployee(id){
   const additional=e.additionalCertificates||[];
   const documents=[
     ['Passport',e.passportNumber||e.passportNo,e.passportExpiry],
-    ['Visa',e.visaNumber||e.visaNo,e.visaExpiry],
+    ['Visa / Residence',e.visaStatus||e.residenceFile||e.unifiedNumber,e.idExpiry||e.residenceExpiry],
     ['Emirates ID',e.emiratesId,e.idExpiry||e.emiratesIdExpiry],
-    ['Labour Card',e.labourCardNumber||e.labourCardNo,e.labourExpiry],
+    ['Labour Card',e.labourNumber||e.labourCardNumber||e.labourCardNo,e.labourExpiry],
     ...additional.map(c=>[c.name||'Certificate',c.number,c.expiryDate])
   ];
   const wqtItems=Object.keys(e).filter(k=>k.toLowerCase().includes('wqt')).map(k=>[k.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()),e[k]]);
@@ -3156,8 +3224,22 @@ function viewEmployee(id){
         ['Company',e.company],['Designation',e.actualDesignation||e.designation],['Date of Joining',e.dateOfJoining||e.joiningDate],['Working Status',e.workingStatus],['Site Status',e.siteStatus],['Current Site',e.currentSiteName]
       ])}</div>
       <div class="e360-section"><h3>Identity & Employment Summary</h3>${e360Info([
-        ['Passport Number',e.passportNumber||e.passportNo],['Passport Expiry',e.passportExpiry],['Visa Number',e.visaNumber||e.visaNo],['Visa Expiry',e.visaExpiry],['Emirates ID',e.emiratesId],['Emirates ID Expiry',e.idExpiry||e.emiratesIdExpiry],
-        ['Labour Card',e.labourCardNumber||e.labourCardNo],['Labour Expiry',e.labourExpiry],['Approval Status',e.approvalStatus],['Updated By',e.updatedBy],['Updated At',e.updatedAt],['Status Source',e.statusSource]
+        ['Passport Number',e.passportNumber||e.passportNo||e.passport],
+        ['Passport Issue Date',e.passportIssue||e.passportIssueDate],
+        ['Passport Expiry',e.passportExpiry||e.passportExpiryDate],
+        ['Visa Status',e.visaStatus||e.residenceStatus],
+        ['Trade as per Visa',e.visaTrade||e.tradeAsPerVisa],
+        ['Unified Number',e.unifiedNumber||e.uidNumber],
+        ['Residence File Number',e.residenceFile||e.residenceFileNumber],
+        ['Emirates ID',e.emiratesId||e.emiratesIdNumber||e.eid],
+        ['ID Issue Date',e.idIssue||e.emiratesIdIssue],
+        ['Emirates ID Expiry',e.idExpiry||e.emiratesIdExpiry||e.eidExpiry],
+        ['Labour Card Number',e.labourNumber||e.labourCardNumber||e.labourCardNo],
+        ['Labour Card Expiry',e.labourExpiry||e.labourCardExpiry],
+        ['Date of Joining',e.joiningDate||e.dateOfJoining],
+        ['Approval Status',e.approvalStatus],
+        ['Updated By',e.updatedBy],
+        ['Updated At',e.updatedAt]
       ])}</div>
     </div>
 
@@ -5059,6 +5141,21 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
       }
     });
   });
+})();
+</script>
+
+
+<script id="identity-summary-data-fix">
+(function(){
+  window.employeeIdentityValue=function(e){
+    const values=[
+      e.passportNumber,e.passportNo,e.passport,e.passportIssue,e.passportExpiry,
+      e.visaStatus,e.visaTrade,e.unifiedNumber,e.residenceFile,
+      e.emiratesId,e.emiratesIdNumber,e.eid,e.idIssue,e.idExpiry,e.emiratesIdExpiry,
+      e.labourNumber,e.labourCardNumber,e.labourExpiry,e.joiningDate
+    ];
+    return values.some(v=>String(v||'').trim());
+  };
 })();
 </script>
 

@@ -3196,258 +3196,6 @@ function exportExcel(){
 </style>
 
 </head><body><h2>Reliance Gulf Employee List</h2>${table}
-
-
-
-
-<script id="global-smart-autocomplete">
-(function(){
-  const MAX_RESULTS=15;
-
-  function safeArray(v){return Array.isArray(v)?v:[]}
-  function text(v){return String(v??'').trim()}
-  function lower(v){return text(v).toLowerCase()}
-  function uniqueBy(items,keyFn){
-    const seen=new Set(),out=[];
-    items.forEach(x=>{
-      const k=keyFn(x);
-      if(k&&!seen.has(k)){seen.add(k);out.push(x)}
-    });
-    return out;
-  }
-
-  function collectFromSelects(){
-    const out=[];
-    document.querySelectorAll('select option').forEach(o=>{
-      const value=text(o.value),label=text(o.textContent);
-      if(value&&label&&!/^select\b|^all\b/i.test(label)){
-        out.push({value,label,meta:'Dropdown option',type:'Option'});
-      }
-    });
-    return out;
-  }
-
-  function collectEmployees(){
-    const pools=[];
-    try{
-      if(typeof employees!=='undefined') pools.push(...safeArray(employees));
-      if(typeof employeeRecords!=='undefined') pools.push(...safeArray(employeeRecords));
-      if(typeof subcontractorEmployees!=='undefined') pools.push(...safeArray(subcontractorEmployees));
-      if(typeof sceEmployees!=='undefined') pools.push(...safeArray(sceEmployees));
-      if(typeof siteAllEmployees==='function') pools.push(...safeArray(siteAllEmployees()));
-    }catch(e){}
-    return pools.map(e=>{
-      const code=text(e.code||e.employeeCode||e.empCode||e.id);
-      const name=text(e.name||e.employeeName||e.fullName);
-      const trade=text(e.trade||e.craft||e.designation||e.actualDesignation);
-      const company=text(e.subcontractor||e.subcontractorCompany||e.company||e.employeeType||e.type);
-      return {
-        value:code||name,
-        label:[code,name].filter(Boolean).join(' — ')||name||code,
-        meta:[trade,company].filter(Boolean).join(' · '),
-        type:'Employee',
-        code,name,trade,company
-      };
-    }).filter(x=>x.value);
-  }
-
-  function collectClients(){
-    const pools=[];
-    try{
-      if(typeof clientRecords!=='undefined') pools.push(...safeArray(clientRecords));
-      if(typeof clients!=='undefined') pools.push(...safeArray(clients));
-    }catch(e){}
-    return pools.map(c=>{
-      const name=text(c.name||c.clientName||c.companyName);
-      const code=text(c.code||c.clientCode||c.id);
-      return {value:name||code,label:name||code,meta:code&&name?`Code: ${code}`:'',type:'Client'};
-    }).filter(x=>x.value);
-  }
-
-  function collectProjectsSites(){
-    const out=[];
-    try{
-      safeArray(typeof siteProjects!=='undefined'?siteProjects:[]).forEach(p=>{
-        const name=text(p.name||p.projectName);
-        const client=text(p.clientName||p.client);
-        if(name)out.push({value:name,label:name,meta:client?`Client: ${client}`:'',type:'Project'});
-        safeArray(p.locations||p.sites||p.siteLocations).forEach(s=>{
-          const site=text(typeof s==='string'?s:(s.name||s.siteLocation||s.location));
-          if(site)out.push({value:site,label:site,meta:name?`Project: ${name}`:'',type:'Site'});
-        });
-      });
-      safeArray(typeof siteRecords!=='undefined'?siteRecords:[]).forEach(r=>{
-        const project=text(r.projectName),site=text(r.siteLocation),client=text(r.clientName);
-        if(project)out.push({value:project,label:project,meta:client?`Client: ${client}`:'',type:'Project'});
-        if(site)out.push({value:site,label:site,meta:[client,project].filter(Boolean).join(' · '),type:'Site'});
-      });
-    }catch(e){}
-    return out;
-  }
-
-  function collectSubcontractors(){
-    const pools=[];
-    try{
-      if(typeof subcontractorRecords!=='undefined')pools.push(...safeArray(subcontractorRecords));
-      if(typeof subcontractors!=='undefined')pools.push(...safeArray(subcontractors));
-    }catch(e){}
-    return pools.map(s=>{
-      const name=text(s.name||s.companyName||s.subcontractorName);
-      const code=text(s.code||s.id);
-      return {value:name||code,label:name||code,meta:code&&name?`Code: ${code}`:'',type:'Subcontractor'};
-    }).filter(x=>x.value);
-  }
-
-  function allSuggestions(){
-    return uniqueBy(
-      [
-        ...collectEmployees(),
-        ...collectClients(),
-        ...collectProjectsSites(),
-        ...collectSubcontractors(),
-        ...collectFromSelects()
-      ],
-      x=>`${lower(x.type)}|${lower(x.value)}|${lower(x.label)}`
-    );
-  }
-
-  function fieldCategory(input){
-    const s=lower([input.id,input.name,input.placeholder,input.className].join(' '));
-    if(/employee|empcode|employee code|staff/.test(s))return 'Employee';
-    if(/client/.test(s))return 'Client';
-    if(/project/.test(s))return 'Project';
-    if(/site|location/.test(s))return 'Site';
-    if(/subcontract/.test(s))return 'Subcontractor';
-    return '';
-  }
-
-  function isEligible(input){
-    if(!input||input.tagName!=='INPUT')return false;
-    const type=lower(input.type);
-    if(['password','date','month','number','checkbox','radio','file','hidden'].includes(type))return false;
-    if(input.disabled||input.readOnly)return false;
-    const s=lower([input.id,input.name,input.placeholder,input.className].join(' '));
-    return /search|filter|employee|emp code|employee code|client|project|site|location|subcontractor|craft|designation/.test(s);
-  }
-
-  function ensureWrap(input){
-    if(input.dataset.erpAutocompleteReady==='1')return;
-    input.dataset.erpAutocompleteReady='1';
-
-    let wrap=input.parentElement;
-    if(!wrap||!wrap.classList.contains('erp-autocomplete-wrap')){
-      wrap=document.createElement('div');
-      wrap.className='erp-autocomplete-wrap';
-      input.parentNode.insertBefore(wrap,input);
-      wrap.appendChild(input);
-    }
-
-    const menu=document.createElement('div');
-    menu.className='erp-autocomplete-menu';
-    wrap.appendChild(menu);
-
-    let activeIndex=-1;
-    let current=[];
-
-    function choose(item){
-      const id=lower(input.id+' '+input.name+' '+input.placeholder);
-      if(item.type==='Employee'&&/code/.test(id)&&item.code){
-        input.value=item.code;
-      }else{
-        input.value=item.value;
-      }
-      input.dispatchEvent(new Event('input',{bubbles:true}));
-      input.dispatchEvent(new Event('change',{bubbles:true}));
-      menu.classList.remove('show');
-      activeIndex=-1;
-    }
-
-    function render(){
-      const q=lower(input.value);
-      if(q.length<1){
-        menu.classList.remove('show');
-        return;
-      }
-
-      const category=fieldCategory(input);
-      const source=allSuggestions();
-      current=source.filter(item=>{
-        if(category&&item.type!==category&&item.type!=='Option')return false;
-        return lower([item.value,item.label,item.meta,item.type].join(' ')).includes(q);
-      }).slice(0,MAX_RESULTS);
-
-      if(!current.length){
-        menu.innerHTML='<div class="erp-autocomplete-empty">No matching option found</div>';
-        menu.classList.add('show');
-        return;
-      }
-
-      menu.innerHTML=current.map((item,i)=>`
-        <div class="erp-autocomplete-item" data-index="${i}">
-          <div>
-            <b>${escapeHtml(item.label||item.value)}</b>
-            ${item.meta?`<small>${escapeHtml(item.meta)}</small>`:''}
-          </div>
-          <span class="erp-autocomplete-badge">${escapeHtml(item.type||'Option')}</span>
-        </div>
-      `).join('');
-      menu.classList.add('show');
-      activeIndex=-1;
-
-      menu.querySelectorAll('.erp-autocomplete-item').forEach(el=>{
-        el.addEventListener('mousedown',e=>{
-          e.preventDefault();
-          choose(current[Number(el.dataset.index)]);
-        });
-      });
-    }
-
-    input.addEventListener('input',render);
-    input.addEventListener('focus',()=>{if(text(input.value).length)render()});
-    input.addEventListener('keydown',e=>{
-      const items=[...menu.querySelectorAll('.erp-autocomplete-item')];
-      if(!menu.classList.contains('show')||!items.length)return;
-      if(e.key==='ArrowDown'){
-        e.preventDefault();
-        activeIndex=(activeIndex+1)%items.length;
-      }else if(e.key==='ArrowUp'){
-        e.preventDefault();
-        activeIndex=(activeIndex-1+items.length)%items.length;
-      }else if(e.key==='Enter'&&activeIndex>=0){
-        e.preventDefault();
-        choose(current[activeIndex]);
-        return;
-      }else if(e.key==='Escape'){
-        menu.classList.remove('show');
-        return;
-      }else return;
-      items.forEach((el,i)=>el.classList.toggle('active',i===activeIndex));
-      items[activeIndex]?.scrollIntoView({block:'nearest'});
-    });
-
-    document.addEventListener('mousedown',e=>{
-      if(!wrap.contains(e.target))menu.classList.remove('show');
-    });
-  }
-
-  function escapeHtml(v){
-    return text(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
-  function initialize(){
-    document.querySelectorAll('input').forEach(input=>{
-      if(isEligible(input))ensureWrap(input);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    initialize();
-    const observer=new MutationObserver(()=>initialize());
-    observer.observe(document.body,{childList:true,subtree:true});
-  });
-})();
-</script>
-
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
@@ -4830,6 +4578,205 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   document.addEventListener('DOMContentLoaded',function(){
     syncSidebarCounts();
     setInterval(syncSidebarCounts,1500);
+  });
+})();
+</script>
+
+
+<script id="global-smart-autocomplete">
+(function(){
+  const MAX_RESULTS=15;
+
+  function safeArray(v){return Array.isArray(v)?v:[]}
+  function txt(v){return String(v??'').trim()}
+  function low(v){return txt(v).toLowerCase()}
+  function escHtml(v){
+    return txt(v).replace(/[&<>"']/g,m=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[m]));
+  }
+  function unique(items){
+    const seen=new Set(),out=[];
+    items.forEach(x=>{
+      const key=`${low(x.type)}|${low(x.value)}|${low(x.label)}`;
+      if(key&&!seen.has(key)){seen.add(key);out.push(x)}
+    });
+    return out;
+  }
+
+  function collectSuggestions(){
+    const out=[];
+
+    try{
+      if(typeof siteAllEmployees==='function'){
+        safeArray(siteAllEmployees()).forEach(e=>{
+          const code=txt(e.code||e.employeeCode);
+          const name=txt(e.name||e.employeeName||e.fullName);
+          const trade=txt(e.trade||e.craft||e.designation);
+          out.push({
+            value:code||name,
+            label:[code,name].filter(Boolean).join(' — '),
+            meta:trade,
+            type:'Employee',
+            code
+          });
+        });
+      }
+    }catch(e){}
+
+    try{
+      safeArray(typeof clientRecords!=='undefined'?clientRecords:[]).forEach(c=>{
+        const name=txt(c.name||c.clientName||c.companyName);
+        if(name)out.push({value:name,label:name,meta:'',type:'Client'});
+      });
+    }catch(e){}
+
+    try{
+      safeArray(typeof siteProjects!=='undefined'?siteProjects:[]).forEach(p=>{
+        const name=txt(p.name||p.projectName);
+        if(name)out.push({value:name,label:name,meta:'',type:'Project'});
+      });
+      safeArray(typeof siteRecords!=='undefined'?siteRecords:[]).forEach(r=>{
+        if(txt(r.projectName))out.push({
+          value:txt(r.projectName),label:txt(r.projectName),
+          meta:txt(r.clientName),type:'Project'
+        });
+        if(txt(r.siteLocation))out.push({
+          value:txt(r.siteLocation),label:txt(r.siteLocation),
+          meta:[txt(r.clientName),txt(r.projectName)].filter(Boolean).join(' · '),
+          type:'Site'
+        });
+      });
+    }catch(e){}
+
+    document.querySelectorAll('select option').forEach(o=>{
+      const value=txt(o.value),label=txt(o.textContent);
+      if(value&&label&&!/^(select|all)\b/i.test(label)){
+        out.push({value,label,meta:'Dropdown option',type:'Option'});
+      }
+    });
+
+    return unique(out.filter(x=>x.value&&x.label));
+  }
+
+  function category(input){
+    const s=low([input.id,input.name,input.placeholder].join(' '));
+    if(/employee|emp.?code|staff/.test(s))return 'Employee';
+    if(/client/.test(s))return 'Client';
+    if(/project/.test(s))return 'Project';
+    if(/site|location/.test(s))return 'Site';
+    return '';
+  }
+
+  function eligible(input){
+    if(!input||input.tagName!=='INPUT'||input.dataset.erpAutocompleteReady)return false;
+    if(['password','date','month','number','checkbox','radio','file','hidden'].includes(low(input.type)))return false;
+    if(input.disabled||input.readOnly)return false;
+    return /search|filter|employee|emp.?code|client|project|site|location|craft|designation/i
+      .test([input.id,input.name,input.placeholder,input.className].join(' '));
+  }
+
+  function attach(input){
+    input.dataset.erpAutocompleteReady='1';
+
+    const wrap=document.createElement('div');
+    wrap.className='erp-autocomplete-wrap';
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+
+    const menu=document.createElement('div');
+    menu.className='erp-autocomplete-menu';
+    wrap.appendChild(menu);
+
+    let results=[],active=-1;
+
+    function choose(item){
+      const isCode=/code/i.test([input.id,input.name,input.placeholder].join(' '));
+      input.value=isCode&&item.code?item.code:item.value;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      menu.classList.remove('show');
+      active=-1;
+    }
+
+    function render(){
+      const q=low(input.value);
+      if(!q){menu.classList.remove('show');return}
+
+      const cat=category(input);
+      results=collectSuggestions().filter(item=>{
+        if(cat&&item.type!==cat&&item.type!=='Option')return false;
+        return low([item.value,item.label,item.meta,item.type].join(' ')).includes(q);
+      }).slice(0,MAX_RESULTS);
+
+      if(!results.length){
+        menu.innerHTML='<div class="erp-autocomplete-empty">No matching option found</div>';
+        menu.classList.add('show');
+        return;
+      }
+
+      menu.innerHTML=results.map((item,i)=>`
+        <div class="erp-autocomplete-item" data-index="${i}">
+          <div>
+            <b>${escHtml(item.label)}</b>
+            ${item.meta?`<small>${escHtml(item.meta)}</small>`:''}
+          </div>
+          <span class="erp-autocomplete-badge">${escHtml(item.type)}</span>
+        </div>
+      `).join('');
+
+      menu.querySelectorAll('.erp-autocomplete-item').forEach(el=>{
+        el.addEventListener('mousedown',e=>{
+          e.preventDefault();
+          choose(results[Number(el.dataset.index)]);
+        });
+      });
+
+      menu.classList.add('show');
+      active=-1;
+    }
+
+    input.addEventListener('input',render);
+    input.addEventListener('focus',()=>{if(txt(input.value))render()});
+    input.addEventListener('keydown',e=>{
+      const items=[...menu.querySelectorAll('.erp-autocomplete-item')];
+      if(!menu.classList.contains('show')||!items.length)return;
+
+      if(e.key==='ArrowDown'){
+        e.preventDefault();
+        active=(active+1)%items.length;
+      }else if(e.key==='ArrowUp'){
+        e.preventDefault();
+        active=(active-1+items.length)%items.length;
+      }else if(e.key==='Enter'&&active>=0){
+        e.preventDefault();
+        choose(results[active]);
+        return;
+      }else if(e.key==='Escape'){
+        menu.classList.remove('show');
+        return;
+      }else{
+        return;
+      }
+
+      items.forEach((el,i)=>el.classList.toggle('active',i===active));
+      items[active]?.scrollIntoView({block:'nearest'});
+    });
+
+    document.addEventListener('mousedown',e=>{
+      if(!wrap.contains(e.target))menu.classList.remove('show');
+    });
+  }
+
+  function init(){
+    document.querySelectorAll('input').forEach(input=>{
+      if(eligible(input))attach(input);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    init();
+    new MutationObserver(init).observe(document.body,{childList:true,subtree:true});
   });
 })();
 </script>

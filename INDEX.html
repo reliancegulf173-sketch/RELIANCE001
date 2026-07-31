@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="description" content="Reliance Gulf ERP Employee Portal">
-<title>Reliance Gulf ERP — Subcontractor Site Status Updated</title>
+<title>Reliance Gulf ERP — Subcontractor Site Status Visible v77</title>
 <!-- Embedded base64 images were moved to the assets folder for GitHub compatibility. -->
 <link rel="icon" type="image/png" href="assets/logo-small.png">
 <style>
@@ -359,6 +359,7 @@ td.expiry-date-soon,
 .sce-site-status-auto{padding:10px;border:2px solid #22c55e;border-radius:12px;background:#f0fdf4}
 .sce-site-status-auto label{color:#166534!important}
 .sce-site-status-auto input[readonly]{background:#dcfce7!important;color:#166534!important;font-weight:900!important;border-color:#86efac!important;cursor:not-allowed}
+.sce-site-status-auto{display:block!important;visibility:visible!important;opacity:1!important;min-height:92px!important}.sce-site-status-auto input{display:block!important;width:100%!important}
 
 
 /* Leave Management Portal */
@@ -2313,7 +2314,9 @@ function exportExcel(){
   };
 
   const table='<table border="1"><thead><tr>'+cols.map(c=>`<th>${esc(c[1])}</th>`).join('')+'</tr></thead><tbody>'+data.map(employee=>'<tr>'+cols.map(c=>`<td>${esc(cellValue(employee,c[0]))}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
-  const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Reliance Gulf Employee List</h2>${table}</body></html>`;
+  const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Reliance Gulf Employee List</h2>${table}
+
+</body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
 function downloadTemplate(){let headers=fields.map(f=>f[0]);downloadBlob(new Blob([headers.join(',')+'\n'],{type:'text/csv'}),'Employee_Bulk_Upload_Template.csv')}
@@ -2590,7 +2593,9 @@ function exportSubcontractorsPDF(){
   const table=`<table><thead><tr>${headers.map(h=>`<th>${scEscape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${scEscape(r[h])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const w=window.open('','_blank');
   if(!w){alert('Please allow pop-ups to export the PDF.');return;}
-  w.document.write(`<!DOCTYPE html><html><head><title>Subcontractor List</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{text-align:center}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #999;padding:6px;text-align:left}th{background:#eee}@page{size:landscape;margin:10mm}</style></head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><title>Subcontractor List</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{text-align:center}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #999;padding:6px;text-align:left}th{background:#eee}@page{size:landscape;margin:10mm}</style></head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script>
+
+</body></html>`);
   w.document.close();
 }
 
@@ -2724,7 +2729,9 @@ function exportScEmployeesExcel(){
   if(!rows.length){alert('No subcontractor employee records available to export.');return;}
   const headers=Object.keys(rows[0]);
   const table='<table border="1"><thead><tr>'+headers.map(h=>`<th>${scEscape(h)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+headers.map(h=>`<td>${scEscape(r[h]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
-  const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Subcontractor Employee List</h2>${table}</body></html>`;
+  const html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\@;vertical-align:top;white-space:pre-wrap}</style></head><body><h2>Subcontractor Employee List</h2>${table}
+
+</body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Subcontractor_Employee_List.xls');
 }
 function exportScEmployeesPDF(){
@@ -2734,7 +2741,9 @@ function exportScEmployeesPDF(){
   const table='<table><thead><tr>'+headers.map(h=>`<th>${scEscape(h)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+headers.map(h=>`<td>${scEscape(r[h]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
   const w=window.open('','_blank');
   if(!w){alert('Please allow pop-ups to export PDF.');return;}
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Subcontractor Employee List</title><style>@page{size:A3 landscape;margin:8mm}body{font-family:Arial,sans-serif;font-size:8px;color:#111}h2{text-align:center;margin:0 0 10px}table{width:100%;border-collapse:collapse;table-layout:auto}th,td{border:1px solid #555;padding:4px;vertical-align:top;word-break:break-word}th{background:#e9ecef;font-weight:700}tr{page-break-inside:avoid}</style></head><body><h2>Subcontractor Employee List</h2>${table}<script>window.onload=()=>{window.print();}<\/script></body></html>`);
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Subcontractor Employee List</title><style>@page{size:A3 landscape;margin:8mm}body{font-family:Arial,sans-serif;font-size:8px;color:#111}h2{text-align:center;margin:0 0 10px}table{width:100%;border-collapse:collapse;table-layout:auto}th,td{border:1px solid #555;padding:4px;vertical-align:top;word-break:break-word}th{background:#e9ecef;font-weight:700}tr{page-break-inside:avoid}</style></head><body><h2>Subcontractor Employee List</h2>${table}<script>window.onload=()=>{window.print();}<\/script>
+
+</body></html>`);
   w.document.close();
 }
 
@@ -2793,7 +2802,9 @@ function getLeaveReportRecords(){const type=document.getElementById('leaveReport
 function renderLeaveReportPreview(){const el=document.getElementById('leaveReportPreview');if(el)el.innerHTML='<p class="muted">Select a report and use Export Excel or Export PDF.</p>'}
 function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,(r.notRejoined||!r.rejoiningDate?'Not Rejoined Yet':r.rejoiningDate),r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
 function exportLeaveExcel(){const rows=[['Employee Code','Employee Name','Company','Designation','Leave Type','Start Date','End Date','Rejoining Date','Total Days','Paid Days','Unpaid Days','Ticket Provided','Status'],...leaveCsvRows()];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='leave-report.csv';a.click();URL.revokeObjectURL(a.href)}
-function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w.document.write(`<html><head><title>Leave Report</title><style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #999;padding:5px;text-align:left}h2{text-align:center}</style></head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w.document.write(`<html><head><title>Leave Report</title><style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #999;padding:5px;text-align:left}h2{text-align:center}</style></head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table>
+
+</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 // Extend existing page controller without changing existing portal logic.
 if(typeof pageMeta!=='undefined')pageMeta.leavePortal=['Leave Management Portal','Worker leave, return dates, history and reports'];
 function applyLeaveRoleVisibility(){const role=currentUser?.role;document.querySelectorAll('.leave-paid-field').forEach(x=>x.style.display=['Admin','Admin Manager','Accounts','HR/Admin'].includes(role)?'block':'none');document.querySelectorAll('.leave-settlement-field').forEach(x=>x.style.display=['Admin Manager','Accounts','Account Manager'].includes(role)?'block':'none')}
@@ -2917,10 +2928,14 @@ function viewProject(id){let p=projectRecords.find(x=>x.id===id),c=clientRecords
 function closeClientModal(){clientViewModal.classList.remove('show')}
 function clientExportRows(){return filteredClients().map(c=>({'Client Code':c.code,'Client Name':c.name,'Company Address':c.address,'Contact Persons':clientContactsText(c,'name'),'Mobile Numbers':clientContactsText(c,'mobile'),'Email Addresses':clientContactsText(c,'email'),'Contact Remarks':clientContactsText(c,'remark'),'Trade License Number':c.licenseNo,'Trade License Expiry Date':c.licenseExpiry,'VAT Registration Number':c.vatNo,'Client Status':c.status,'Trade License Document':c.docs?.license||'','VAT Certificate':c.docs?.vat||'','Company Profile':c.docs?.profile||'','Other Documents':(c.docs?.other||[]).join('; '),'Remarks':c.remarks,'Project Count':projectRecords.filter(p=>p.clientId===c.id).length}))}
 function projectExportRows(){return filteredProjects().map(p=>{let c=clientRecords.find(x=>x.id===p.clientId);return {'Project Code':p.code,'Project Name':p.name,'Client Name':c?.name||'','Client Code':c?.code||'','Site Location':p.location,'Project State / Emirate':p.emirate,'Project Start Date':p.start,'Project Completion Date':p.completion,'Contract Number':p.contractNo,'Purchase Order Number':p.poNo,'Contract Value':p.value,'Email for Invoice and SOA':p.invoiceEmail,'Client Contact Person':p.contact,'Project Status':p.status,'Scope of Work':p.scope,'Remarks':p.remarks,'Project Documents':(p.documents||[]).join('; ')}})}
-function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records available to export.');return}let h=Object.keys(rows[0]),table='<table><thead><tr>'+h.map(x=>`<th>${cEsc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')+'</tbody></table>',html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\\@;vertical-align:top}</style></head><body><h2>${cEsc(title)}</h2>${table}</body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
+function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records available to export.');return}let h=Object.keys(rows[0]),table='<table><thead><tr>'+h.map(x=>`<th>${cEsc(x)}</th>`).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')+'</tbody></table>',html=`<html><head><meta charset="UTF-8"><style>td,th{mso-number-format:\\@;vertical-align:top}</style></head><body><h2>${cEsc(title)}</h2>${table}
+
+</body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
 function exportProjectsExcel(){exportHtmlExcel(projectExportRows(),'Project List','Project_List.xls')}
-function printRows(rows,title){if(!rows.length){alert('No records available.');return}let h=Object.keys(rows[0]),w=window.open('','_blank');if(!w){alert('Please allow pop-ups.');return}w.document.write(`<html><head><title>${cEsc(title)}</title><style>@page{size:A3 landscape;margin:8mm}body{font-family:Arial;font-size:8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:4px;text-align:left;vertical-align:top}h2{text-align:center}</style></head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
+function printRows(rows,title){if(!rows.length){alert('No records available.');return}let h=Object.keys(rows[0]),w=window.open('','_blank');if(!w){alert('Please allow pop-ups.');return}w.document.write(`<html><head><title>${cEsc(title)}</title><style>@page{size:A3 landscape;margin:8mm}body{font-family:Arial;font-size:8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:4px;text-align:left;vertical-align:top}h2{text-align:center}</style></head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table>
+
+</body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 function printClients(){printRows(clientExportRows(),'Client List Report')}
 function printProjects(){printRows(projectExportRows(),'Project List Report')}
 if(typeof pageMeta!=='undefined')pageMeta.clientPortal=['Client Management Portal','Clients, projects, documents and expiry notifications'];
@@ -3362,6 +3377,33 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   setInterval(()=>{const page=byId('dashboard'); if(page&&page.classList.contains('active')) window.rgRenderProfessionalDashboard()},2000);
 })();
 
+</script>
+
+
+
+<script id="sce-site-status-self-heal-v77">
+(function(){
+  function ensureSubcontractorSiteStatus(){
+    var form=document.querySelector('#scEmployeeForm .sce-form-grid');
+    var working=document.getElementById('sceWorkingStatus');
+    if(!form||!working) return;
+    var existing=document.getElementById('sceSiteStatus');
+    if(existing){
+      var group=existing.closest('.form-group');
+      if(group){ group.style.display='block'; group.style.visibility='visible'; group.style.opacity='1'; }
+      return;
+    }
+    var box=document.createElement('div');
+    box.className='form-group sce-site-status-auto';
+    box.innerHTML='<label>Site Status (Automatic) *</label><input id="sceSiteStatus" class="input" value="Idle" readonly title="Automatically controlled by Site Management Portal"><small class="muted">Default: Idle | Mobilization: On Site | Leave: On Leave | Demobilization/Rejoining: Idle</small>';
+    working.closest('.form-group').insertAdjacentElement('afterend',box);
+  }
+  document.addEventListener('DOMContentLoaded',ensureSubcontractorSiteStatus);
+  document.addEventListener('click',function(e){
+    if(e.target && (e.target.matches('[onclick*="openScEmployeeForm"]') || e.target.closest('[onclick*="openScEmployeeForm"]'))){ setTimeout(ensureSubcontractorSiteStatus,30); }
+  });
+  setTimeout(ensureSubcontractorSiteStatus,300);
+})();
 </script>
 </body>
 </html>

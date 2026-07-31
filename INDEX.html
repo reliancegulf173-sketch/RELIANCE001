@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="description" content="Reliance Gulf ERP Employee Portal">
-<title>Reliance Gulf ERP — SITE MANAGEMENT COUNT FINAL</title>
+<title>Reliance Gulf ERP — Subcontractor Site Status Updated</title>
 <!-- Embedded base64 images were moved to the assets folder for GitHub compatibility. -->
 <link rel="icon" type="image/png" href="assets/logo-small.png">
 <style>
@@ -2665,7 +2665,7 @@ function renderScEmployees(){
   });
 
   const maxCertificates=Math.max(1,...employees.map(x=>(x.certificates||[]).length));
-  const baseHeaders=['Employee Name','Name in Arabic','Employee Code','Subcontractor Company','Trade in Arabic','Trade in English','Date of Birth','Blood Type','Nationality','Mobile Number','Passport Number','Passport Expiry Date','Visa Number','Unified Number','Emirates ID Number','Emirates ID Expiry Date','Working Status','TWP Status','TWP Card Number','TWP Card Expiry Date','TWP Card File'];
+  const baseHeaders=['Employee Name','Name in Arabic','Employee Code','Subcontractor Company','Trade in Arabic','Trade in English','Date of Birth','Blood Type','Nationality','Mobile Number','Passport Number','Passport Expiry Date','Visa Number','Unified Number','Emirates ID Number','Emirates ID Expiry Date','Working Status','Site Status (Automatic)','TWP Status','TWP Card Number','TWP Card Expiry Date','TWP Card File'];
   const certHeaders=Array.from({length:maxCertificates},(_,i)=>`Certificate ${i+1}`);
   const endHeaders=['Missing Information','Last Updated','Action'];
   document.getElementById('sceTableHeadRow').innerHTML=[...baseHeaders,...certHeaders,...endHeaders].map(h=>`<th>${scEscape(h)}</th>`).join('');
@@ -2678,6 +2678,7 @@ function renderScEmployees(){
       <td dir="rtl">${scEscape(x.tradeArabic||'')}</td><td>${scEscape(x.tradeEnglish||x.trade||'')}</td><td>${scEscape(x.dob||'')}</td><td>${scEscape(x.bloodType||'')}</td><td>${scEscape(x.nationality||'')}</td>
       <td>${scEscape(x.mobile||'')}</td><td>${scEscape(x.passport||'')}</td><td>${sceDateHtml(x.passportExpiry)}</td><td>${scEscape(x.visa||'')}</td><td>${scEscape(x.unified||'')}</td>
       <td>${scEscape(x.eid||'')}</td><td>${sceDateHtml(x.eidExpiry)}</td><td><span class="pill ${x.workingStatus==='Active'?'approved':'rejected'}">${scEscape(x.workingStatus||'')}</span></td>
+      <td><span class="pill ${(x.siteStatus||'Idle')==='On Site'?'onsite':(x.siteStatus||'Idle')==='On Leave'?'leave':'idle'}">${scEscape(x.siteStatus||'Idle')}</span></td>
       <td>${scEscape(x.twpStatus||'')}</td><td>${scEscape(x.twpCard||'')}</td><td>${sceDateHtml(x.twpExpiry)}</td><td>${scEscape(x.twpFileName||'')}</td>
       ${certCells}
       <td>${sceMissingFields(x).map(v=>`<div class="sce-expired">${scEscape(v)}</div>`).join('')||'<span class="pill approved">Complete</span>'}</td>
@@ -2706,7 +2707,7 @@ function scEmployeeExportRows(){
       'Employee Name':x.name||'','Name in Arabic':x.nameArabic||'','Employee Code':x.code||'','Subcontractor Company':sceCompanyName(x.companyId)||'',
       'Trade in Arabic as per ID Card':x.tradeArabic||'','Trade in English as per ID Card':x.tradeEnglish||x.trade||'','Date of Birth':x.dob||'','Blood Type':x.bloodType||'','Nationality':x.nationality||'',
       'Mobile Number':x.mobile||'','Passport Number':x.passport||'','Passport Expiry Date':x.passportExpiry||'','Visa Number':x.visa||'','Unified Number':x.unified||'',
-      'Emirates ID Number':x.eid||'','Emirates ID Expiry Date':x.eidExpiry||'','Working Status':x.workingStatus||'','TWP Status':x.twpStatus||'',
+      'Emirates ID Number':x.eid||'','Emirates ID Expiry Date':x.eidExpiry||'','Working Status':x.workingStatus||'','Site Status (Automatic)':x.siteStatus||'Idle','TWP Status':x.twpStatus||'',
       'TWP Card Number':x.twpCard||'','TWP Card Expiry Date':x.twpExpiry||'','TWP Card File':x.twpFileName||''
     };
     for(let i=0;i<maxCertificates;i++) row[`Certificate ${i+1}`]=sceCertificateExportText((x.certificates||[])[i]||{});

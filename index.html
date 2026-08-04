@@ -2432,7 +2432,7 @@ if(!managedCicpaLocations.length)managedCicpaLocations=['Habshan','Ruwais','Muss
 function persistCicpa(){localStorage.setItem(CICPA_STORAGE_KEY,JSON.stringify(cicpaRecords));localStorage.setItem(CICPA_LOCATION_STORAGE_KEY,JSON.stringify(managedCicpaLocations));localStorage.setItem(CICPA_LOA_STORAGE_KEY,JSON.stringify(cicpaLoas))}
 function cicpaPassStatus(p){if(p.cancelled)return 'Cancelled';const d=daysTo(p.expiryDate);if(d===null)return 'Active';if(d<0)return 'Expired';if(d<=7)return '0-7 Days';if(d<=15)return '8-15 Days';if(d<=30)return '16-30 Days';return 'Active'}
 function statusMatches(status,filter){if(!filter)return true;if(filter==='Within 30 Days')return ['0-7 Days','8-15 Days','16-30 Days'].includes(status);if(filter==='Within 15 Days')return ['0-7 Days','8-15 Days'].includes(status);if(filter==='Within 7 Days')return status==='0-7 Days';return status===filter}
-function allCicpaPasses(){return cicpaRecords.flatMap(r=>(r.passes||[]).map((p,index)=>({record:r,pass:p,index,status:cicpaPassStatus(p),days:daysTo(p.expiryDate)})))}
+function allCicpaPasses(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));return cicpaRecords.filter(r=>activeCodes.has(String(r.employeeId||'').trim().toLowerCase())).flatMap(r=>(r.passes||[]).map((p,index)=>({record:r,pass:p,index,status:cicpaPassStatus(p),days:daysTo(p.expiryDate)})))}
 function loaStatus(l){if(l.cancelled)return 'Cancelled';const d=daysTo(l.expiryDate),bal=Math.max(0,Number(l.total||0)-Number(l.used||0));if(d!==null&&d<0)return 'Expired';if(bal===0&&Number(l.total||0)>0)return 'Fully Utilized';if(d!==null&&d<=30)return 'Within 30 Days';return 'Active'}
 function showCicpaHome(){document.getElementById('cicpaHome').style.display='block';document.querySelectorAll('.cicpa-module').forEach(x=>x.classList.remove('active'));renderCicpaHome()}
 function openCicpaModule(type,filter=''){document.getElementById('cicpaHome').style.display='none';document.querySelectorAll('.cicpa-module').forEach(x=>x.classList.remove('active'));if(type==='manpower'){document.getElementById('cicpaManpowerModule').classList.add('active');if(filter)document.getElementById('cicpaStatusFilter').value=filter;renderCicpa()}else{document.getElementById('cicpaLoaModule').classList.add('active');if(filter)document.getElementById('loaStatusFilter').value=filter;renderLoas()}}
@@ -2844,7 +2844,12 @@ function expiryRemarksHtml(employee,filterType=''){
 
 function getFiltered(){
   let q=search.value.toLowerCase(),co=filterCompany.value,ws=filterWorkingStatus.value,ss=filterSiteStatus.value,ap=filterApproval.value,sp=filterSpecial.value;
-  return employees.filter(e=>(!q||[e.nameEnglish,e.employeeId,e.company,e.designation,e.workingStatus,e.siteStatus,e.visaTrade,e.maritalStatus,e.religion].join(' ').toLowerCase().includes(q))&&(!co||e.company===co)&&(!ws||e.workingStatus===ws)&&(!ss||e.siteStatus===ss)&&(!ap||e.approvalStatus===ap)&&(!sp||(sp==='missing'&&missing(e).length)||(sp==='expiry'&&employeeExpiryRemarks(e,'expiry').length)||(sp==='expired'&&employeeExpiryRemarks(e,'expired').length)));
+  return employees.filter(e=>{
+    const inactive=['inactive','cancelled','canceled'].includes(String(e.workingStatus||'').trim().toLowerCase());
+    if(ws==='Inactive'){ if(!inactive)return false; }
+    else if(inactive){ return false; }
+    return (!q||[e.nameEnglish,e.employeeId,e.company,e.designation,e.workingStatus,e.siteStatus,e.visaTrade,e.maritalStatus,e.religion].join(' ').toLowerCase().includes(q))&&(!co||e.company===co)&&(!ws||ws==='Inactive'||e.workingStatus===ws)&&(!ss||e.siteStatus===ss)&&(!ap||e.approvalStatus===ap)&&(!sp||(sp==='missing'&&missing(e).length)||(sp==='expiry'&&employeeExpiryRemarks(e,'expiry').length)||(sp==='expired'&&employeeExpiryRemarks(e,'expired').length));
+  });
 }
 function renderEmployees(){
   const data=getFiltered();
@@ -2888,7 +2893,7 @@ function renderEmployees(){
 
       const expiryClass=getExpiryDateClass(key,c[1],v);
       return `<td class="${[v?'':'empty-cell',expiryClass].filter(Boolean).join(' ')}">${esc(v||'Not Filled')}</td>`;
-    }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button></td></tr>`;
+    }).join('')}<td><button class="btn light" onclick="viewEmployee('${e.id}')">View</button> <button class="btn primary" onclick="editEmployee('${e.id}')">Edit</button> ${['inactive','cancelled','canceled'].includes(String(e.workingStatus||'').toLowerCase())?`<button class="btn success" onclick="openReactivateEmployee('${e.id}')">Reactivate Employee</button>`:''}</td></tr>`;
   }).join('');
   employeeNotices.innerHTML='';
 }
@@ -3036,6 +3041,68 @@ function viewEmployee(id){
 }
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 
+
+/* Employee Inactive → Active CICPA validation */
+function employeeActiveCicpaPasses(employeeId){
+  const code=String(employeeId||'').trim().toLowerCase();
+  if(!code)return [];
+  return (cicpaRecords||[])
+    .filter(r=>String(r.employeeId||'').trim().toLowerCase()===code)
+    .flatMap(r=>(r.passes||[]).map((pass,index)=>({record:r,pass,index,status:cicpaPassStatus(pass)})))
+    .filter(x=>x.status!=='Cancelled'&&x.status!=='Expired');
+}
+function isSuperUser(){
+  const role=String(currentUser?.role||'').trim().toLowerCase().replace(/[\s_-]+/g,'');
+  return role==='superuser';
+}
+function viewEmployeeCicpaFromValidation(employeeId){
+  closeInactiveCicpaValidation(false);
+  showPage('cicpaPortal');
+  openCicpaModule('manpower');
+  setTimeout(()=>{
+    const search=document.getElementById('cicpaSearch');
+    if(search){search.value=employeeId;renderCicpa();search.focus();}
+  },50);
+}
+let inactiveCicpaResolve=null;
+function closeInactiveCicpaValidation(result=false){
+  const modal=document.getElementById('inactiveCicpaValidationModal');
+  if(modal)modal.classList.remove('show');
+  if(inactiveCicpaResolve){const resolve=inactiveCicpaResolve;inactiveCicpaResolve=null;resolve(result);}
+}
+function confirmInactiveWithActiveCicpa(employee,passes){
+  let modal=document.getElementById('inactiveCicpaValidationModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='inactiveCicpaValidationModal';
+    modal.className='modal';
+    modal.innerHTML=`<div class="modal-box" style="max-width:620px">
+      <button class="modal-close" type="button" onclick="closeInactiveCicpaValidation(false)">×</button>
+      <div style="font-size:42px;margin-bottom:8px">⚠️</div>
+      <h2 style="margin-top:0">Active CICPA Found</h2>
+      <div class="notice" style="background:#fff7ed;border-color:#fdba74;color:#9a3412;margin:14px 0">
+        Is employee ke naam par Active CICPA maujood hai. Employee ko Inactive karne se pehle CICPA cancel karein.
+      </div>
+      <div id="inactiveCicpaEmployeeInfo" style="margin:12px 0"></div>
+      <div id="inactiveCicpaPassList" class="table-wrap" style="max-height:220px;overflow:auto"></div>
+      <div class="form-actions" style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        <button id="inactiveCicpaViewBtn" class="btn primary" type="button">View CICPA</button>
+        <button class="btn light" type="button" onclick="closeInactiveCicpaValidation(false)">Cancel</button>
+        <button id="inactiveCicpaProceedBtn" class="btn danger" type="button">Proceed Anyway</button>
+      </div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('inactiveCicpaEmployeeInfo').innerHTML=`<b>${esc(employee.nameEnglish||'-')} (${esc(employee.employeeId||'-')})</b><br><small>${passes.length} active CICPA pass(es) found.</small>`;
+  document.getElementById('inactiveCicpaPassList').innerHTML=`<table><thead><tr><th>CICPA No.</th><th>Expiry Date</th><th>Status</th></tr></thead><tbody>${passes.map(x=>`<tr><td><b>${esc(x.pass.number||'-')}</b></td><td>${esc(x.pass.expiryDate||'-')}</td><td><span class="status-dot status-${x.status.toLowerCase().replaceAll(' ','-')}">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('inactiveCicpaViewBtn').onclick=()=>viewEmployeeCicpaFromValidation(employee.employeeId);
+  const proceed=document.getElementById('inactiveCicpaProceedBtn');
+  proceed.style.display=isSuperUser()?'inline-flex':'none';
+  proceed.onclick=()=>closeInactiveCicpaValidation(true);
+  modal.classList.add('show');
+  return new Promise(resolve=>{inactiveCicpaResolve=resolve;});
+}
+
 employeeForm.onsubmit=async e=>{
   e.preventDefault();let rec={},missingNow=[];
   try{
@@ -3055,6 +3122,15 @@ employeeForm.onsubmit=async e=>{
   const existingPhoto=editingId?(employees.find(x=>x.id===editingId)?.photo||''):'';
   rec.photo=document.getElementById('employeePhoto').files[0]?await fileToDataUrl(document.getElementById('employeePhoto').files[0]):existingPhoto;
   if(rec.workingStatus==='Inactive'&&!rec.cancellationDate){missingNow.push('Cancellation Date');document.querySelector('.form-group[data-key="cancellationDate"]').classList.add('missing')}
+  const oldForInactiveCheck=editingId?employees.find(x=>x.id===editingId):null;
+  const becomingInactive=rec.workingStatus==='Inactive'&&String(oldForInactiveCheck?.workingStatus||'Active').toLowerCase()!=='inactive';
+  if(becomingInactive){
+    const activeCicpa=employeeActiveCicpaPasses(rec.employeeId);
+    if(activeCicpa.length){
+      const allowed=await confirmInactiveWithActiveCicpa({...oldForInactiveCheck,...rec},activeCicpa);
+      if(!allowed)return;
+    }
+  }
   let duplicate=employees.find(x=>x.id!==editingId&&(x.employeeId===rec.employeeId||(rec.emiratesId&&x.emiratesId===rec.emiratesId)));
   if(duplicate){alert(duplicate.employeeId===rec.employeeId?'Already have this Employee ID.':'Already have this Emirates ID.');return}
   if(missingNow.length){missingList.innerHTML=missingNow.map(x=>`<li>${esc(x)}</li>`).join('');}
@@ -3146,6 +3222,70 @@ function exportExcel(){
 
 
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Reliance_Gulf_Employee_All_Data.xls');
 }
@@ -3432,6 +3572,70 @@ function exportSubcontractorsPDF(){
 
 </head><body><h2>Subcontractor List</h2>${table}<script>window.onload=()=>window.print();<\/script>
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`);
   w.document.close();
 }
@@ -3575,6 +3779,70 @@ function exportScEmployeesExcel(){
 
 </head><body><h2>Subcontractor Employee List</h2>${table}
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`;
   downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),'Subcontractor_Employee_List.xls');
 }
@@ -3594,6 +3862,70 @@ function exportScEmployeesPDF(){
 
 </head><body><h2>Subcontractor Employee List</h2>${table}<script>window.onload=()=>{window.print();}<\/script>
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`);
   w.document.close();
 }
@@ -3642,14 +3974,14 @@ function isLeaveActiveToday(r){
   if(r.notRejoined||!r.rejoiningDate)return true;
   return !!(rejoin&&rejoin>today);
 }
-function leaveFilteredRecords(){const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=isLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
+function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=isLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){syncEmployeeLeaveStatuses();document.getElementById('leaveTotalEmployees').textContent=(employees||[]).length;document.getElementById('leaveToday').textContent=leaveRecords.filter(isLeaveActiveToday).length;document.getElementById('leaveReturn15').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.rejoiningDate);return d>=0&&d<=15&&r.status==='Approved'}).length;document.getElementById('leaveGoing7').textContent=leaveRecords.filter(r=>{let d=leaveDaysFromToday(r.startDate);return d>=0&&d<=7&&r.status==='Approved'}).length;const alerts=[];leaveRecords.forEach(r=>{const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(r.status==='Approved'&&ret>=0&&ret<=15)alerts.push(`${r.employeeName} (${r.company}) is returning in ${ret} day(s).`);if(r.status==='Approved'&&go>=0&&go<=7)alerts.push(`${r.employeeName} (${r.company}) is going on leave in ${go} day(s).`);if(r.status==='Approved'&&ret<0&&!r.returnConfirmed)alerts.push(`${r.employeeName} has not returned after the leave expiry date.`)});document.getElementById('leaveNotifications').innerHTML=alerts.length?alerts.map(x=>'<div class="leave-alert">'+esc(x)+'</div>').join(''):'<p class="muted">No leave alerts.</p>';const companies={};const companyField=(typeof fields!=='undefined'?fields.find(f=>f[0]==='company'):null);const employeePortalCompanies=(companyField&&Array.isArray(companyField[5])?companyField[5]:['RELIANCE GULF','RELIANCE INTERNATIONAL']);employeePortalCompanies.forEach(company=>{const name=String(company||'').trim();if(name)companies[name]={totalEmployees:0,today:0,return15:0,going7:0}});(employees||[]).forEach(e=>{const company=String(e.company||e.companyName||'').trim();if(company&&!companies[company])companies[company]={totalEmployees:0,today:0,return15:0,going7:0};if(company)companies[company].totalEmployees++});leaveRecords.forEach(r=>{if(r.status!=='Approved')return;const company=String(r.company||'Unassigned').trim()||'Unassigned';companies[company]=companies[company]||{totalEmployees:0,today:0,return15:0,going7:0};const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);if(isLeaveActiveToday(r))companies[company].today++;if(ret>=0&&ret<=15)companies[company].return15++;if(go>=0&&go<=7)companies[company].going7++});document.getElementById('leaveCompanySummary').innerHTML=Object.keys(companies).length?'<div class="table-wrap"><table><thead><tr><th>Company Name</th><th>Total Employees</th><th>On Leave Today</th><th>Returning ≤15 Days</th><th>Going ≤7 Days</th></tr></thead><tbody>'+Object.entries(companies).sort((a,b)=>a[0].localeCompare(b[0])).map(([c,v])=>`<tr><td><b>${esc(c)}</b></td><td>${v.totalEmployees}</td><td>${v.today}</td><td>${v.return15}</td><td>${v.going7}</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">No company names are available in the Employee Portal.</p>';renderLeaveTable()}
 function renderLeaveTable(){const adminView=['Admin','Admin Manager','Accounts','HR/Admin'].includes(currentUser?.role);const rows=leaveFilteredRecords();document.getElementById('leaveTableBody').innerHTML=rows.length?rows.map(r=>{const st=leaveCurrentStatus(r),cls='leave-'+st.toLowerCase();return `<tr><td><b>${esc(r.employeeName)}</b><br><small>${esc(r.employeeId)}</small></td><td>${esc(r.company)}</td><td>${esc(r.designation)}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)} to ${esc(r.endDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${adminView?r.paidDays:'Restricted'}</td><td>${r.unpaidDays}</td><td>${esc(r.ticketProvided)}</td><td><span class="leave-status ${cls}">${st}</span></td><td style="min-width:180px;white-space:normal">${esc(r.remarks||'-')}</td><td><button class="btn light" onclick="editLeaveRecord(${r.id})">Edit</button> <button class="btn danger" onclick="deleteLeaveRecord(${r.id})">Delete</button></td></tr>`}).join(''):'<tr><td colspan="13" style="text-align:center">No leave records found.</td></tr>'}
 function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySearch')?.value||'').toLowerCase();const groups={};leaveRecords.filter(r=>!q||[r.employeeId,r.employeeName].join(' ').toLowerCase().includes(q)).forEach(r=>(groups[r.employeeId]??=[]).push(r));document.getElementById('leaveHistoryContent').innerHTML=Object.entries(groups).map(([id,rs])=>{const e=leaveEmployeeById(id)||rs[0];rs.sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));return `<div class="panel" style="margin:14px 0"><h3>${esc(e.employeeName||e.nameEnglish)} <small>(${esc(id)})</small></h3><p>${esc(e.company||'')} · ${esc(e.designation||'')} · Joining: ${esc(e.joiningDate||'-')}</p><div class="table-wrap"><table><thead><tr><th>Step</th><th>Leave Type</th><th>Went on Leave</th><th>Returned / Rejoining</th><th>Total Days</th><th>Paid</th><th>Unpaid</th><th>Status</th><th>Audit Trail</th></tr></thead><tbody>${rs.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.leaveType)}</td><td>${esc(r.startDate)}</td><td>${r.notRejoined||!r.rejoiningDate?'<span class="leave-status leave-overdue">Not Rejoined Yet</span>':esc(r.rejoiningDate)}</td><td>${r.totalDays}</td><td>${r.paidDays}</td><td>${r.unpaidDays}</td><td>${esc(leaveCurrentStatus(r))}</td><td class="leave-audit">${(r.audit||[]).map(a=>`${esc(a.action)} by ${esc(a.by)} — ${esc(a.date)}${a.comment?'<br>'+esc(a.comment):''}`).join('<hr>')}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')||'<p class="muted">No employee leave history found.</p>'}
 function addLeaveType(){const v=document.getElementById('newLeaveType').value.trim();if(!v)return;if(leaveTypes.some(x=>x.toLowerCase()===v.toLowerCase())){alert('This leave type already exists.');return}leaveTypes.push(v);leavePersist();document.getElementById('newLeaveType').value='';renderLeaveTypes();refreshLeaveTypeOptions()}
 function removeLeaveType(i){const type=leaveTypes[i];if(DEFAULT_LEAVE_TYPES.includes(type)){alert('This is a required leave type and cannot be removed.');return}if(confirm('Remove this leave type?')){leaveTypes.splice(i,1);leavePersist();renderLeaveTypes();refreshLeaveTypeOptions()}}
 function renderLeaveTypes(){document.getElementById('leaveTypeList').innerHTML=leaveTypes.map((x,i)=>`<span class="location-chip">${esc(x)} <button onclick="removeLeaveType(${i})">×</button></span>`).join('')}
-function getLeaveReportRecords(){const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords];if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&(r.notRejoined||!r.rejoiningDate||leaveDaysFromToday(r.rejoiningDate)>0)&&r.status==='Approved');return rows}
+function getLeaveReportRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords].filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase()));if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&(r.notRejoined||!r.rejoiningDate||leaveDaysFromToday(r.rejoiningDate)>0)&&r.status==='Approved');return rows}
 function renderLeaveReportPreview(){const el=document.getElementById('leaveReportPreview');if(el)el.innerHTML='<p class="muted">Select a report and use Export Excel or Export PDF.</p>'}
 function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,(r.notRejoined||!r.rejoiningDate?'Not Rejoined Yet':r.rejoiningDate),r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
 function exportLeaveExcel(){const rows=[['Employee Code','Employee Name','Company','Designation','Leave Type','Start Date','End Date','Rejoining Date','Total Days','Paid Days','Unpaid Days','Ticket Provided','Status'],...leaveCsvRows()];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='leave-report.csv';a.click();URL.revokeObjectURL(a.href)}
@@ -3662,6 +3994,70 @@ function exportLeavePDF(){const rows=leaveCsvRows(),w=window.open('','_blank');w
 
 </head><body><h2>Leave Management Report</h2><table><thead><tr><th>Code</th><th>Name</th><th>Company</th><th>Designation</th><th>Type</th><th>Start</th><th>End</th><th>Rejoining</th><th>Total</th><th>Paid</th><th>Unpaid</th><th>Ticket</th><th>Status</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table>
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 // Extend existing page controller without changing existing portal logic.
 if(typeof pageMeta!=='undefined')pageMeta.leavePortal=['Leave Management Portal','Worker leave, return dates, history and reports'];
@@ -3795,6 +4191,70 @@ function exportHtmlExcel(rows,title,file){if(!rows.length){alert('No records ava
 
 </head><body><h2>${cEsc(title)}</h2>${table}
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`;downloadBlob(new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8;'}),file)}
 function exportClientsExcel(){exportHtmlExcel(clientExportRows(),'Client List','Client_List.xls')}
 function exportProjectsExcel(){exportHtmlExcel(projectExportRows(),'Project List','Project_List.xls')}
@@ -3807,6 +4267,70 @@ function printRows(rows,title){if(!rows.length){alert('No records available.');r
 
 </head><body><h2>${cEsc(title)}</h2><table><thead><tr>${h.map(x=>`<th>${cEsc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>'<tr>'+h.map(x=>`<td>${cEsc(r[x])}</td>`).join('')+'</tr>').join('')}</tbody></table>
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),300)}
 function printClients(){printRows(clientExportRows(),'Client List Report')}
 function printProjects(){printRows(projectExportRows(),'Project List Report')}
@@ -3825,7 +4349,7 @@ function sitePersist(){localStorage.setItem(SITE_STORAGE_KEY,JSON.stringify(site
 function siteToday(){return new Date().toISOString().slice(0,10)}
 function siteMonth(d){return String(d||'').slice(0,7)}
 function siteCompanyName(id){return (typeof subcontractors!=='undefined'&&subcontractors.find(x=>String(x.id)===String(id))?.name)||''}
-function siteAllEmployees(){const own=(employees||[]).map(e=>({key:'EMP:'+e.id,source:'company',ref:e,id:e.id,code:e.employeeId,name:e.nameEnglish,photo:e.photo||'',type:'Company Employee',subcontractor:'',trade:e.designation||e.visaTrade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));const subs=(typeof scEmployees==='undefined'?[]:scEmployees).map(e=>({key:'SUB:'+e.id,source:'subcontractor',ref:e,id:e.id,code:e.code,name:e.name,photo:e.photo||'',type:'Subcontractor Employee',subcontractor:siteCompanyName(e.companyId),trade:e.tradeEnglish||e.trade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));return own.concat(subs)}
+function siteAllEmployees(){const own=(employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>({key:'EMP:'+e.id,source:'company',ref:e,id:e.id,code:e.employeeId,name:e.nameEnglish,photo:e.photo||'',type:'Company Employee',subcontractor:'',trade:e.designation||e.visaTrade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));const subs=(typeof scEmployees==='undefined'?[]:scEmployees).map(e=>({key:'SUB:'+e.id,source:'subcontractor',ref:e,id:e.id,code:e.code,name:e.name,photo:e.photo||'',type:'Subcontractor Employee',subcontractor:siteCompanyName(e.companyId),trade:e.tradeEnglish||e.trade||'',nationality:e.nationality||'',workingStatus:e.workingStatus||'',siteStatus:e.siteStatus||''}));return own.concat(subs)}
 function siteEmployeeByKey(key){return siteAllEmployees().find(e=>e.key===key)}
 function siteActiveRecords(){return siteRecords.filter(r=>!r.demobilizationDate)}
 function getSiteManpowerCounts(){
@@ -4215,7 +4739,7 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
   };
 
   window.rgRenderProfessionalDashboard=function(){
-    const emps=arr(typeof window.rgGetEmployees==='function'?window.rgGetEmployees():[]);
+    const emps=arr(typeof window.rgGetEmployees==='function'?window.rgGetEmployees():[]).filter(e=>String(e.workingStatus||'').trim().toLowerCase()==='active');
     const leaves=arr(typeof leaveRecords!=='undefined'?leaveRecords:window.leaveRecords);
     const cicpas=arr(typeof cicpaRecords!=='undefined'?cicpaRecords:window.cicpaRecords);
     const today=new Date();
@@ -4334,5 +4858,69 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
 })();
 </script>
 
+
+<div id="reactivateEmployeeModal" class="modal"><div class="modal-box" style="max-width:520px"><button class="modal-close" onclick="closeReactivateEmployee()">×</button><h2>Reactivate Employee</h2><input type="hidden" id="reactivateEmployeeId"><div id="reactivateEmployeeInfo" class="notice blue"></div><div class="form-grid" style="margin-top:16px"><label>Reactivation Date *<input id="reactivationDate" type="date" class="input" required></label><label>New Site Status *<select id="reactivationSiteStatus" class="input"><option value="Idle">Idle</option><option value="On Site">On Site</option><option value="On Leave">On Leave</option></select></label><label class="span-2">Remarks<textarea id="reactivationRemarks" class="input" rows="3" placeholder="Reason or reactivation remarks"></textarea></label></div><div class="form-actions"><button class="btn light" onclick="closeReactivateEmployee()">Cancel</button><button class="btn success" onclick="confirmReactivateEmployee()">Reactivate Employee</button></div></div></div>
+
+<script id="inactive-employee-rules-v1">
+function isEmployeeInactive(e){return ['inactive','cancelled','canceled'].includes(String(e?.workingStatus||'').trim().toLowerCase())}
+function activeCompanyEmployees(){return (employees||[]).filter(e=>!isEmployeeInactive(e))}
+function activeEmployeeCodeSet(){return new Set(activeCompanyEmployees().map(e=>String(e.employeeId||'').trim().toLowerCase()).filter(Boolean))}
+
+// Front Employee Dashboard: inactive/cancelled employees are excluded from every operational count.
+renderDashboard=function(){
+  const active=activeCompanyEmployees();
+  const miss=active.filter(e=>missing(e).length),exp=active.flatMap(e=>expiryInfo(e).map(x=>({...x,e})));
+  mTotal.textContent=active.length;mActive.textContent=active.length;mInactive.textContent=0;
+  const activeKeys=new Set(active.map(e=>'EMP:'+e.id));
+  const records=(typeof siteRecords!=='undefined'&&Array.isArray(siteRecords)?siteRecords:[]).filter(r=>activeKeys.has(r.employeeKey));
+  const onsite=records.filter(r=>!String(r.demobilizationDate||'').trim()).length;
+  const leaveCodes=getActiveLeaveEmployeeCodes();
+  const onleave=active.filter(e=>leaveCodes.has(String(e.employeeId||'').trim().toLowerCase()));
+  mOnsite.textContent=onsite;mOnLeave.textContent=onleave.length;mIdle.textContent=active.filter(e=>e.siteStatus==='Idle'&&!leaveCodes.has(String(e.employeeId||'').trim().toLowerCase())).length;
+  mReview.textContent=active.filter(e=>e.approvalStatus==='Under Review').length;mMissing.textContent=miss.length;
+  recentEmployees.innerHTML=active.slice(-5).reverse().map(e=>`<div class="notification-item"><div><b>${esc(e.nameEnglish)} (${esc(e.employeeId)})</b><span class="muted">${esc(e.company)} · ${esc(e.designation)} · ${esc(e.workingStatus)} · ${esc(e.siteStatus||'-')}</span></div><span class="pill ${e.approvalStatus==='Approved'?'approved':'review'}">${esc(e.approvalStatus)}</span></div>`).join('')||'<div class="muted">No active employees.</div>';
+  dashboardNotices.innerHTML=(miss.length?`<div class="notice" onclick="specialFilter('missing')"><b>Missing Information</b><br>${miss.length} active employee record(s) need completion.</div>`:'')+(exp.filter(x=>x.days<0).length?`<div class="notice red" onclick="specialFilter('expired')"><b>Expired Documents</b><br>${exp.filter(x=>x.days<0).length} active employee document(s) require action.</div>`:'')+(exp.filter(x=>x.days>=0).length?`<div class="notice blue" onclick="specialFilter('expiry')"><b>Upcoming Expiry</b><br>${exp.filter(x=>x.days>=0).length} active employee document(s) expire within 60 days.</div>`:'')||'<div class="muted">No important alerts.</div>';
+  updateBadge();
+  if(typeof window.rgRenderProfessionalDashboard==='function')setTimeout(window.rgRenderProfessionalDashboard,0);
+}
+
+// Site dashboard totals must ignore old active site records belonging to inactive employees.
+getSiteManpowerCounts=function(){
+  let records=Array.isArray(siteRecords)?siteRecords:[];
+  const activeOwn=new Set(activeCompanyEmployees().map(e=>'EMP:'+e.id));
+  const activeSubs=new Set((typeof scEmployees==='undefined'?[]:scEmployees).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>'SUB:'+e.id));
+  const active=records.filter(r=>!String(r.demobilizationDate||'').trim()).filter(r=>activeOwn.has(r.employeeKey)||activeSubs.has(r.employeeKey));
+  return{total:active.length,own:active.filter(r=>r.employeeType==='Company Employee').length,sub:active.filter(r=>r.employeeType==='Subcontractor Employee').length};
+}
+
+function openReactivateEmployee(id){
+  const e=(employees||[]).find(x=>String(x.id)===String(id));if(!e||!isEmployeeInactive(e))return;
+  document.getElementById('reactivateEmployeeId').value=e.id;
+  document.getElementById('reactivateEmployeeInfo').innerHTML=`<b>${esc(e.nameEnglish||'-')} (${esc(e.employeeId||'-')})</b><br>Current Working Status: ${esc(e.workingStatus||'-')} · Previous Site Status: ${esc(e.siteStatus||'-')}`;
+  document.getElementById('reactivationDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reactivationSiteStatus').value='Idle';document.getElementById('reactivationRemarks').value='';
+  document.getElementById('reactivateEmployeeModal').classList.add('show');
+}
+function closeReactivateEmployee(){document.getElementById('reactivateEmployeeModal')?.classList.remove('show')}
+function confirmReactivateEmployee(){
+  const id=document.getElementById('reactivateEmployeeId').value,e=(employees||[]).find(x=>String(x.id)===String(id));
+  const date=document.getElementById('reactivationDate').value,status=document.getElementById('reactivationSiteStatus').value,remarks=document.getElementById('reactivationRemarks').value.trim();
+  if(!e||!isEmployeeInactive(e))return alert('Inactive employee record was not found.');if(!date)return alert('Please select Reactivation Date.');
+  const oldWorking=e.workingStatus||'Inactive',oldSite=e.siteStatus||'-',actor=currentUser?.name||currentUser?.username||'System User',now=new Date().toLocaleString();
+  e.workingStatus='Active';e.siteStatus=status;e.reactivationDate=date;e.reactivatedBy=actor;e.reactivationRemarks=remarks;e.statusUpdatedAt=date;e.statusSource='Employee Reactivation';
+  e.history=Array.isArray(e.history)?e.history:[];
+  e.history.push({action:'Employee Reactivated',by:actor,role:currentUser?.role||'',date:now,effectiveDate:date,fromWorkingStatus:oldWorking,toWorkingStatus:'Active',fromSiteStatus:oldSite,toSiteStatus:status,comment:remarks});
+  persist();closeReactivateEmployee();filterWorkingStatus.value='';renderEmployees();renderDashboard();
+  if(typeof syncAllEmployeeSiteStatuses==='function')syncAllEmployeeSiteStatuses('Employee Reactivation');
+  alert(`Employee reactivated successfully.\nNew Status: Active / ${status}`);
+}
+
+// Block inactive employees from being newly used in leave and CICPA transactions.
+const _findLeaveEmployee=findLeaveEmployee;findLeaveEmployee=function(){const code=document.getElementById('leaveEmployeeCode').value,e=leaveEmployeeByCode(code);if(e&&isEmployeeInactive(e)){document.getElementById('leaveEmployeeInfo').classList.remove('show');alert('This employee is Inactive / Cancelled. Reactivate the employee before creating a leave record.');return}_findLeaveEmployee()}
+const _findCicpaEmployee=findCicpaEmployee;findCicpaEmployee=function(){const code=String(cicpaEmployeeSearch?.value||'').trim().toLowerCase(),e=(employees||[]).find(x=>String(x.employeeId||'').trim().toLowerCase()===code);if(e&&isEmployeeInactive(e)){alert('This employee is Inactive / Cancelled. Reactivate the employee before adding CICPA.');return}_findCicpaEmployee()}
+
+// Refresh dashboard after page load with the active-only rules.
+setTimeout(()=>{try{renderDashboard();renderEmployees();if(typeof renderCicpa==='function')renderCicpa()}catch(e){console.error(e)}},100);
+</script>
 </body>
 </html>

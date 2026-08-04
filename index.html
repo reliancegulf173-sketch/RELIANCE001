@@ -3706,7 +3706,7 @@ function leavePersist(){leaveTypes=normalizeLeaveTypes(leaveTypes);localStorage.
 function leaveDate(v){return v?new Date(v+'T00:00:00'):null}function leaveTodayDate(){const d=new Date();d.setHours(0,0,0,0);return d}function leaveDaysFromToday(v){const d=leaveDate(v);return d?Math.round((d-leaveTodayDate())/86400000):99999}
 function leaveEmployeeByCode(code){return (employees||[]).find(e=>String(e.employeeId||'').trim().toLowerCase()===String(code||'').trim().toLowerCase())}
 function leaveEmployeeById(id){return (employees||[]).find(e=>String(e.employeeId||'')===String(id||''))}
-function leaveCurrentStatus(r){const today=leaveTodayDate(),s=leaveDate(r.startDate),re=leaveDate(r.rejoiningDate||r.endDate);if(r.status==='Rejected')return'Rejected';if(r.status==='Pending')return'Pending';if(r.notRejoined||!r.rejoiningDate)return r.status||'Approved';if(s&&re&&today>s&&today>re)return r.returnConfirmed?'Returned':'Overdue';return r.status||'Approved'}
+function leaveCurrentStatus(r){const today=leaveTodayDate(),s=leaveDate(r.ticketDate||r.startDate),re=leaveDate(r.rejoiningDate||r.endDate);if(r.status==='Rejected')return'Rejected';if(r.status==='Pending')return'Pending';if(r.notRejoined||!r.rejoiningDate)return r.status||'Approved';if(s&&re&&today>s&&today>re)return r.returnConfirmed?'Returned':'Overdue';return r.status||'Approved'}
 function syncEmployeeLeaveStatuses(){return syncAllEmployeeSiteStatuses('Leave Management')}
 function openLeavePortal(){document.querySelectorAll('.employee-nav,.site-nav,.cicpa-nav,.subcontractor-nav').forEach(el=>el.classList.add('hidden'));syncEmployeeLeaveStatuses();showPage('leavePortal');showLeaveModule('dashboard')}
 function showLeaveModule(module){['dashboard','add','history','reports'].forEach(x=>{document.getElementById('leave'+x.charAt(0).toUpperCase()+x.slice(1)+'Module')?.classList.toggle('hidden',x!==module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('active',x===module);document.getElementById('leaveTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('light',x!==module)});refreshLeaveTypeOptions();if(module==='dashboard')renderLeaveDashboard();if(module==='history')renderLeaveHistory();if(module==='reports')renderLeaveReportPreview()}
@@ -3721,7 +3721,7 @@ function deleteLeaveRecord(id){if(!confirm('Delete this leave record?'))return;l
 function setLeaveQuickFilter(f){leaveQuickFilter=f;renderLeaveTable();if(f==='today'){setTimeout(()=>{document.getElementById('leaveTableBody')?.closest('.table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'})},50)}}
 function isLeaveActiveToday(r){
   if(!r||r.status==='Rejected'||r.returnConfirmed||leaveCurrentStatus(r)==='Returned')return false;
-  const today=leaveTodayDate(),start=leaveDate(r.startDate);
+  const today=leaveTodayDate(),start=leaveDate(r.ticketDate||r.startDate);
   if(!start||start>today)return false;
   // Once the leave has started and nobody has confirmed the employee returned
   // (returnConfirmed / 'Returned' status, checked above), the employee is still
@@ -3737,7 +3737,7 @@ function isLeaveActiveToday(r){
 function isApprovedLeaveActiveToday(r){
   return !!(r&&String(r.status||'').trim().toLowerCase()==='approved'&&isLeaveActiveToday(r));
 }
-function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),approved=String(r.status||'').trim().toLowerCase()==='approved',today=isApprovedLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&approved&&dr>=0&&dr<=15&&!r.returnConfirmed)||(leaveQuickFilter==='going7'&&approved&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
+function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.ticketDate||r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),approved=String(r.status||'').trim().toLowerCase()==='approved',today=isApprovedLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&approved&&dr>=0&&dr<=15&&!r.returnConfirmed)||(leaveQuickFilter==='going7'&&approved&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){
   syncEmployeeLeaveStatuses();
 
@@ -3761,13 +3761,13 @@ function renderLeaveDashboard(){
   document.getElementById('leaveTotalEmployees').textContent=activeEmployees.length;
   document.getElementById('leaveToday').textContent=uniqueEmployeeCount(approvedActiveRecords,isLeaveActiveToday);
   document.getElementById('leaveReturn15').textContent=uniqueEmployeeCount(approvedActiveRecords,r=>{const d=leaveDaysFromToday(r.rejoiningDate);return d>=0&&d<=15&&!r.returnConfirmed;});
-  document.getElementById('leaveGoing7').textContent=uniqueEmployeeCount(approvedActiveRecords,r=>{const d=leaveDaysFromToday(r.startDate);return d>=0&&d<=7;});
+  document.getElementById('leaveGoing7').textContent=uniqueEmployeeCount(approvedActiveRecords,r=>{const d=leaveDaysFromToday(r.ticketDate||r.startDate);return d>=0&&d<=7;});
 
   const alerts=[];
   const alertSeen=new Set();
   approvedActiveRecords.forEach(r=>{
     const code=String(r.employeeId||r.employeeCode||'').trim().toLowerCase();
-    const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);
+    const go=leaveDaysFromToday(r.ticketDate||r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);
     if(ret>=0&&ret<=15&&!r.returnConfirmed){const k='ret:'+code;if(!alertSeen.has(k)){alerts.push(`${r.employeeName} (${r.company}) is returning in ${ret} day(s).`);alertSeen.add(k)}}
     if(go>=0&&go<=7){const k='go:'+code;if(!alertSeen.has(k)){alerts.push(`${r.employeeName} (${r.company}) is going on leave in ${go} day(s).`);alertSeen.add(k)}}
     if(ret<0&&!r.returnConfirmed){const k='late:'+code;if(!alertSeen.has(k)){alerts.push(`${r.employeeName} has not returned after the leave expiry date.`);alertSeen.add(k)}}
@@ -3787,7 +3787,7 @@ function renderLeaveDashboard(){
     const company=String(r.company||activeEmployeeMap.get(String(r.employeeId||'').trim().toLowerCase())?.company||'Unassigned').trim()||'Unassigned';
     if(!companies[company])companies[company]={totalEmployees:0,today:new Set(),return15:new Set(),going7:new Set()};
     const code=String(r.employeeId||r.employeeCode||'').trim().toLowerCase();
-    const go=leaveDaysFromToday(r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);
+    const go=leaveDaysFromToday(r.ticketDate||r.startDate),ret=leaveDaysFromToday(r.rejoiningDate);
     if(isLeaveActiveToday(r))companies[company].today.add(code);
     if(ret>=0&&ret<=15&&!r.returnConfirmed)companies[company].return15.add(code);
     if(go>=0&&go<=7)companies[company].going7.add(code);
@@ -3800,7 +3800,7 @@ function renderLeaveHistory(){const q=(document.getElementById('leaveHistorySear
 function addLeaveType(){const v=document.getElementById('newLeaveType').value.trim();if(!v)return;if(leaveTypes.some(x=>x.toLowerCase()===v.toLowerCase())){alert('This leave type already exists.');return}leaveTypes.push(v);leavePersist();document.getElementById('newLeaveType').value='';renderLeaveTypes();refreshLeaveTypeOptions()}
 function removeLeaveType(i){const type=leaveTypes[i];if(DEFAULT_LEAVE_TYPES.includes(type)){alert('This is a required leave type and cannot be removed.');return}if(confirm('Remove this leave type?')){leaveTypes.splice(i,1);leavePersist();renderLeaveTypes();refreshLeaveTypeOptions()}}
 function renderLeaveTypes(){document.getElementById('leaveTypeList').innerHTML=leaveTypes.map((x,i)=>`<span class="location-chip">${esc(x)} <button onclick="removeLeaveType(${i})">×</button></span>`).join('')}
-function getLeaveReportRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords].filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase()));if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.startDate)<=0&&(r.notRejoined||!r.rejoiningDate||leaveDaysFromToday(r.rejoiningDate)>0)&&r.status==='Approved');return rows}
+function getLeaveReportRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const type=document.getElementById('leaveReportType').value,month=document.getElementById('leaveReportMonth').value;let rows=[...leaveRecords].filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase()));if(type==='monthly'&&month)rows=rows.filter(r=>r.startDate?.startsWith(month));if(type==='current')rows=rows.filter(r=>leaveDaysFromToday(r.ticketDate||r.startDate)<=0&&(r.notRejoined||!r.rejoiningDate||leaveDaysFromToday(r.rejoiningDate)>0)&&r.status==='Approved');return rows}
 function renderLeaveReportPreview(){const el=document.getElementById('leaveReportPreview');if(el)el.innerHTML='<p class="muted">Select a report and use Export Excel or Export PDF.</p>'}
 function leaveCsvRows(){return getLeaveReportRecords().map(r=>[r.employeeId,r.employeeName,r.company,r.designation,r.leaveType,r.startDate,r.endDate,(r.notRejoined||!r.rejoiningDate?'Not Rejoined Yet':r.rejoiningDate),r.totalDays,r.paidDays,r.unpaidDays,r.ticketProvided,leaveCurrentStatus(r)])}
 function exportLeaveExcel(){const rows=[['Employee Code','Employee Name','Company','Designation','Leave Type','Start Date','End Date','Rejoining Date','Total Days','Paid Days','Unpaid Days','Ticket Provided','Status'],...leaveCsvRows()];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='leave-report.csv';a.click();URL.revokeObjectURL(a.href)}
@@ -4008,7 +4008,7 @@ function statusDateValue(v){if(!v)return null;const d=new Date(v+'T00:00:00');re
 function statusToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function employeeAutomaticStatus(employee){
   const today=statusToday(),code=String(employee.employeeId||'').trim().toLowerCase();
-  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim().toLowerCase()===code&&(typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):r.status==='Approved')).sort((a,b)=>String(b.startDate||b.ticketDate||'').localeCompare(String(a.startDate||a.ticketDate||'')))[0];
+  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim().toLowerCase()===code&&(typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):r.status==='Approved')).sort((a,b)=>String(b.ticketDate||b.startDate||'').localeCompare(String(a.ticketDate||a.startDate||'')))[0];
   if(activeLeave)return{siteStatus:'On Leave',currentSiteName:'',leaveRejoiningDate:activeLeave.notRejoined||!activeLeave.rejoiningDate?'Not Rejoined Yet':activeLeave.rejoiningDate,statusSource:'Leave Management'};
   const activeSite=(siteRecords||[]).filter(r=>String(r.employeeCode||'').trim().toLowerCase()===code).filter(r=>{const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);return mob&&today>=mob&&(!demob||today<demob)}).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
   if(activeSite)return{siteStatus:'On Site',currentSiteName:[activeSite.clientName,activeSite.projectName,activeSite.siteLocation].filter(Boolean).join(' / '),leaveRejoiningDate:'',statusSource:'Site Management'};
@@ -4403,7 +4403,7 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
       labour:emps.filter(e=>within(e.labourExpiry,30)).length,
       cicpa:cicpas.reduce((n,r)=>n+arr(r.passes).filter(p=>!p.cancelled&&within(p.expiryDate,30)).length,0),
       return7:leaves.filter(r=>norm(r.status)==='approved'&&within(r.rejoiningDate,7)).length,
-      going7:leaves.filter(r=>norm(r.status)==='approved'&&within(r.startDate,7)).length
+      going7:leaves.filter(r=>norm(r.status)==='approved'&&within(r.ticketDate||r.startDate,7)).length
     };
     const idMap={cicpa:'rgCicpaCount',passport:'rgPassportCount',visa:'rgVisaCount',emirates:'rgEmiratesCount',medical:'rgMedicalCount',ata:'rgAtaCount',twp:'rgTwpCount',labour:'rgLabourCount',return7:'rgReturnCount',going7:'rgGoingCount'};
     Object.entries(idMap).forEach(([k,id])=>setText(id,counts[k]));

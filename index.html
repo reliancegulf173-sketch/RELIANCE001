@@ -3721,10 +3721,14 @@ function deleteLeaveRecord(id){if(!confirm('Delete this leave record?'))return;l
 function setLeaveQuickFilter(f){leaveQuickFilter=f;renderLeaveTable();if(f==='today'){setTimeout(()=>{document.getElementById('leaveTableBody')?.closest('.table-wrap')?.scrollIntoView({behavior:'smooth',block:'start'})},50)}}
 function isLeaveActiveToday(r){
   if(!r||r.status==='Rejected'||r.returnConfirmed||leaveCurrentStatus(r)==='Returned')return false;
-  const today=leaveTodayDate(),start=leaveDate(r.startDate),rejoin=leaveDate(r.rejoiningDate);
+  const today=leaveTodayDate(),start=leaveDate(r.startDate);
   if(!start||start>today)return false;
-  if(r.notRejoined||!r.rejoiningDate)return true;
-  return !!(rejoin&&rejoin>today);
+  // Once the leave has started and nobody has confirmed the employee returned
+  // (returnConfirmed / 'Returned' status, checked above), the employee is still
+  // on leave — whether they're within the expected rejoining window, past their
+  // rejoining date (Overdue), or marked "Not Rejoined Yet". A passed rejoining
+  // date must NOT silently remove them from on-leave lists.
+  return true;
 }
 // Single source of truth for "officially On Leave today": must be Approved AND date-active
 // (based on Leave Start / Rejoining Date). Used by both the dashboard counters and
@@ -3733,7 +3737,7 @@ function isLeaveActiveToday(r){
 function isApprovedLeaveActiveToday(r){
   return !!(r&&String(r.status||'').trim().toLowerCase()==='approved'&&isLeaveActiveToday(r));
 }
-function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=isLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
+function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),approved=String(r.status||'').trim().toLowerCase()==='approved',today=isApprovedLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&approved&&dr>=0&&dr<=15&&!r.returnConfirmed)||(leaveQuickFilter==='going7'&&approved&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){
   syncEmployeeLeaveStatuses();
 
@@ -4003,10 +4007,10 @@ function siteSetEmployeeStatus(key,working,site){const e=siteEmployeeByKey(key);
 function statusDateValue(v){if(!v)return null;const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?null:d}
 function statusToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function employeeAutomaticStatus(employee){
-  const today=statusToday(),code=String(employee.employeeId||'').trim();
-  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim()===code&&(typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):r.status==='Approved')).sort((a,b)=>String(b.startDate||b.ticketDate||'').localeCompare(String(a.startDate||a.ticketDate||'')))[0];
+  const today=statusToday(),code=String(employee.employeeId||'').trim().toLowerCase();
+  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim().toLowerCase()===code&&(typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):r.status==='Approved')).sort((a,b)=>String(b.startDate||b.ticketDate||'').localeCompare(String(a.startDate||a.ticketDate||'')))[0];
   if(activeLeave)return{siteStatus:'On Leave',currentSiteName:'',leaveRejoiningDate:activeLeave.notRejoined||!activeLeave.rejoiningDate?'Not Rejoined Yet':activeLeave.rejoiningDate,statusSource:'Leave Management'};
-  const activeSite=(siteRecords||[]).filter(r=>String(r.employeeCode||'').trim()===code).filter(r=>{const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);return mob&&today>=mob&&(!demob||today<demob)}).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
+  const activeSite=(siteRecords||[]).filter(r=>String(r.employeeCode||'').trim().toLowerCase()===code).filter(r=>{const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);return mob&&today>=mob&&(!demob||today<demob)}).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
   if(activeSite)return{siteStatus:'On Site',currentSiteName:[activeSite.clientName,activeSite.projectName,activeSite.siteLocation].filter(Boolean).join(' / '),leaveRejoiningDate:'',statusSource:'Site Management'};
   return{siteStatus:'Idle',currentSiteName:'',leaveRejoiningDate:'',statusSource:'Automatic'};
 }

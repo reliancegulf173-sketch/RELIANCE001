@@ -2778,7 +2778,7 @@ function returnPortalHome(){
 
 function getActiveLeaveEmployeeCodes(){
   const records=(typeof leaveRecords!=='undefined'&&Array.isArray(leaveRecords))?leaveRecords:[];
-  const active=records.filter(r=>typeof isLeaveActiveToday==='function'?isLeaveActiveToday(r):false);
+  const active=records.filter(r=>typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):false);
   return new Set(active.map(r=>String(r.employeeId||r.employeeCode||'').trim().toLowerCase()).filter(Boolean));
 }
 function getActiveLeaveEmployees(){
@@ -3726,6 +3726,13 @@ function isLeaveActiveToday(r){
   if(r.notRejoined||!r.rejoiningDate)return true;
   return !!(rejoin&&rejoin>today);
 }
+// Single source of truth for "officially On Leave today": must be Approved AND date-active
+// (based on Leave Start / Rejoining Date). Used by both the dashboard counters and
+// employeeAutomaticStatus (which drives the employee listing), so the counter and the
+// listing always agree on the exact same set of employees.
+function isApprovedLeaveActiveToday(r){
+  return !!(r&&String(r.status||'').trim().toLowerCase()==='approved'&&isLeaveActiveToday(r));
+}
 function leaveFilteredRecords(){const activeCodes=new Set((employees||[]).filter(e=>String(e.workingStatus||'').toLowerCase()==='active').map(e=>String(e.employeeId||'').trim().toLowerCase()));const q=(document.getElementById('leaveSearch')?.value||'').toLowerCase(),type=document.getElementById('leaveTypeFilter')?.value||'all',status=document.getElementById('leaveStatusFilter')?.value||'all',from=document.getElementById('leaveDateFrom')?.value,to=document.getElementById('leaveDateTo')?.value;return leaveRecords.filter(r=>activeCodes.has(String(r.employeeId||r.employeeCode||'').trim().toLowerCase())).filter(r=>{const ds=leaveDaysFromToday(r.startDate),dr=leaveDaysFromToday(r.rejoiningDate),today=isLeaveActiveToday(r);let quick=leaveQuickFilter==='all'||(leaveQuickFilter==='today'&&today)||(leaveQuickFilter==='return15'&&dr>=0&&dr<=15)||(leaveQuickFilter==='going7'&&ds>=0&&ds<=7);const hay=[r.employeeId,r.employeeName,r.company,r.project,r.designation,r.remarks].join(' ').toLowerCase();return quick&&(!q||hay.includes(q))&&(type==='all'||r.leaveType===type)&&(status==='all'||leaveCurrentStatus(r)===status)&&(!from||r.startDate>=from)&&(!to||r.startDate<=to)})}
 function renderLeaveDashboard(){
   syncEmployeeLeaveStatuses();
@@ -3997,7 +4004,7 @@ function statusDateValue(v){if(!v)return null;const d=new Date(v+'T00:00:00');re
 function statusToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function employeeAutomaticStatus(employee){
   const today=statusToday(),code=String(employee.employeeId||'').trim();
-  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim()===code&&r.status==='Approved').sort((a,b)=>String(b.ticketDate||b.startDate||'').localeCompare(String(a.ticketDate||a.startDate||''))).find(r=>{const ticket=statusDateValue(r.ticketDate),rejoin=statusDateValue(r.rejoiningDate),stillAway=!!r.notRejoined||!rejoin;return ticket&&today>=ticket&&(stillAway||today<rejoin)});
+  const activeLeave=(leaveRecords||[]).filter(r=>String(r.employeeId||'').trim()===code&&(typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):r.status==='Approved')).sort((a,b)=>String(b.startDate||b.ticketDate||'').localeCompare(String(a.startDate||a.ticketDate||'')))[0];
   if(activeLeave)return{siteStatus:'On Leave',currentSiteName:'',leaveRejoiningDate:activeLeave.notRejoined||!activeLeave.rejoiningDate?'Not Rejoined Yet':activeLeave.rejoiningDate,statusSource:'Leave Management'};
   const activeSite=(siteRecords||[]).filter(r=>String(r.employeeCode||'').trim()===code).filter(r=>{const mob=statusDateValue(r.mobilizationDate),demob=statusDateValue(r.demobilizationDate);return mob&&today>=mob&&(!demob||today<demob)}).sort((a,b)=>String(b.mobilizationDate||'').localeCompare(String(a.mobilizationDate||'')))[0];
   if(activeSite)return{siteStatus:'On Site',currentSiteName:[activeSite.clientName,activeSite.projectName,activeSite.siteLocation].filter(Boolean).join(' / '),leaveRejoiningDate:'',statusSource:'Site Management'};
@@ -4374,7 +4381,7 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     const totalOnsite=siteCounts.total;
     const ownOnsite=siteCounts.own;
     const subcontractorOnsite=siteCounts.sub;
-    const activeLeaveCodes=new Set(leaves.filter(r=>typeof isLeaveActiveToday==='function'?isLeaveActiveToday(r):false).map(r=>String(r.employeeId||r.employeeCode||'').trim().toLowerCase()).filter(Boolean));
+    const activeLeaveCodes=new Set(leaves.filter(r=>typeof isApprovedLeaveActiveToday==='function'?isApprovedLeaveActiveToday(r):false).map(r=>String(r.employeeId||r.employeeCode||'').trim().toLowerCase()).filter(Boolean));
     const onleave=emps.filter(e=>activeLeaveCodes.has(String(e.employeeId||e.code||'').trim().toLowerCase()));
     const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e))&&!activeLeaveCodes.has(String(e.employeeId||e.code||'').trim().toLowerCase()));
     setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',totalOnsite);

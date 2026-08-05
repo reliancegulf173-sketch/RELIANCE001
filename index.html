@@ -4377,9 +4377,15 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     const totalOnsite=siteCounts.total;
     const ownOnsite=siteCounts.own;
     const subcontractorOnsite=siteCounts.sub;
-    const activeLeaveCodes=new Set(leaves.filter(r=>typeof isLeaveActiveToday==='function'?isLeaveActiveToday(r):false).map(r=>String(r.employeeId||r.employeeCode||'').trim().toLowerCase()).filter(Boolean));
-    const onleave=emps.filter(e=>activeLeaveCodes.has(String(e.employeeId||e.code||'').trim().toLowerCase()));
-    const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e))&&!activeLeaveCodes.has(String(e.employeeId||e.code||'').trim().toLowerCase()));
+    const activeEmployeeCodes=new Set(emps.map(e=>String(e.employeeId||e.employeeCode||e.code||'').trim().toLowerCase()).filter(Boolean));
+    const activeLeaveCodes=new Set(
+      leaves
+        .filter(r=>typeof isLeaveActiveToday==='function'?isLeaveActiveToday(r):false)
+        .map(r=>String(r.employeeId||r.employeeCode||r.code||'').trim().toLowerCase())
+        .filter(code=>code&&activeEmployeeCodes.has(code))
+    );
+    const onleave=Array.from(activeLeaveCodes);
+    const idle=emps.filter(e=>['idle','available','demobilized'].includes(employeeStatus(e))&&!activeLeaveCodes.has(String(e.employeeId||e.employeeCode||e.code||'').trim().toLowerCase()));
     setText('rgTotalEmployees',emps.length); setText('rgOnSiteEmployees',totalOnsite);
     setText('rgOnSiteOwnEmployees',ownOnsite); setText('rgOnSiteSubEmployees',subcontractorOnsite);
     setText('rgOnLeaveEmployees',onleave.length); setText('rgIdleEmployees',idle.length);
@@ -4410,7 +4416,12 @@ document.addEventListener('DOMContentLoaded',()=>{const statusField=document.get
     try{
       if(type==='total') return openEmployeeList('all');
       if(type==='onsite'){openSitePortal(); if(typeof showSiteModule==='function') showSiteModule('mobilized'); return;}
-      if(['onleave','idle'].includes(type)) return openEmployeeList(type);
+      if(type==='onleave'){
+        openLeavePortal();
+        if(typeof setLeaveQuickFilter==='function') setLeaveQuickFilter('today');
+        return;
+      }
+      if(type==='idle') return openEmployeeList('idle');
       if(type==='cicpa'){openCicpaPortal(); if(typeof showCicpaModule==='function') showCicpaModule('manpower'); return;}
       if(type==='return7'||type==='going7'){openLeavePortal(); if(typeof showLeaveModule==='function') showLeaveModule('history'); return;}
       if(type==='allalerts'){openEmployeePortal(); specialFilter('expiry'); return;}
